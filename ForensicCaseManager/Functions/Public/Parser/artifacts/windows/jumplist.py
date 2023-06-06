@@ -9,8 +9,8 @@ from dissect.target.helpers.descriptor_extensions import UserRecordDescriptorExt
 from dissect.target.helpers.record import create_extended_descriptor
 
 
-from lib.carpe.jumplist.app_id_list import app_id_list
-from lib.carpe.jumplist.jumplist import TJumpListParser
+from lib.jumplist.app_id_list import app_id_list
+from lib.jumplist.jumplist import TJumpListParser
 
 from forensic_artifact import Source, ForensicArtifact
 
