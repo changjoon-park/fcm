@@ -1,5 +1,27 @@
 # ForensicCaseManager(FCM)
-# Dependencies: dissect 3.5
+# Dependencies: dissect 3.9
+
+# User Platform Check
+$Platform = $PSVersionTable.Platform
+
+if ($Platform -eq "Unix") {
+    $ConfigPath = "$env:HOME\.fcm\config.json"
+}
+else {
+    $ConfigPath = "$env:USERPROFILE\.fcm\config.json"
+}
+
+$json = @{
+    platform = $Platforms
+} | ConvertTo-Json
+
+if (Test-Path -Path $ConfigPath) {
+    $json | Set-Content -Path $ConfigPath
+}
+else {
+    New-Item -Path $ConfigPath -ItemType File -Force
+    $json | Set-Content -Path $ConfigPath
+}
 
 # Create Virtual Environment
 if (-not (Test-Path -Path $PSScriptRoot\.venv -PathType Container)) {
@@ -7,20 +29,31 @@ if (-not (Test-Path -Path $PSScriptRoot\.venv -PathType Container)) {
     Write-Host ">>> Creating a Virtual Environment for ForensicCaseManager(FCM)" -ForegroundColor DarkBlue
 
     try {
-        python.exe -m venv $PSScriptRoot\.venv
+        if ($Platform -eq "Unix") {
+            python3 -m venv $PSScriptRoot/.venv
+        }
+        else {
+            python.exe -m venv $PSScriptRoot\.venv
+        }
     }
     catch {
-        Write-Warning "Failed to create Python Virtualenv." -ForegroundColor DarkMagenta
+        Write-Warning "Failed to create Python Virtualenv."
         return
     }
 }
 
 # Activate Virtual Environment
 try {
-    & $PSScriptRoot\.venv\Scripts\activate.ps1
+    if ($Platform -eq "Unix") {
+        & $PSScriptRoot/.venv/bin/activate.ps1
+    }
+    else {
+        & $PSScriptRoot\.venv\Scripts\activate.ps1
+    }
 }
 catch {
-    Write-Warning "Failed to enter Python Virtualenv." -ForegroundColor DarkMagenta
+    Write-Host ""
+    Write-Warning "Failed to enter Python Virtualenv."
     return
 }
 
@@ -31,14 +64,19 @@ if (-not $Packages) {
     Write-Warning "Dependencies are required. Installing.."
     Write-Host ""
 
-    & $PSScriptRoot\.venv\Scripts\pip install -r $PSScriptRoot\requirements.txt
+    if ($Platform -eq "Unix") {
+        pip install -r $PSScriptRoot/requirements.txt
+    }
+    else {
+        pip install -r $PSScriptRoot\requirements.txt
+    }
 }
 
 # Set Virtalenv Information Object
 $Packages = pip freeze
 $PackageInfo = foreach ($package in $Packages) {
     $obj = [PSCustomObject] @{
-        "Name" = $package.split("==")[0]
+        "Name"    = $package.split("==")[0]
         "Version" = $package.split("==")[1]
     }
     Add-Member -InputObject $obj -MemberType ScriptMethod -Name "ToString" -Value {
@@ -49,9 +87,18 @@ $PackageInfo = foreach ($package in $Packages) {
 }
 
 # Out Virtualenv Information Object
-$venv = [PSCustomObject] @{
-    "Path" = "$PSScriptRoot\.venv"
-    "Packages" = $PackageInfo
+if ($Platform -eq "Unix") {
+    $venv = [PSCustomObject] @{
+        "Path"     = "$PSScriptRoot/.venv"
+        "Packages" = $PackageInfo
+    }
+}
+else {
+    $venv = [PSCustomObject] @{
+        "Path"     = "$PSScriptRoot\.venv"
+        "Packages" = $PackageInfo
+    }
 }
 
 Write-Output $venv
+
