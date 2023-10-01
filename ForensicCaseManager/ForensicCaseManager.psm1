@@ -4,7 +4,7 @@ foreach ($resource in (Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -Child
 }
 
 ## Import Scripts
-$Public  = @( Get-ChildItem -Path "$PSScriptRoot\Functions\Public\" -Recurse -Filter *.ps1 )
+$Public = @( Get-ChildItem -Path "$PSScriptRoot\Functions\Public\" -Recurse -Filter *.ps1 )
 $Private = @( Get-ChildItem -Path "$PSScriptRoot\Functions\Private\*.ps1" )
 
 @($Public + $Private) | ForEach-Object {

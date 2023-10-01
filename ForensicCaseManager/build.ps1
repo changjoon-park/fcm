@@ -5,14 +5,14 @@
 $Platform = $PSVersionTable.Platform
 
 if ($Platform -eq "Unix") {
-    $ConfigPath = "$env:HOME\.fcm\config.json"
+    $ConfigPath = "$env:HOME/.fcm/config.json"
 }
 else {
     $ConfigPath = "$env:USERPROFILE\.fcm\config.json"
 }
 
 $json = @{
-    platform = $Platforms
+    platform = $Platform
 } | ConvertTo-Json
 
 if (Test-Path -Path $ConfigPath) {

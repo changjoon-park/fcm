@@ -10,11 +10,10 @@ from plugins import PLUGINS
 from forensic_artifact import (
     Source,
     ForensicArtifact,
-    SOURCE_TYPE_CONTAINER,
-    SOURCE_TYPE_LOCAL,
 )
 
-ROOT_DIRECTORY_NAME = "_fcm"
+MODULE_DIRECTORY = Path.home() / ".fcm"
+ROOT_DIRECTORY_NAME = "cases"
 
 
 @dataclass(kw_only=True)
@@ -164,8 +163,7 @@ if __name__ == "__main__":
     if args.out:
         root_directory = Path(args.out) / ROOT_DIRECTORY_NAME
     else:
-        temp_dir = Path.home() / "AppData" / "Local" / "Temp"
-        root_directory = temp_dir / ROOT_DIRECTORY_NAME
+        root_directory = MODULE_DIRECTORY / ROOT_DIRECTORY_NAME
 
     if args.artifact:
         artifacts = args.artifact.split(",")
@@ -189,4 +187,4 @@ if __name__ == "__main__":
     session, case_information = case.export_all()
 
     if session and case_information:
-        print(True)
+        print("Parsing is done.")
