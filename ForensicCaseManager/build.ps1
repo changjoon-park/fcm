@@ -5,36 +5,39 @@
 $Platform = $PSVersionTable.Platform
 
 if ($Platform -eq "Unix") {
-    $ConfigPath = "$env:HOME/.fcm/config.json"
+    $Config = Join-Path -Path $env:HOME -ChildPath ".fcm/config.json"
+    $Python = "python3"
+    $Pip = "pip3"
 }
 else {
-    $ConfigPath = "$env:USERPROFILE\.fcm\config.json"
+    $Config = Join-Path -Path $env:USERPROFILE -ChildPath ".fcm/config.json"
+    $Python = "python.exe"
+    $Pip = "pip.exe"
 }
 
 $json = @{
     platform = $Platform
 } | ConvertTo-Json
 
-if (Test-Path -Path $ConfigPath) {
-    $json | Set-Content -Path $ConfigPath
+if (Test-Path -Path $Config) {
+    $json | Set-Content -Path $Config
 }
 else {
-    New-Item -Path $ConfigPath -ItemType File -Force
-    $json | Set-Content -Path $ConfigPath
+    New-Item -Path $Config -ItemType File -Force
+    $json | Set-Content -Path $Config
 }
+
+$VirtualEnvDirectory = Join-Path -Path $PSScriptRoot -ChildPath ".venv"
 
 # Create Virtual Environment
 if (-not (Test-Path -Path $PSScriptRoot\.venv -PathType Container)) {
     Write-Host ""
     Write-Host ">>> Creating a Virtual Environment for ForensicCaseManager(FCM)" -ForegroundColor DarkBlue
 
+    $VirtualEnvDirectory = Join-Path -Path $PSScriptRoot -ChildPath ".venv"
+
     try {
-        if ($Platform -eq "Unix") {
-            python3 -m venv $PSScriptRoot/.venv
-        }
-        else {
-            python.exe -m venv $PSScriptRoot\.venv
-        }
+        & $Python -m venv $VirtualEnvDirectory
     }
     catch {
         Write-Warning "Failed to create Python Virtualenv."
@@ -44,12 +47,9 @@ if (-not (Test-Path -Path $PSScriptRoot\.venv -PathType Container)) {
 
 # Activate Virtual Environment
 try {
-    if ($Platform -eq "Unix") {
-        & $PSScriptRoot/.venv/bin/activate.ps1
-    }
-    else {
-        & $PSScriptRoot\.venv\Scripts\activate.ps1
-    }
+    $VirtualEnvScript = Get-ChildItem -Path $VirtualEnvDirectory -Recurse | Where-Object { $_.Name -eq "activate.ps1" }
+
+    & $VirtualEnvScript.FullName
 }
 catch {
     Write-Host ""
@@ -58,22 +58,20 @@ catch {
 }
 
 # Check if Dependencies are installed
-$Packages = pip freeze
+$RequiredPackages = Join-Path -Path $PSScriptRoot -ChildPath "requirements.txt"
+$Packages = & $Pip freeze
+
 if (-not $Packages) {
     Write-Host ""
     Write-Warning "Dependencies are required. Installing.."
     Write-Host ""
 
-    if ($Platform -eq "Unix") {
-        pip install -r $PSScriptRoot/requirements.txt
-    }
-    else {
-        pip install -r $PSScriptRoot\requirements.txt
-    }
+    & $Pip install -r $RequiredPackages
 }
 
 # Set Virtalenv Information Object
-$Packages = pip freeze
+$Packages = & $Pip freeze
+
 $PackageInfo = foreach ($package in $Packages) {
     $obj = [PSCustomObject] @{
         "Name"    = $package.split("==")[0]
@@ -87,17 +85,9 @@ $PackageInfo = foreach ($package in $Packages) {
 }
 
 # Out Virtualenv Information Object
-if ($Platform -eq "Unix") {
-    $venv = [PSCustomObject] @{
-        "Path"     = "$PSScriptRoot/.venv"
-        "Packages" = $PackageInfo
-    }
-}
-else {
-    $venv = [PSCustomObject] @{
-        "Path"     = "$PSScriptRoot\.venv"
-        "Packages" = $PackageInfo
-    }
+$venv = [PSCustomObject] @{
+    "Path"     = $VirtualEnvDirectory
+    "Packages" = $PackageInfo
 }
 
 Write-Output $venv
