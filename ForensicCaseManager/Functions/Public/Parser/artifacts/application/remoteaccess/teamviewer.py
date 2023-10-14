@@ -31,7 +31,9 @@ class TeamviewerPlugin(Plugin):
 
         # Teamviewer logs when as user (Windows)
         for user_details in self.target.user_details.all_with_home():
-            for logfile in user_details.home_path.glob("appdata/roaming/teamviewer/teamviewer*_logfile.log"):
+            for logfile in user_details.home_path.glob(
+                "appdata/roaming/teamviewer/teamviewer*_logfile.log"
+            ):
                 self.logfiles.append([logfile, user_details.user])
 
     def check_compatible(self):
@@ -68,7 +70,9 @@ class TeamviewerPlugin(Plugin):
                 ts_day, ts_time, description = line.split(" ", 2)
                 ts_time = ts_time.split(".")[0]
 
-                timestamp = datetime.strptime(f"{ts_day} {ts_time}", "%Y/%m/%d %H:%M:%S")
+                timestamp = datetime.strptime(
+                    f"{ts_day} {ts_time}", "%Y/%m/%d %H:%M:%S"
+                )
 
                 yield RemoteAccessRecord(
                     tool="teamviewer",

@@ -186,22 +186,19 @@ UserAccountRecord = TargetRecordDescriptor(
     ],
 )
 
+
 class UserAccount(ForensicArtifact):
     """SAM plugin."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
         user_account = [
             json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
             for record in self.user_account()
         ]
-        
+
         self.result = {
             "user_account": user_account,
         }
@@ -243,9 +240,15 @@ class UserAccount(ForensicArtifact):
                     user_v = user_key.value("V").value
                     d = c_sam.user_V(user_v)
 
-                    u_username = user_v[d.username_ofs + 0xCC : d.username_ofs + 0xCC + d.username_len].decode("utf-16-le")
-                    u_fullname = user_v[d.fullname_ofs + 0xCC : d.fullname_ofs + 0xCC + d.fullname_len].decode("utf-16-le")
-                    u_comment = user_v[d.comment_ofs + 0xCC : d.comment_ofs + 0xCC + d.comment_len].decode("utf-16-le")
+                    u_username = user_v[
+                        d.username_ofs + 0xCC : d.username_ofs + 0xCC + d.username_len
+                    ].decode("utf-16-le")
+                    u_fullname = user_v[
+                        d.fullname_ofs + 0xCC : d.fullname_ofs + 0xCC + d.fullname_len
+                    ].decode("utf-16-le")
+                    u_comment = user_v[
+                        d.comment_ofs + 0xCC : d.comment_ofs + 0xCC + d.comment_len
+                    ].decode("utf-16-le")
                     u_lmpw = user_v[d.lmpw_ofs + 0xCC : d.lmpw_ofs + 0xCC + d.lmpw_len]
                     u_ntpw = user_v[d.ntpw_ofs + 0xCC : d.ntpw_ofs + 0xCC + d.ntpw_len]
 

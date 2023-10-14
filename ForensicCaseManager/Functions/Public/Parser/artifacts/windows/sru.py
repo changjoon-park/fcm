@@ -24,22 +24,21 @@ from forensic_artifact import Source, ForensicArtifact
 
 
 class SRU(ForensicArtifact):
-    
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self):
         if self.artifact == "SRU(Network)":
             network_data = [
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
                 for record in self.network_data()
             ]
             network_connectivity = [
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
                 for record in self.network_connectivity()
             ]
             self.result = {
@@ -48,7 +47,9 @@ class SRU(ForensicArtifact):
             }
         elif self.artifact == "SRU(App)":
             application = [
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
                 for record in self.application()
             ]
             # application_timeline = [
@@ -58,8 +59,8 @@ class SRU(ForensicArtifact):
             self.result = {
                 "sru_application": application,
                 # "application_timeline": application_timeline,
-            }        
-            
+            }
+
         # energy_estimator = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.energy_estimator()
@@ -83,20 +84,20 @@ class SRU(ForensicArtifact):
         # sdp_volume_provider = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.sdp_volume_provider()
-        # ]        
+        # ]
         # sdp_physical_disk_provider = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.sdp_physical_disk_provider()
-        # ]        
+        # ]
         # sdp_cpu_provider = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.sdp_cpu_provider()
-        # ]        
+        # ]
         # sdp_network_provider = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.sdp_network_provider()
         # ]
-                    
+
         # self.result = {
         #     "application_timeline": application_timeline,
         #     "energy_estimator": energy_estimator,
@@ -109,7 +110,6 @@ class SRU(ForensicArtifact):
         #     "sdp_cpu_provider": sdp_cpu_provider,
         #     "sdp_network_provider": sdp_network_provider,
         # }
-        
 
     def network_data(self):
         """
@@ -177,7 +177,9 @@ class SRU(ForensicArtifact):
 
     def sdp_physical_disk_provider(self):
         """Return the contents of SDP Physical Disk Provider table from the SRUDB.dat file."""
-        yield from self.read_records("sdp_physical_disk_provider", SdpPhysicalDiskProviderRecord)
+        yield from self.read_records(
+            "sdp_physical_disk_provider", SdpPhysicalDiskProviderRecord
+        )
 
     def sdp_cpu_provider(self):
         """Return the contents of SDP CPU Provider table from the SRUDB.dat file."""
@@ -187,8 +189,7 @@ class SRU(ForensicArtifact):
         """Return the contents of SDP Network Provider table from the SRUDB.dat file."""
         yield from self.read_records("sdp_network_provider", SdpNetworkProviderRecord)
 
-
-    def read_records(self, table_name:str, record_type:TargetRecordDescriptor):
+    def read_records(self, table_name: str, record_type: TargetRecordDescriptor):
         for db_file in self._iter_entry():
             try:
                 db = SRUParser(db_file.open("rb"))
@@ -199,7 +200,9 @@ class SRU(ForensicArtifact):
 
                 columns = [c.name for c in table.columns]
                 if columns[:4] != ["AutoIncId", "TimeStamp", "AppId", "UserId"]:
-                    raise ValueError(f"Unexpected table layout in SRU iteration: {table} ({columns[:4]})")
+                    raise ValueError(
+                        f"Unexpected table layout in SRU iteration: {table} ({columns[:4]})"
+                    )
                 columns = columns[1:]
 
                 for entry in db.get_table_entries(table=table):
@@ -208,7 +211,9 @@ class SRU(ForensicArtifact):
 
                     record_values = {}
                     for column, value in column_values:
-                        new_value = TRANSFORMS[column](value) if column in TRANSFORMS else value
+                        new_value = (
+                            TRANSFORMS[column](value) if column in TRANSFORMS else value
+                        )
                         new_column = FIELD_MAPPINGS.get(column, column)
                         record_values[new_column] = new_value
 

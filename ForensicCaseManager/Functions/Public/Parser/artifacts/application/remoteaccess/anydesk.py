@@ -30,7 +30,9 @@ class AnydeskPlugin(Plugin):
 
         # Anydesk logs when as user
         for user_details in self.target.user_details.all_with_home():
-            for logfile in user_details.home_path.glob("appdata/roaming/AnyDesk/*.trace"):
+            for logfile in user_details.home_path.glob(
+                "appdata/roaming/AnyDesk/*.trace"
+            ):
                 self.logfiles.append([logfile, user_details.user])
 
     def check_compatible(self):
@@ -64,7 +66,9 @@ class AnydeskPlugin(Plugin):
                 description = f"{level} {description}"
                 ts_time = ts_time.split(".")[0]
 
-                timestamp = datetime.strptime(f"{ts_day} {ts_time}", "%Y-%m-%d %H:%M:%S")
+                timestamp = datetime.strptime(
+                    f"{ts_day} {ts_time}", "%Y-%m-%d %H:%M:%S"
+                )
 
                 yield RemoteAccessRecord(
                     ts=timestamp,

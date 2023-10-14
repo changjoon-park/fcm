@@ -30,10 +30,22 @@ UsbRegistryRecord = TargetRecordDescriptor(
 
 
 USB_DEVICE_PROPERTY_KEYS = {
-    "first_install": ("0064", "00000064"),  # Windows 7 and higher. USB device first install date
-    "first_insert": ("0065", "00000065"),  # Windows 7 and higher. USB device first insert date.
-    "last_insert": ("0066", "00000066"),  # Windows 8 and higher. USB device last insert date.
-    "last_removal": ("0067", "00000067"),  # Windows 8 and higer. USB device last removal date.
+    "first_install": (
+        "0064",
+        "00000064",
+    ),  # Windows 7 and higher. USB device first install date
+    "first_insert": (
+        "0065",
+        "00000065",
+    ),  # Windows 7 and higher. USB device first insert date.
+    "last_insert": (
+        "0066",
+        "00000066",
+    ),  # Windows 8 and higher. USB device last insert date.
+    "last_removal": (
+        "0067",
+        "00000067",
+    ),  # Windows 8 and higer. USB device last removal date.
 }
 
 
@@ -41,21 +53,23 @@ class USB(ForensicArtifact):
     """USB plugin."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        usbstor = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.usbstor()], reverse=descending)
-                            
+        usbstor = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.usbstor()
+            ],
+            reverse=descending,
+        )
+
         self.result = {
             "usbstor": usbstor,
         }
-        
+
     @internal
     def unpack_timestamps(self, usb_reg_properties):
         """
@@ -64,7 +78,9 @@ class USB(ForensicArtifact):
         Returns:
             timestamps (Dict): A dict containing parsed timestamps within passed registry object
         """
-        usb_reg_properties = usb_reg_properties.subkey("{83da6326-97a6-4088-9453-a1923f573b29}")
+        usb_reg_properties = usb_reg_properties.subkey(
+            "{83da6326-97a6-4088-9453-a1923f573b29}"
+        )
         timestamps = {}
 
         for device_property, usbstor_values in USB_DEVICE_PROPERTY_KEYS.items():
@@ -75,7 +91,9 @@ class USB(ForensicArtifact):
                         data_value = version_key.subkey("00000000").value("Data").value
                     else:
                         data_value = version_key.value("(Default)").value
-                    timestamps[device_property] = self.ts.wintimestamp(struct.unpack("<Q", data_value)[0])
+                    timestamps[device_property] = self.ts.wintimestamp(
+                        struct.unpack("<Q", data_value)[0]
+                    )
                     break
                 else:
                     timestamps[device_property] = None
@@ -89,7 +107,9 @@ class USB(ForensicArtifact):
         product = device_info[2].split("Prod_")[1]
         version = None if len(device_info) < 4 else device_info[3].split("Rev_")[1]
 
-        return dict(device_type=device_type, vendor=vendor, product=product, version=version)
+        return dict(
+            device_type=device_type, vendor=vendor, product=product, version=version
+        )
 
     def usbstor(self):
         """Return information about attached USB devices.

@@ -61,15 +61,11 @@ FilesystemFilenameRecord = TargetRecordDescriptor(
 
 
 class MFT(ForensicArtifact):
-
     def __init__(self, _path: str, _container: str, artifact_name: str, entry: str):
         super().__init__(
-            _path=_path, 
-            _container=_container,
-            artifact_name=artifact_name,
-            entry=entry
+            _path=_path, _container=_container, artifact_name=artifact_name, entry=entry
         )
-        
+
     def parse(self):
         """Return the MFT records of all NTFS filesystems.
 
@@ -80,12 +76,19 @@ class MFT(ForensicArtifact):
         """
         parse_result = []
         for fs in self._iter_filesystem():
-            if (entry:=fs.ntfs.mft):
+            if entry := fs.ntfs.mft:
                 for record in self.read_records(entry=entry, fs=fs):
-                    print(json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False))
+                    print(
+                        json.dumps(
+                            record._packdict(),
+                            indent=2,
+                            default=str,
+                            ensure_ascii=False,
+                        )
+                    )
                     # parse_result.append(json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False))
         return parse_result
-    
+
     def mft_records(
         self,
         drive_letter: str,
@@ -134,7 +137,9 @@ class MFT(ForensicArtifact):
                 _target=self.target,
             )
 
-        ads_attributes = (data_attr for data_attr in record.attributes.DATA if data_attr.name != "")
+        ads_attributes = (
+            data_attr for data_attr in record.attributes.DATA if data_attr.name != ""
+        )
         ads_info = record.attributes.FILE_NAME[0]
 
         for data_attr in ads_attributes:
@@ -159,7 +164,9 @@ class MFT(ForensicArtifact):
                 _target=self.target,
             )
 
-    def read_records(self, entry: Path, fs: Optional[NtfsFilesystem] = None) -> Iterator[Iterator]:
+    def read_records(
+        self, entry: Path, fs: Optional[NtfsFilesystem] = None
+    ) -> Iterator[Iterator]:
         drive_letter = get_drive_letter(self.source, fs)
         volume_uuid = get_volume_identifier(fs)
 

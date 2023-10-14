@@ -25,39 +25,38 @@ SystemInfoRecord = TargetRecordDescriptor(
     ],
 )
 
+
 class SystemInfo(ForensicArtifact):
     """Plugin that iterates various Runkey locations."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
         system_info = [
             json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
             for record in self.system_info()
         ]
-                    
+
         self.result = {
             "system_info": system_info,
         }
-        
+
     @property
     def timezone(self):
         return self.src.source.datetime.tzinfo
-    
+
     @property
     def last_shutdown_time(self):
         for reg_path in self._iter_key(name="Windows"):
             try:
-                bin_value = self.src.source.registry.key(reg_path).value("ShutdownTime").value
+                bin_value = (
+                    self.src.source.registry.key(reg_path).value("ShutdownTime").value
+                )
                 return self.ts.wintimestamp(int.from_bytes(bin_value, "little"))
             except:
                 return ""
-    
+
     @property
     def codepage(self):
         for reg_path in self._iter_key(name="CodePage"):
@@ -65,7 +64,7 @@ class SystemInfo(ForensicArtifact):
                 return self.src.source.registry.key(reg_path).value("ACP").value
             except RegistryError:
                 return ""
-    
+
     @property
     def architecture(self):
         arch_strings = {
@@ -78,7 +77,11 @@ class SystemInfo(ForensicArtifact):
 
         for reg_path in self._iter_key(name="Environment"):
             try:
-                arch = self.src.source.registry.key(reg_path).value("PROCESSOR_ARCHITECTURE").value
+                arch = (
+                    self.src.source.registry.key(reg_path)
+                    .value("PROCESSOR_ARCHITECTURE")
+                    .value
+                )
                 bits = arch_strings.get(arch)
 
                 if bits == 64:
@@ -87,7 +90,7 @@ class SystemInfo(ForensicArtifact):
                     return f"{arch}_{bits}-win{bits}".lower()
             except RegistryError:
                 pass
-    
+
     # https://dfir.ru/2018/12/08/the-last-access-updates-are-almost-back/?fbclid=IwAR2Q6uj5EIAZ-HqBeRmYXecYCCQa693wc81HCm8KsRHDJ9rwOldaraipy-o
     # @property
     # def ntfs_disable_lastaccess_update(self):
@@ -96,10 +99,9 @@ class SystemInfo(ForensicArtifact):
     #             lastaccess_update_flag = self.src.source.registry.key(reg_path).value("NtfsDisableLastAccessUpdate").value
     #         except RegistryError:
     #             pass
-            
+
     #     if lastaccess_update_flag:
     #         pass
-            
 
     def get_current_version(self):
         key_map = {
@@ -116,10 +118,12 @@ class SystemInfo(ForensicArtifact):
             "Windows 10 Enterprise G": "YYVX9-NTFWV-6MDM3-9PT4T-4M68B",
             "Windows 10 Enterprise G N": "44RPN-FTY23-9VTTB-MP9BX-T84FV",
         }
-        
+
         for reg_path in self._iter_key(name="CurrentVersion"):
             try:
-                csd_version = self.src.source.registry.key(reg_path).value("CSDVersion").value
+                csd_version = (
+                    self.src.source.registry.key(reg_path).value("CSDVersion").value
+                )
             except:
                 csd_version = str()
 
@@ -168,8 +172,7 @@ class SystemInfo(ForensicArtifact):
                 "system_root": system_root,
                 "path_name": path_name,
             }
-            
-                
+
     def system_info(self):
         current_version = self.get_current_version()
 

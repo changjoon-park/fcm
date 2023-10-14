@@ -22,40 +22,42 @@ FileHistoryRecord = TargetRecordDescriptor(
         ("string", "id"),
         ("string", "browser"),
         ("path", "source"),
-    ]    
+    ],
 )
 
-class FileHistory(ForensicArtifact):
 
+class FileHistory(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self, descending: bool = False):
-        file_history = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.file_history()], reverse=descending)
-        
+        file_history = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.file_history()
+            ],
+            reverse=descending,
+        )
+
         self.result = {
             "file_history": file_history,
         }
 
-    def file_history(self) -> Generator[FileHistoryRecord, None, None] :
+    def file_history(self) -> Generator[FileHistoryRecord, None, None]:
         # Edge History
         for db_file in self._iter_entry(name="History*"):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
                     urls = {row.id: row for row in db.table("urls").rows()}
-                            
+
                     for row in db.table("visits").rows():
                         url_record = urls[row.url]
                         url = url_record.url
                         visit_count = url_record.visit_count
-                        
+
                         if (path := urllib.parse.unquote(url)).startswith("file://"):
                             path = path.strip("file://").replace("/", "\\")
 
@@ -74,7 +76,7 @@ class FileHistory(ForensicArtifact):
                     print(f"Error processing history file: {db_file} / exc_info={e}")
             except:
                 pass
-            
+
         # IE History
         for db_file in self._iter_entry(name="WebCacheV01.dat"):
             db = WebCache(fh=db_file.open("rb"))
@@ -82,7 +84,9 @@ class FileHistory(ForensicArtifact):
                 if not container_record.get("Url"):
                     continue
 
-                _, _, url = container_record.get("Url", "").rstrip("\x00").partition("@")
+                _, _, url = (
+                    container_record.get("Url", "").rstrip("\x00").partition("@")
+                )
 
                 if accessed_time := container_record.get("AccessedTime"):
                     ts = self.ts.wintimestamp(accessed_time)
@@ -102,4 +106,3 @@ class FileHistory(ForensicArtifact):
                         browser="iexplore",
                         source=str(db_file),
                     )
-                    

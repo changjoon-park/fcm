@@ -23,7 +23,7 @@ BrowserHistoryRecord = TargetRecordDescriptor(
         ("uri", "from_url"),
         ("string", "browser_type"),
         ("path", "source"),
-    ]
+    ],
 )
 
 BrowserDownloadsRecord = TargetRecordDescriptor(
@@ -111,21 +111,16 @@ BookmarkRecord = TargetRecordDescriptor(
 
 
 class ChromiumBrowser(ForensicArtifact):
-    
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-    
+        super().__init__(src=src, artifact=artifact, category=category)
+
     @property
     def browser_type(self) -> str:
-        raise NotImplementedError   
-    
+        raise NotImplementedError
+
     def parse(self, descending: bool = False) -> None:
         raise NotImplementedError
-    
+
     def history(self) -> Generator[BrowserHistoryRecord, None, None]:
         for db_file in self._iter_entry(name="History*"):
             try:
@@ -137,7 +132,7 @@ class ChromiumBrowser(ForensicArtifact):
                     for row in db.table("visits").rows():
                         visits[row.id] = row
                         url_record = urls[row.url]
-                        
+
                         if row.from_visit and row.from_visit in visits:
                             from_visit = visits[row.from_visit]
                             from_url = urls[from_visit.url]
@@ -157,7 +152,7 @@ class ChromiumBrowser(ForensicArtifact):
                                 from_url=from_url.url if from_url else None,
                                 source=str(db_file),
                                 browser_type=self.browser_type,
-                                _target=self._target
+                                _target=self._target,
                             )
                 except SQLError as e:
                     print(f"Error processing history file: {db_file} / exc_info={e}")
@@ -165,7 +160,6 @@ class ChromiumBrowser(ForensicArtifact):
                     pass
             except:
                 pass
-
 
     def downloads(self) -> Generator[BrowserDownloadsRecord, None, None]:
         for db_file in self._iter_entry(name="History*"):
@@ -184,7 +178,7 @@ class ChromiumBrowser(ForensicArtifact):
                         file_name = extract_basename(download_path)
                         file_extension = extract_fileext(download_path)
 
-                        if (download_chain := download_chains.get(row.id)):
+                        if download_chain := download_chains.get(row.id):
                             download_chain_url = download_chain[-1].url
                         else:
                             download_chain_url = None
@@ -196,7 +190,9 @@ class ChromiumBrowser(ForensicArtifact):
 
                         yield BrowserDownloadsRecord(
                             ts_start=self.ts.webkittimestamp(row.start_time),
-                            ts_end=self.ts.webkittimestamp(row.end_time) if row.end_time else None,
+                            ts_end=self.ts.webkittimestamp(row.end_time)
+                            if row.end_time
+                            else None,
                             file_name=file_name,
                             file_extension=file_extension,
                             received_bytes=row.get("total_bytes"),
@@ -205,7 +201,7 @@ class ChromiumBrowser(ForensicArtifact):
                             download_chain_url=download_chain_url,
                             reference_url=row.referrer,
                             id=row.get("id"),
-                            mime_type = row.get("mime_type"),
+                            mime_type=row.get("mime_type"),
                             state=state,
                             browser_type=self.browser_type,
                             source=str(db_file),
@@ -217,7 +213,7 @@ class ChromiumBrowser(ForensicArtifact):
                     pass
             except:
                 pass
-                
+
     def keyword_search_terms(self):
         for db_file in self._iter_entry(name="History*"):
             try:
@@ -230,7 +226,7 @@ class ChromiumBrowser(ForensicArtifact):
                         url_row = urls.get(row.url_id)
                         keyword_search_terms.update(row._values)
                         keyword_search_terms.update(url_row._values)
-                        
+
                         last_visit_time = keyword_search_terms.get("last_visit_time")
                         term = keyword_search_terms.get("term")
                         title = keyword_search_terms.get("title")
@@ -238,7 +234,7 @@ class ChromiumBrowser(ForensicArtifact):
                         id = keyword_search_terms.get("id")
                         visit_count = keyword_search_terms.get("visit_count")
                         hidden = keyword_search_terms.get("hidden")
-                        
+
                         engines = {
                             "Google": "://www.google.com",
                             "Amazon": "://www.amazon.com",
@@ -257,7 +253,7 @@ class ChromiumBrowser(ForensicArtifact):
                             "국가법령정보센터": "://www.law.go.kr/",
                             "파일보고": "://www.filebogo.com",
                         }
-                        
+
                         search_engine = "Unknown"
                         for engine_name, site_url in engines.items():
                             if site_url in url:
@@ -280,7 +276,7 @@ class ChromiumBrowser(ForensicArtifact):
                     print(f"Error processing history file: {db_file} / exc_info={e}")
             except:
                 pass
-    
+
     def autofill(self):
         for db_file in self._iter_entry(name="Web Data"):
             try:
@@ -289,13 +285,13 @@ class ChromiumBrowser(ForensicArtifact):
                     for row in db.table("autofill").rows():
                         autofill = {}
                         autofill.update(row._values)
-                        
+
                         name = autofill.get("name")
                         value = autofill.get("value")
                         date_created = autofill.get("date_created")
                         date_last_used = autofill.get("date_last_used")
                         count = autofill.get("count")
-                            
+
                         yield AutoFillRecord(
                             ts_created=self.ts.from_unix(date_created),
                             value=value,
@@ -319,7 +315,7 @@ class ChromiumBrowser(ForensicArtifact):
                     for row in db.table("logins").rows():
                         logins = {}
                         logins.update(row._values)
-                        
+
                         origin_url = logins.get("origin_url")
                         action_url = logins.get("action_url")
                         username_element = logins.get("username_element")
@@ -330,7 +326,7 @@ class ChromiumBrowser(ForensicArtifact):
                         date_created = logins.get("date_created")
                         date_last_used = logins.get("date_last_used")
                         date_password_modified = logins.get("date_password_modified")
-                            
+
                         yield LoginDataRecord(
                             ts_created=self.ts.webkittimestamp(date_created),
                             username_element=username_element,
@@ -341,7 +337,9 @@ class ChromiumBrowser(ForensicArtifact):
                             action_url=action_url,
                             signon_realm=signon_realm,
                             ts_last_used=self.ts.webkittimestamp(date_last_used),
-                            ts_password_modified=self.ts.webkittimestamp(date_password_modified),
+                            ts_password_modified=self.ts.webkittimestamp(
+                                date_password_modified
+                            ),
                             browser_type=self.browser_type,
                             _target=self._target,
                         )
@@ -350,7 +348,7 @@ class ChromiumBrowser(ForensicArtifact):
                     print(f"Error processing history file: {db_file} / exc_info={e}")
             except:
                 pass
-            
+
     def bookmarks(self):
         for db_file in self._iter_entry(name="Bookmarks"):
             json_data = json.load(db_file.open("r", encoding="UTF-8"))
@@ -361,11 +359,11 @@ class ChromiumBrowser(ForensicArtifact):
             for dir in bookmarks_dir_list:
                 if type(json_data["roots"][dir]) == dict:
                     if "children" in json_data["roots"][dir].keys():
-                        for row in json_data["roots"][dir]['children']:
-                            path = '/roots' + '/' + dir
+                        for row in json_data["roots"][dir]["children"]:
+                            path = "/roots" + "/" + dir
 
                             self._bookmark_dir_tree(row, path, bookmark_result)
-                            
+
                         for record in bookmark_result:
                             yield BookmarkRecord(
                                 ts_added=record[0],
@@ -381,51 +379,61 @@ class ChromiumBrowser(ForensicArtifact):
                             )
 
     def _bookmark_dir_tree(self, row, path, bookmark_result):
-        if row['type'] == 'folder':
-            path = path + '/' + row['name']
+        if row["type"] == "folder":
+            path = path + "/" + row["name"]
 
-            for row in row['children']:
+            for row in row["children"]:
                 self._bookmark_dir_tree(row, path, bookmark_result)
 
-        if row['type'] == 'url':
+        if row["type"] == "url":
             try:
                 date_added = None
-                guid = ''
-                id = ''
+                guid = ""
+                id = ""
                 last_visited_desktop = None
-                name = ''
-                bookmark_type = ''
-                url = ''
+                name = ""
+                bookmark_type = ""
+                url = ""
 
                 bookmark_columns = list(row.keys())
                 for column in bookmark_columns:
+                    if column == "date_added":
+                        date_added = self.ts.webkittimestamp(int(row["date_added"]))
 
-                    if column == 'date_added':
-                        date_added = self.ts.webkittimestamp(int(row['date_added']))
+                    if column == "guid":
+                        guid = row["guid"]
 
-                    if column == 'guid':
-                        guid = row['guid']
+                    if column == "id":
+                        id = row["id"]
 
-                    if column == 'id':
-                        id = row['id']
+                    if column == "meta_info":
+                        last_visited_desktop = self.ts.webkittimestamp(
+                            int(row["meta_info"]["last_visited_desktop"])
+                        )
 
-                    if column == 'meta_info':
-                        last_visited_desktop = self.ts.webkittimestamp(int(row['meta_info']['last_visited_desktop']))
-
-                    if column == 'name':
-                        if type(row['name']) == str and ("\'" or "\"") in row['name']:
-                            name = row['name'].replace("\'", "\'\'").replace('\"', '\"\"')
+                    if column == "name":
+                        if type(row["name"]) == str and ("'" or '"') in row["name"]:
+                            name = row["name"].replace("'", "''").replace('"', '""')
                         else:
-                            name = row['name']
+                            name = row["name"]
 
-                    if column == 'type':
-                        bookmark_type = row['type']
+                    if column == "type":
+                        bookmark_type = row["type"]
 
-                    if column == 'url':
-                        url = row['url']
+                    if column == "url":
+                        url = row["url"]
 
-                bookmark = [date_added, guid, id, last_visited_desktop, name, bookmark_type, url, path]
+                bookmark = [
+                    date_added,
+                    guid,
+                    id,
+                    last_visited_desktop,
+                    name,
+                    bookmark_type,
+                    url,
+                    path,
+                ]
                 bookmark_result.append(bookmark)
 
             except KeyError:
-                print('KeyError')
+                print("KeyError")

@@ -26,10 +26,11 @@ GroupedPrefetchRecord = TargetRecordDescriptor(
     ],
 )
 
+
 class PrefetchParser:
     def __init__(self, fh: BinaryIO):
         header_detect = prefetch.PREFETCH_HEADER_DETECT(fh.read(8))
-        if header_detect.signature ==b"MAM\x04":
+        if header_detect.signature == b"MAM\x04":
             fh.seek(0)
             fh = LZXpressHuffman.decompress(fh=fh)
 
@@ -50,7 +51,9 @@ class PrefetchParser:
 
     def parse(self):
         try:
-            file_info_header, file_metrics_header = prefetch_version_structs.get(self.version)
+            file_info_header, file_metrics_header = prefetch_version_structs.get(
+                self.version
+            )
             self.fh.seek(84)
             self.fn = file_info_header(self.fh)
             self.metrics = self.parse_metrics(metric_array_struct=file_metrics_header)
@@ -86,21 +89,18 @@ class PrefetchParser:
         """Get the previous timestamps from the prefetch file."""
         try:
             # We check if timestamp actually has a value
-            return [timestamp for timestamp in self.fn.last_run_remains if timestamp != 0]
+            return [
+                timestamp for timestamp in self.fn.last_run_remains if timestamp != 0
+            ]
         except AttributeError:
             # Header version 17 doesn't contain last_run_remains
             return []
 
 
 class Prefetch(ForensicArtifact):
-
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self, descending: bool = False) -> Path:
         """Return the content of all prefetch files.
 
@@ -121,21 +121,29 @@ class Prefetch(ForensicArtifact):
             previousruns: Previous run non zero timestamps
         """
 
-        prefetch = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.prefetch()], reverse=descending)
-               
-        self.result = {
-            "prefetch": prefetch
-        }
-        
+        prefetch = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.prefetch()
+            ],
+            reverse=descending,
+        )
+
+        self.result = {"prefetch": prefetch}
+
     def prefetch(self) -> Generator[GroupedPrefetchRecord, None, None]:
         for entry in self._iter_entry():
             try:
                 prefetch = PrefetchParser(fh=entry.open("rb"))
-                filename = prefetch.header.name.decode("utf-16-le", errors="ignore").split("\x00")[0]
+                filename = prefetch.header.name.decode(
+                    "utf-16-le", errors="ignore"
+                ).split("\x00")[0]
                 ts = self.ts.wintimestamp(prefetch.latest_timestamp)
-                previousruns = [self.ts.wintimestamp(ts) for ts in prefetch.previous_timestamps]
+                previousruns = [
+                    self.ts.wintimestamp(ts) for ts in prefetch.previous_timestamps
+                ]
 
                 yield GroupedPrefetchRecord(
                     ts=ts,
@@ -144,7 +152,7 @@ class Prefetch(ForensicArtifact):
                     linkedfiles=prefetch.metrics,
                     runcount=prefetch.fn.run_count,
                     previousruns=previousruns,
-                    _target=self._target
+                    _target=self._target,
                 )
             except:
                 pass

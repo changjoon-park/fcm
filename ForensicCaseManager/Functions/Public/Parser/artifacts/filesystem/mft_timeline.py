@@ -99,7 +99,9 @@ def format_info(
 
 class MftTimelinePlugin(Plugin):
     def check_compatible(self):
-        ntfs_filesystems = [fs for fs in self.target.filesystems if fs.__fstype__ == "ntfs"]
+        ntfs_filesystems = [
+            fs for fs in self.target.filesystems if fs.__fstype__ == "ntfs"
+        ]
         return len(ntfs_filesystems) > 0
 
     @export(output="yield")

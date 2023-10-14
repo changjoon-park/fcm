@@ -10,7 +10,7 @@ from dissect.target.plugins.os.windows.regf.shimcache import (
     ShimcacheRecord,
     ShimCache as ShimCacheParser,
     CRCMismatchException,
-    ShimCacheGeneratorType
+    ShimCacheGeneratorType,
 )
 
 from forensic_artifact import Source, ForensicArtifact
@@ -22,22 +22,19 @@ class ShimCache(ForensicArtifact):
     """
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self, descending: bool = False):
         sorted_shimcache = sorted(
-            [record._packdict() for record in self.shimcache()], 
-            key=lambda x: x["name"], reverse=descending
+            [record._packdict() for record in self.shimcache()],
+            key=lambda x: x["name"],
+            reverse=descending,
         )
         shimcache = [
             json.dumps(entry, indent=2, default=str, ensure_ascii=False)
             for entry in sorted_shimcache
         ]
-                    
+
         self.result = {
             "shimcache": shimcache,
         }
@@ -69,7 +66,11 @@ class ShimCache(ForensicArtifact):
                         continue
 
                     try:
-                        cache = ShimCacheParser(BytesIO(data), self.src.source.ntversion, value_name != "AppCompatCache")
+                        cache = ShimCacheParser(
+                            BytesIO(data),
+                            self.src.source.ntversion,
+                            value_name != "AppCompatCache",
+                        )
                     except NotImplementedError:
                         # self.target.log.warning("Not implemented ShimCache version: %s %s", key, value_name)
                         continue

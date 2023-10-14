@@ -12,25 +12,28 @@ from dissect.target.plugins.os.windows.regf.userassist import (
 
 from forensic_artifact import Source, ForensicArtifact
 
+
 class UserAssist(ForensicArtifact):
     """UserAssist plugin."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        userassist = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.userassist()], reverse=descending)
-        
+        userassist = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.userassist()
+            ],
+            reverse=descending,
+        )
+
         self.result = {
             "userassist": userassist,
         }
-        
+
     def userassist(self):
         """Return the UserAssist information for each user.
 
@@ -71,7 +74,9 @@ class UserAssist(ForensicArtifact):
                                 timestamp = data.timestamp
                                 number_of_executions = data.number_of_executions
                                 application_focus_count = data.application_focus_count
-                                application_focus_duration = data.application_focus_duration
+                                application_focus_duration = (
+                                    data.application_focus_duration
+                                )
                             elif version == 3 and len(entry.value) == 16:
                                 data = c_userassist.VERSION3_ENTRY(entry.value)
                                 timestamp = data.timestamp
@@ -85,11 +90,15 @@ class UserAssist(ForensicArtifact):
                             else:
                                 continue
 
-                            value = uri.from_windows(codecs.decode(entry.name, "rot-13"))
+                            value = uri.from_windows(
+                                codecs.decode(entry.name, "rot-13")
+                            )
                             parts = value.split("/")
 
                             try:
-                                value = value.replace(parts[0], DESCRIPTIONS[parts[0][1:-1].lower()])
+                                value = value.replace(
+                                    parts[0], DESCRIPTIONS[parts[0][1:-1].lower()]
+                                )
                             except KeyError:
                                 pass
 

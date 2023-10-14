@@ -30,15 +30,11 @@ UsnjrnlRecord = TargetRecordDescriptor(
     ],
 )
 
+
 class UsnJrnl(ForensicArtifact):
-    
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self) -> Path:
         """Return the UsnJrnl entries of all NTFS filesystems.
 
@@ -51,15 +47,24 @@ class UsnJrnl(ForensicArtifact):
         """
         usnjrnl = []
         for fs in self._iter_filesystem():
-            if (entry:=fs.ntfs.usnjrnl):
+            if entry := fs.ntfs.usnjrnl:
                 for record in self.read_records(entry=entry, fs=fs):
-                    usnjrnl.append(json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False))
-                    
+                    usnjrnl.append(
+                        json.dumps(
+                            record._packdict(),
+                            indent=2,
+                            default=str,
+                            ensure_ascii=False,
+                        )
+                    )
+
         self.result = {
             "usnjrnl": usnjrnl,
         }
 
-    def read_records(self, entry: Path, fs: Optional[NtfsFilesystem] = None) -> Iterator[Iterator]:
+    def read_records(
+        self, entry: Path, fs: Optional[NtfsFilesystem] = None
+    ) -> Iterator[Iterator]:
         drive_letter = get_drive_letter(self.src.source, fs)
 
         for record in entry.records():

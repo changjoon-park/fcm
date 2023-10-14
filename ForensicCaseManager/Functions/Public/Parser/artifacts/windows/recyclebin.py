@@ -42,6 +42,7 @@ struct header_v2 {
 recyclebin_parser = cstruct.cstruct()
 recyclebin_parser.load(c_recyclebin_i)
 
+
 @dataclass(kw_only=True)
 class RecycleBinParser:
     path: Path
@@ -49,7 +50,9 @@ class RecycleBinParser:
     def __post_init__(self):
         self.sid = self.find_sid(self.path)
         self.source_path = str(self.path).lstrip("/")
-        self.deleted_path = str(self.path.parent / self.path.name.replace("/$i", "/$r")).lstrip("/")
+        self.deleted_path = str(
+            self.path.parent / self.path.name.replace("/$i", "/$r")
+        ).lstrip("/")
         self.parse()
 
     def parse(self):
@@ -77,18 +80,13 @@ class RecycleBinParser:
 
 
 class RecycleBin(ForensicArtifact):
-
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self, descending: bool = False) -> None:
         """
         Return files located in the recycle bin ($Recycle.Bin).
-        
+
         Write RecycleBinRecords with fields:
           hostname (string): The target hostname
           domain (string): The target domain
@@ -100,13 +98,17 @@ class RecycleBin(ForensicArtifact):
           deleted_path (uri): Location of the deleted file after deletion $R file
           source (uri): Location of $I meta file on disk
         """
-        recyclebin = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.recyclebin()], reverse=descending)
-     
-        self.result = {
-            "recyclebin": recyclebin
-        }
+        recyclebin = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.recyclebin()
+            ],
+            reverse=descending,
+        )
+
+        self.result = {"recyclebin": recyclebin}
 
     def recyclebin(self) -> Generator[RecycleBinRecord, None, None]:
         for entry in self._iter_entry(recurse=True):
@@ -114,7 +116,7 @@ class RecycleBin(ForensicArtifact):
                 recyclebin = RecycleBinParser(path=entry)
                 path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
                 filename = os.path.split(path)[1]
-                
+
                 yield RecycleBinRecord(
                     ts=self.ts.wintimestamp(recyclebin.timestamp),
                     path=path,
@@ -122,7 +124,7 @@ class RecycleBin(ForensicArtifact):
                     source=uri.from_windows(recyclebin.source_path),
                     filesize=recyclebin.file_size,
                     deleted_path=uri.from_windows(recyclebin.deleted_path),
-                    _target=self._target
+                    _target=self._target,
                 )
             except:
                 pass
