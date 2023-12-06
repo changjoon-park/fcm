@@ -133,6 +133,8 @@ class CaseManager:
                     id=id,
                     category=category,
                 )
+        if not self.db_manager.is_table_exist("session_data"):
+            self.db_manager.create_session_data_table()
         self.db_manager.close()
 
     def parse_all(self) -> None:
@@ -140,6 +142,9 @@ class CaseManager:
             entry.parse(descending=False)
 
     def export_all(self) -> list[dict]:
+        for entry in self.forensic_artifact:
+            entry.export_db(session_id=self.session_time)
+
         result_files = []
         for entry in self.forensic_artifact:
             output_dir = self.session_dir / f"{entry.category}" / f"{entry.artifact}"
@@ -165,7 +170,7 @@ class CaseManager:
             computer_name=self._computer_name,
             registered_owner=self._registered_owner,
             source=self.src.source_path,
-            session=self.session_time,
+            session_id=self.session_time,
         )
         self.db_manager.close()
 

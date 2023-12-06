@@ -1,0 +1,22 @@
+Name: RecycleBin
+Desc: Data extracted from the Recycle Bin
+Table:
+  - TableName: recyclebin
+    Columns:
+      - ts
+      - path
+      - filename
+      - source
+      - filesize
+      - deleted_path
+      # - source_evidence
+      - session_id
+    Types:
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [TEXT]
+      # - [TEXT]
+      - [TEXT]

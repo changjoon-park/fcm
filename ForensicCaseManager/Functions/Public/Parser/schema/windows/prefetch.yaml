@@ -1,0 +1,22 @@
+Name: Prefetch
+Desc: Data extracted from the Prefetch folder
+Table:
+  - TableName: prefetch
+    Columns:
+      - ts
+      - filename
+      - prefetch
+      - linkedfiles
+      - runcount
+      - previousruns
+      # - source_evidence
+      - session_id
+    Types:
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [TEXT]
+      # - [TEXT]
+      - [TEXT]

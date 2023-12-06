@@ -7,8 +7,11 @@ from dataclasses import dataclass, field
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
+
 from path_finder import ARTIFACT_PATH
 from util.ts import TimeStamp
+from database_manager import DatabaseManager
+from schema.artifact_schema import ARTIFACT_SCHEMA
 
 SOURCE_TYPE_PATH = "Path"
 SOURCE_TYPE_LOCAL = "Local"
@@ -54,6 +57,7 @@ class ForensicArtifact:
     result: dict = field(
         default_factory=dict
     )  # {name: [json.dumps(data, indent=2, default=str, ensure_ascii=False), ...]}
+    db_manager: DatabaseManager = field(default_factory=DatabaseManager)
 
     def __post_init__(self):
         self.directory, self.entry = ARTIFACT_PATH.get(self.artifact)
@@ -126,6 +130,18 @@ class ForensicArtifact:
                 - sort parsed results by descending/ascending order. Defaults to False.
         """
         raise NotImplementedError
+
+    def export_db(self, session_id: str):
+        self.db_manager.connect()
+        self.db_manager.create_artifact_table_from_yaml(
+            ARTIFACT_SCHEMA.get(self.artifact)
+        )
+        # for artifact_name, artifact_data in self.result.items():
+
+        # self.db_manager.insert_artifact_data(
+
+        # )
+        self.db_manager.close()
 
     def export(self, output_dir: Path, current_time: str = None) -> list[dict]:
         if not output_dir.exists():
