@@ -101,7 +101,7 @@ class Prefetch(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(src=src, artifact=artifact, category=category)
 
-    def parse(self, descending: bool = False) -> Path:
+    def parse(self, descending: bool = False) -> None:
         """Return the content of all prefetch files.
 
         Prefetch is a memory management feature in Windows. It contains information (for example run count and
@@ -130,7 +130,6 @@ class Prefetch(ForensicArtifact):
             ],
             reverse=descending,
         )
-
         self.result = {"prefetch": prefetch}
 
     def prefetch(self) -> Generator[GroupedPrefetchRecord, None, None]:
