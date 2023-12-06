@@ -2,7 +2,7 @@ import sqlite3
 
 
 class DatabaseManager:
-    DATABASE = "teset.sqlite"
+    DATABASE = "test.sqlite"
 
     def __init__(self):
         self.conn = None
@@ -13,6 +13,18 @@ class DatabaseManager:
 
     def close(self):
         self.conn.close()
+
+    def is_table_exist(self, table_name: str) -> bool:
+        with self.conn:
+            self.c.execute(
+                """
+            SELECT name
+            FROM sqlite_master
+            WHERE type='table' AND name=?
+            """,
+                (table_name,),
+            )
+            return self.c.fetchone() is not None
 
     def create_case_information_table(self):
         with self.conn:
@@ -51,14 +63,6 @@ class DatabaseManager:
                     category,
                 ),
             )
-
-    def is_category_exist(self, id: int):
-        with self.conn:
-            self.c.execute(
-                "SELECT COUNT(*) FROM category WHERE category = ?",
-                (id,),
-            )
-            return self.c.fetchone() is not None
 
     def insert_case_information(
         self,
