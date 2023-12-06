@@ -39,7 +39,7 @@ class DatabaseManager:
             )"""
             )
 
-    def insert_category(self, id, category):
+    def insert_category(self, id: int, category: str):
         with self.conn:
             self.c.execute(
                 """
@@ -52,8 +52,21 @@ class DatabaseManager:
                 ),
             )
 
+    def is_category_exist(self, id: int):
+        with self.conn:
+            self.c.execute(
+                "SELECT COUNT(*) FROM category WHERE category = ?",
+                (id,),
+            )
+            return self.c.fetchone() is not None
+
     def insert_case_information(
-        self, case_label, computer_name, registered_owner, source, session
+        self,
+        case_label: str,
+        computer_name: str,
+        registered_owner: str,
+        source: str,
+        session: str,
     ):
         with self.conn:
             self.c.execute(

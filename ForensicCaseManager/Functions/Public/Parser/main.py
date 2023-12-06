@@ -30,7 +30,7 @@ class CaseManager:
     root_directory: Path
     src: Source = field(init=False)
     forensic_artifact: ForensicArtifact = field(default_factory=list)
-    database_manager: DatabaseManager = field(default_factory=DatabaseManager)
+    db_manager: DatabaseManager = field(default_factory=DatabaseManager)
 
     def __post_init__(self):
         self.database_init()
@@ -125,15 +125,16 @@ class CaseManager:
             (8, "SYSTEM_INFORMATION"),
             (9, "EXTERNAL_DEVICE_USB_USAGE"),
         ]
-        self.database_manager.connect()
-        self.database_manager.create_case_information_table()
-        self.database_manager.create_category_table()
+        self.db_manager.connect()
+        self.db_manager.create_case_information_table()
+        self.db_manager.create_category_table()
         for id, category in categories:
-            self.database_manager.insert_category(
-                id=id,
-                category=category,
-            )
-        self.database_manager.close()
+            if not self.db_manager.is_category_exist(id=id):
+                self.db_manager.insert_category(
+                    id=id,
+                    category=category,
+                )
+        self.db_manager.close()
 
     def parse_all(self) -> None:
         for entry in self.forensic_artifact:
@@ -159,15 +160,15 @@ class CaseManager:
         return session
 
     def _export_case_information(self):
-        self.database_manager.connect()
-        self.database_manager.insert_case_information(
+        self.db_manager.connect()
+        self.db_manager.insert_case_information(
             case_label=self._case_label,
             computer_name=self._computer_name,
             registered_owner=self._registered_owner,
             source=self.src.source_path,
             session=self.session_time,
         )
-        self.database_manager.close()
+        self.db_manager.close()
 
         case_information = (
             "["
