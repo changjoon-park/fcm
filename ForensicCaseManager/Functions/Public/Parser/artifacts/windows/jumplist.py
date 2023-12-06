@@ -9,8 +9,8 @@ from dissect.target.helpers.descriptor_extensions import UserRecordDescriptorExt
 from dissect.target.helpers.record import create_extended_descriptor
 
 
-from lib.carpe.jumplist.app_id_list import app_id_list
-from lib.carpe.jumplist.jumplist import TJumpListParser
+from lib.jumplist.app_id_list import app_id_list
+from lib.jumplist.jumplist import TJumpListParser
 
 from forensic_artifact import Source, ForensicArtifact
 
@@ -35,21 +35,17 @@ JumpListRecord = create_extended_descriptor([UserRecordDescriptorExtension])(
         ("string", "machine_id"),
         ("string", "mac_address"),
     ],
-)                
+)
+
 
 class JumpList(ForensicArtifact):
-
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
-        
+        super().__init__(src=src, artifact=artifact, category=category)
+
     def parse(self, descending: bool = False) -> None:
         """
         Return files located in the recycle bin ($Recycle.Bin).
-        
+
         Write RecycleBinRecords with fields:
           hostname (string): The target hostname
           domain (string): The target domain
@@ -62,19 +58,23 @@ class JumpList(ForensicArtifact):
           source (uri): Location of $I meta file on disk
         """
 
-        jumplist = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.jumplist()], reverse=descending)
-   
-        self.result = {
-            "jumplist": jumplist
-        }
+        jumplist = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.jumplist()
+            ],
+            reverse=descending,
+        )
+
+        self.result = {"jumplist": jumplist}
 
     def jumplist(self) -> Generator[JumpListRecord, None, None]:
         for entry in self._iter_entry():
             try:
                 entry_filename = os.path.split(entry)[1]
-                app_id = entry_filename[:entry_filename.rfind('.')]
+                app_id = entry_filename[: entry_filename.rfind(".")]
                 jumplist = TJumpListParser(fh=entry.open("rb"))
                 parse_results = jumplist.dest_list
                 # print(parse_results)
@@ -86,7 +86,7 @@ class JumpList(ForensicArtifact):
 
                 for result in parse_results:
                     if result[1] is None:
-                        record_time = ''
+                        record_time = ""
                     else:
                         record_time = wintimestamp(result[1])
 
@@ -97,7 +97,7 @@ class JumpList(ForensicArtifact):
                     basename = os.path.basename(path)
                     file_name = os.path.splitext(basename)[0]
                     file_ext = os.path.splitext(basename)[1].strip(".")
-                                        
+
                     yield JumpListRecord(
                         last_opened=self.ts.to_localtime(record_time),
                         file_name=str(file_name),
@@ -116,7 +116,7 @@ class JumpList(ForensicArtifact):
                         entry_id=str(result[3]),
                         machine_id=str(result[16]),
                         mac_address=str(result[17]),
-                        _target=self._target
+                        _target=self._target,
                     )
             except:
                 pass
