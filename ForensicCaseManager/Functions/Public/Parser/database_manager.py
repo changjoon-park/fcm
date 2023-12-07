@@ -39,7 +39,8 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS forensic_case (
                 id TEXT PRIMARY KEY,
                 case_name TEXT NOT NULL,
-                case_directory TEXT NOT NULL
+                case_directory TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
             )
             """
             )
@@ -69,7 +70,7 @@ class DatabaseManager:
             self.c.execute(
                 """
             CREATE TABLE IF NOT EXISTS evidences (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                evidence_number INTEGER NOT NULL,
                 evidence_label TEXT NOT NULL,
                 computer_name TEXT,
                 registered_owner TEXT,
@@ -82,6 +83,7 @@ class DatabaseManager:
 
     def insert_evidences(
         self,
+        evidence_number: int,
         evidence_label: str,
         computer_name: str,
         registered_owner: str,
@@ -92,14 +94,16 @@ class DatabaseManager:
             self.c.execute(
                 """
             INSERT INTO evidences (
+                evidence_number,
                 evidence_label, 
                 computer_name, 
                 registered_owner, 
                 source, 
                 case_id)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
                 (
+                    evidence_number,
                     evidence_label,
                     computer_name,
                     registered_owner,

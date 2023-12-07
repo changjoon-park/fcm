@@ -82,10 +82,22 @@ class CaseManager:
         self.db_manager.close()
 
     def _init_table_evidences(self):
-        for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.export_evidences(
-                db_manager=self.db_manager, case_id=self.case_id
+        for index, forensic_evidence in enumerate(self.forensic_evidences):
+            self.db_manager.connect()
+            # create "evidences" table
+            if not self.db_manager.is_table_exist("evidences"):
+                self.db_manager.create_evidences_table()
+
+            # insert "evidences" table
+            self.db_manager.insert_evidences(
+                evidence_number=index,
+                evidence_label=forensic_evidence._evidence_label,
+                computer_name=forensic_evidence._computer_name,
+                registered_owner=forensic_evidence._registered_owner,
+                source=forensic_evidence.src.source_path,
+                case_id=self.case_id,
             )
+            self.db_manager.close()
 
     def _init_table_artifact_category(self):
         self.db_manager.connect()

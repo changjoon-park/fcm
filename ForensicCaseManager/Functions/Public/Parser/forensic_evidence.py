@@ -100,19 +100,3 @@ class ForensicEvidence:
     def export_artifacts(self, db_manager: DatabaseManager = None):
         for artifact in self.forensic_artifacts:
             artifact.export(db_manager=db_manager)
-
-    def export_evidences(self, db_manager: DatabaseManager = None, case_id: str = None):
-        db_manager.connect()
-        # create "evidences" table
-        if not db_manager.is_table_exist("evidences"):
-            db_manager.create_evidences_table()
-
-        # insert "evidences" table
-        db_manager.insert_evidences(
-            evidence_label=self._evidence_label,
-            computer_name=self._computer_name,
-            registered_owner=self._registered_owner,
-            source=self.src.source_path,
-            case_id=case_id,
-        )
-        db_manager.close()

@@ -120,7 +120,11 @@ class ForensicArtifact:
 
     def export(self, db_manager: DatabaseManager = None):
         db_manager.connect()
+
+        # create artifact table
         db_manager.create_artifact_table_from_yaml(ARTIFACT_SCHEMA.get(self.artifact))
+
+        # insert artifact data
         # for artifact_name, artifact_data in self.result.items():
 
         # self.db_manager.insert_artifact_data(
