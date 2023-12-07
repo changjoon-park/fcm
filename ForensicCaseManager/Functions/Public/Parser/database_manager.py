@@ -1,16 +1,18 @@
 import sqlite3
 import yaml
 from pathlib import Path
+from dataclasses import dataclass, field
 
 
+@dataclass(kw_only=True)
 class DatabaseManager:
-    DATABASE = "test.sqlite"
+    database: Path
 
-    def __init__(self):
-        self.conn = None
+    def __post_init__(self):
+        pass
 
     def connect(self):
-        self.conn = sqlite3.connect(self.DATABASE)
+        self.conn = sqlite3.connect(self.database)
         self.c = self.conn.cursor()
 
     def close(self):
@@ -29,41 +31,38 @@ class DatabaseManager:
             return self.c.fetchone() is not None
 
     # create/insert case_information table
-    def create_case_information_table(self):
+    def create_evidence_information_table(self):
         with self.conn:
             self.c.execute(
                 """
-            CREATE TABLE IF NOT EXISTS case_information (
+            CREATE TABLE IF NOT EXISTS evidence_information (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                case_label TEXT NOT NULL,
+                evidence_label TEXT NOT NULL,
                 computer_name TEXT NOT NULL,
                 registered_owner TEXT NOT NULL,
-                source TEXT NOT NULL,
-                session_id TEXT NOT NULL
+                source TEXT NOT NULL
             )
             """
             )
 
-    def insert_case_information(
+    def insert_evidence_information(
         self,
-        case_label: str,
+        evidence_label: str,
         computer_name: str,
         registered_owner: str,
         source: str,
-        session_id: str,
     ):
         with self.conn:
             self.c.execute(
                 """
-            INSERT INTO case_information (case_label, computer_name, registered_owner, source, session_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO evidence_information (evidence_label, computer_name, registered_owner, source)
+            VALUES (?, ?, ?, ?)
             """,
                 (
-                    case_label,
+                    evidence_label,
                     computer_name,
                     registered_owner,
                     source,
-                    session_id,
                 ),
             )
 

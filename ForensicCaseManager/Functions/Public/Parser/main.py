@@ -1,11 +1,15 @@
 import argparse
 from pathlib import Path
 
-from case_manager import CaseManager, ROOT_DIRECTORY_NAME
+from case_manager import CaseManager
+from forensic_evidence import ForensicEvidence
+from config import ROOT_DIRECTORY_NAME
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--path", default=None, help="path to parse", dest="path")
+    parser.add_argument(
+        "-n", "--case_name", default=None, help="case name", dest="case_name"
+    )
     parser.add_argument(
         "-l", "--local", action="store_true", help="local to parse", dest="local"
     )
@@ -23,14 +27,10 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    path = args.path
+    case_name = args.case_name
     local = args.local
-    container = args.container
-    if args.out:
-        root_directory = Path(args.out) / ROOT_DIRECTORY_NAME
-    else:
-        temp_dir = Path.home() / "AppData" / "Local" / "Temp"
-        root_directory = temp_dir / ROOT_DIRECTORY_NAME
+    if args.container:
+        containers = args.container.split(",")
 
     if args.artifact:
         artifacts = args.artifact.split(",")
@@ -42,17 +42,21 @@ if __name__ == "__main__":
     else:
         categories = None
 
+    if args.out:
+        root_directory = Path(args.out) / ROOT_DIRECTORY_NAME
+    else:
+        root_directory = Path.home() / ROOT_DIRECTORY_NAME
+
     case = CaseManager(
-        _path=path,
-        _local=local,
-        _container=container,
-        _artifacts=artifacts,
-        _categories=categories,
+        case_name=case_name,
         root_directory=root_directory,
+        forensic_evidences=[
+            ForensicEvidence(
+                _local=local,
+                _container=container,
+                _artifacts=args.artifact,
+                _categories=args.category,
+            )
+            for container in containers
+        ],
     )
-
-    case.parse_all()
-    session, case_information = case.export_all()
-
-    if session and case_information:
-        print(True)
