@@ -60,3 +60,4 @@ if __name__ == "__main__":
             for container in containers
         ],
     )
+    case.investigate_case()

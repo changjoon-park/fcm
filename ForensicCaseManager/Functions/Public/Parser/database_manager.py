@@ -1,7 +1,8 @@
 import sqlite3
 import yaml
+import json
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(kw_only=True)
@@ -30,58 +31,99 @@ class DatabaseManager:
             )
             return self.c.fetchone() is not None
 
-    # create/insert case_information table
-    def create_evidence_information_table(self):
+    # create/insert forensic_case table
+    def create_forensic_case_table(self):
         with self.conn:
             self.c.execute(
                 """
-            CREATE TABLE IF NOT EXISTS evidence_information (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                evidence_label TEXT NOT NULL,
-                computer_name TEXT NOT NULL,
-                registered_owner TEXT NOT NULL,
-                source TEXT NOT NULL
+            CREATE TABLE IF NOT EXISTS forensic_case (
+                id TEXT PRIMARY KEY,
+                case_name TEXT NOT NULL,
+                case_directory TEXT NOT NULL
             )
             """
             )
 
-    def insert_evidence_information(
+    def insert_forensic_case(
+        self,
+        id: str,
+        case_name: str,
+        case_directory: str,
+    ):
+        with self.conn:
+            self.c.execute(
+                """
+            INSERT INTO forensic_case (id, case_name, case_directory)
+            VALUES (?, ?, ?)
+            """,
+                (
+                    id,
+                    case_name,
+                    case_directory,
+                ),
+            )
+
+    # create/insert evidences table
+    def create_evidences_table(self):
+        with self.conn:
+            self.c.execute(
+                """
+            CREATE TABLE IF NOT EXISTS evidences (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                evidence_label TEXT NOT NULL,
+                computer_name TEXT,
+                registered_owner TEXT,
+                source TEXT NOT NULL,
+                case_id TEXT NOT NULL,
+                FOREIGN KEY (case_id) REFERENCES forensic_case (id)
+            )
+            """
+            )
+
+    def insert_evidences(
         self,
         evidence_label: str,
         computer_name: str,
         registered_owner: str,
         source: str,
+        case_id: str,
     ):
         with self.conn:
             self.c.execute(
                 """
-            INSERT INTO evidence_information (evidence_label, computer_name, registered_owner, source)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO evidences (
+                evidence_label, 
+                computer_name, 
+                registered_owner, 
+                source, 
+                case_id)
+            VALUES (?, ?, ?, ?, ?)
             """,
                 (
                     evidence_label,
                     computer_name,
                     registered_owner,
                     source,
+                    case_id,
                 ),
             )
 
-    # create/insert category table
-    def create_category_table(self):
+    # create/insert artifact category table
+    def create_artifact_category_table(self):
         with self.conn:
             self.c.execute(
                 """
-            CREATE TABLE IF NOT EXISTS category (
+            CREATE TABLE IF NOT EXISTS artifact_category (
                 id INTEGER PRIMARY KEY,
                 category TEXT NOT NULL
             )"""
             )
 
-    def insert_category(self, id: int, category: str):
+    def insert_artifact_category(self, id: int, category: str):
         with self.conn:
             self.c.execute(
                 """
-            INSERT INTO category (id, category)
+            INSERT INTO artifact_category (id, category)
             VALUES (?, ?)
             """,
                 (

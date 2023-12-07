@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass, field
@@ -6,10 +7,6 @@ from dataclasses import dataclass, field
 from util.converter import convertfrom_extended_ascii
 from util.extractor import extract_basename
 from pathlib import Path
-from forensic_artifact import (
-    SOURCE_TYPE_CONTAINER,
-    SOURCE_TYPE_LOCAL,
-)
 from database_manager import DatabaseManager
 from forensic_evidence import ForensicEvidence
 from config import DATABASE_NAME, ARTIFACT_CATEGORIES
@@ -24,7 +21,7 @@ class CaseManager:
 
     def __post_init__(self):
         self.db_manager = DatabaseManager(database=self.database)
-        self.investigate_case()
+        self.case_id = str(uuid.uuid4())
 
     @property
     def case_directory(self):
@@ -40,57 +37,71 @@ class CaseManager:
             "case_name": self.case_name,
             "case_directory": self.root_directory / self.case_name,
             "forensic_evidences": self.forensic_evidences,
+            "case_id": self.case_id,
         }
+
+    def investigate_case(self):
+        # create case directory
+        self._create_case_directory()
+
+        # initialize database
+        self._init_database()
+
+        # parse artifacts in all forensic evidences
+        self._parse_artifacts_all()
+
+        # export artifacts in all forensic evidences
+        self._export_artifacts_all()
 
     def _create_case_directory(self):
         self.case_directory.mkdir(parents=True, exist_ok=True)
 
-    def _database_init(self):
-        # connect to database
+    def _init_database(self):
+        # set forensic case table
+        self._init_table_forensic_case()
+
+        # set evidences table
+        self._init_table_evidences()
+
+        # set artifact category table
+        self._init_table_artifact_category()
+
+    def _init_table_forensic_case(self):
         self.db_manager.connect()
 
-        # create/insert "category" table
-        if not self.db_manager.is_table_exist("category"):
-            self.db_manager.create_category_table()
+        # create forensic_case table
+        if not self.db_manager.is_table_exist("forensic_case"):
+            self.db_manager.create_forensic_case_table()
+
+        # insert forensic_case data
+        self.db_manager.insert_forensic_case(
+            id=self.case_id,
+            case_name=self.case_name,
+            case_directory=str(self.case_directory),
+        )
+        self.db_manager.close()
+
+    def _init_table_evidences(self):
+        for forensic_evidence in self.forensic_evidences:
+            forensic_evidence.export_evidences(
+                db_manager=self.db_manager, case_id=self.case_id
+            )
+
+    def _init_table_artifact_category(self):
+        self.db_manager.connect()
+        if not self.db_manager.is_table_exist("artifact_category"):
+            self.db_manager.create_artifact_category_table()
             for id, category in ARTIFACT_CATEGORIES:
-                self.db_manager.insert_category(
+                self.db_manager.insert_artifact_category(
                     id=id,
                     category=category,
                 )
-
-        # create "session_data" table
-        if not self.db_manager.is_table_exist("session_data"):
-            self.db_manager.create_session_data_table()
-
-        # close database
         self.db_manager.close()
 
-    def _export_evidence_information(self):
-        self.db_manager.connect()
+    def _parse_artifacts_all(self):
         for forensic_evidence in self.forensic_evidences:
-            # create "case_information" table
-            if not self.db_manager.is_table_exist("case_information"):
-                self.db_manager.create_evidence_information_table()
+            forensic_evidence.parse_artifacts()
 
-            self.db_manager.insert_evidence_information(
-                evidence_label=forensic_evidence._evidence_label,
-                computer_name=forensic_evidence._computer_name,
-                registered_owner=forensic_evidence._registered_owner,
-                source=forensic_evidence.src.source_path,
-            )
-            self.db_manager.close()
-
-    def _parse_evidence_artifacts(self):
+    def _export_artifacts_all(self):
         for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.parse_all()
-
-    def _export_evidence_artifacts(self):
-        for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.export_all(db_manager=self.db_manager)
-
-    def investigate_case(self):
-        self._create_case_directory()
-        self._database_init()
-        self._export_evidence_information()
-        self._parse_evidence_artifacts()
-        self._export_evidence_artifacts()
+            forensic_evidence.export_artifacts(db_manager=self.db_manager)
