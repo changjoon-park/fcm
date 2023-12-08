@@ -1,10 +1,25 @@
 import argparse
-import uuid
 from pathlib import Path
 
 from case_manager import CaseManager
 from forensic_evidence import ForensicEvidence
 from config import ROOT_DIRECTORY_NAME
+
+
+def get_container_files(container_input):
+    container_files = []
+    for path_str in container_input.split(","):
+        path = Path(path_str)
+        if path.is_dir():
+            container_files.extend(
+                [str(file) for file in path.glob("*.E01")]
+            )  # Assuming .E01 as container file extension
+        elif path.is_file():
+            container_files.append(str(path))
+        else:
+            print(f"Warning: Path {path} is neither a valid file nor a directory")
+    return container_files
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -18,31 +33,38 @@ if __name__ == "__main__":
         "-c", "--container", default=None, help="container to parse", dest="container"
     )
     parser.add_argument(
-        "-a", "--artifact", default=None, help="artifact to parse", dest="artifact"
-    )
-    parser.add_argument(
-        "-y", "--category", default=None, help="category to parse", dest="category"
-    )
-    parser.add_argument(
         "-o", "--out", default=None, help="output directory", dest="out"
     )
 
+    # Creating a mutually exclusive group
+    group = parser.add_mutually_exclusive_group()
+
+    # 'artifact' and 'category' are mutually exclusive
+    group.add_argument(
+        "-a", "--artifact", default=None, help="artifact to parse", dest="artifact"
+    )
+    group.add_argument(
+        "-y", "--category", default=None, help="category to parse", dest="category"
+    )
+
     args = parser.parse_args()
+
+    # Assigning values to case_name
     case_name = args.case_name
+
+    # Assigning values to local
     local = args.local
-    if args.container:
-        containers = args.container.split(",")
 
-    if args.artifact:
-        artifacts = args.artifact.split(",")
-    else:
-        artifacts = None
+    # Get container files from 'container' input
+    containers = get_container_files(args.container) if args.container else []
 
-    if args.category:
-        categories = args.category.split(",")
-    else:
-        categories = None
+    # Assigning values to artifact
+    artifacts = args.artifact.split(",") if args.artifact else None
 
+    # Assigning values to category
+    categories = args.category.split(",") if args.category else None
+
+    # Assigning values to root_directory
     if args.out:
         root_directory = Path(args.out) / ROOT_DIRECTORY_NAME
     else:
