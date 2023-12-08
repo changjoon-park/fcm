@@ -48,9 +48,7 @@ class ForensicArtifact:
     category: str
     artifact_directory: list[str] = field(init=False)
     artifact_entry: str = field(init=False)
-    result: dict = field(
-        default_factory=dict
-    )  # {name: [json.dumps(data, indent=2, default=str, ensure_ascii=False), ...]}
+    result: dict = field(default_factory=dict)  # result: {name: [data, ...]}
 
     def __post_init__(self):
         self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)
@@ -121,6 +119,7 @@ class ForensicArtifact:
     def export(
         self,
         db_manager: DatabaseManager = None,
+        evidence_id: str = None,
     ) -> None:
         db_manager.connect()
 
@@ -128,10 +127,12 @@ class ForensicArtifact:
         db_manager.create_artifact_table_from_yaml(ARTIFACT_SCHEMA.get(self.artifact))
 
         # insert artifact data
-        for artifact, data_list in self.result.items():
-            for data in data_list:
+        # result: {name: [data, ...]}
+        for artifact, entry_data in self.result.items():
+            for data in entry_data:
                 db_manager.insert_artifact_data(
                     artifact=artifact,
                     data=data,
+                    evidence_id=evidence_id,
                 )
         db_manager.close()

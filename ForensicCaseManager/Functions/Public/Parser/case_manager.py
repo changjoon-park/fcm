@@ -23,6 +23,10 @@ class CaseManager:
     def __post_init__(self):
         self.db_manager = DatabaseManager(database=self.database)
 
+        # set case_id to forensic_evidences
+        for evidence in self.forensic_evidences:
+            evidence.case_id = self.case_id
+
     @property
     def case_directory(self):
         return self.root_directory / self.case_name
@@ -48,10 +52,10 @@ class CaseManager:
         self._init_database()
 
         # parse artifacts in all forensic evidences
-        self._parse_artifacts_all()
+        self._parse_artifacts()
 
         # export artifacts in all forensic evidences
-        self._export_artifacts_all()
+        self._export_artifacts()
 
     def _create_case_directory(self):
         self.case_directory.mkdir(parents=True, exist_ok=True)
@@ -90,12 +94,13 @@ class CaseManager:
 
             # insert "evidences" table
             self.db_manager.insert_evidences(
-                evidence_number=evidence.evidence_number,
+                id=evidence.evidence_id,
                 evidence_label=evidence.evidence_label,
                 computer_name=evidence.computer_name,
                 registered_owner=evidence.registered_owner,
                 source=evidence.src.source_path,
                 case_id=self.case_id,
+                evidence_number=evidence.evidence_number,
             )
             self.db_manager.close()
 
@@ -110,10 +115,18 @@ class CaseManager:
                 )
         self.db_manager.close()
 
-    def _parse_artifacts_all(self):
+    def _parse_artifacts(self):
         for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.parse_artifacts()
+            for artifact in forensic_evidence.forensic_artifacts:
+                artifact.parse(descending=False)
 
-    def _export_artifacts_all(self):
+    def _export_artifacts(self):
         for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.export_artifacts(db_manager=self.db_manager)
+            for artifact in forensic_evidence.forensic_artifacts:
+                print(
+                    f"exporting {artifact.artifact} artifact data in {forensic_evidence.evidence_id}"
+                )
+                artifact.export(
+                    db_manager=self.db_manager,
+                    evidence_id=forensic_evidence.evidence_id,
+                )

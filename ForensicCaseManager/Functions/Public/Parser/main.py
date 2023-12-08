@@ -1,4 +1,5 @@
 import argparse
+import uuid
 from pathlib import Path
 
 from case_manager import CaseManager

@@ -10,8 +10,6 @@ from plugins import PLUGINS
 from forensic_artifact import (
     Source,
     ForensicArtifact,
-    SOURCE_TYPE_CONTAINER,
-    SOURCE_TYPE_LOCAL,
 )
 from database_manager import DatabaseManager
 
@@ -49,6 +47,25 @@ class ForensicEvidence:
                                 src=self.src, artifact=artifact, category=category
                             )
                         )
+
+    @property
+    def case_id(self):
+        return self._case_id
+
+    @case_id.setter
+    def case_id(self, value):
+        self._case_id = value
+
+    @property
+    def evidence_id(self):
+        evidence_id = [
+            str(self.evidence_label),
+            str(self.computer_name),
+            str(self.registered_owner),
+            str(self.case_id),
+            str(self.evidence_number),
+        ]
+        return "|".join(evidence_id)
 
     @property
     def evidence_label(self):
@@ -93,14 +110,3 @@ class ForensicEvidence:
             "registered_owner": self._registered_owner,
             "forensic_artifacts": self.forensic_artifacts,
         }
-
-    def parse_artifacts(self) -> None:
-        for artifact in self.forensic_artifacts:
-            artifact.parse(descending=False)
-
-    def export_artifacts(self, db_manager: DatabaseManager = None):
-        for artifact in self.forensic_artifacts:
-            print(f"exporting {artifact.artifact} artifact data...")
-            artifact.export(
-                db_manager=db_manager,
-            )

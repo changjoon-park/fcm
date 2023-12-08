@@ -71,12 +71,13 @@ class DatabaseManager:
             self.c.execute(
                 """
             CREATE TABLE IF NOT EXISTS evidences (
-                evidence_number INTEGER NOT NULL,
+                id TEXT NOT NULL PRIMARY KEY,
                 evidence_label TEXT NOT NULL,
                 computer_name TEXT,
                 registered_owner TEXT,
                 source TEXT NOT NULL,
                 case_id TEXT NOT NULL,
+                evidence_number INTEGER NOT NULL,
                 FOREIGN KEY (case_id) REFERENCES forensic_case (id)
             )
             """
@@ -84,32 +85,35 @@ class DatabaseManager:
 
     def insert_evidences(
         self,
-        evidence_number: int,
+        id: str,
         evidence_label: str,
         computer_name: str,
         registered_owner: str,
         source: str,
         case_id: str,
+        evidence_number: int,
     ):
         with self.conn:
             self.c.execute(
                 """
             INSERT INTO evidences (
-                evidence_number,
+                id,
                 evidence_label, 
                 computer_name, 
                 registered_owner, 
                 source, 
-                case_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+                case_id,
+                evidence_number)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
                 (
-                    evidence_number,
+                    id,
                     evidence_label,
                     computer_name,
                     registered_owner,
                     source,
                     case_id,
+                    evidence_number,
                 ),
             )
 
@@ -137,43 +141,6 @@ class DatabaseManager:
                 ),
             )
 
-    # create/insert artifacts table
-    def create_artifacts_table(self):
-        with self.conn:
-            self.c.execute(
-                """
-            CREATE TABLE IF NOT EXISTS artifacts (
-                artifact TEXT NOT NULL,
-                category TEXT NOT NULL,
-                record TEXT NOT NULL,
-            )"""
-            )
-
-    # create/insert session_data table
-    def create_session_data_table(self):
-        with self.conn:
-            self.c.execute(
-                """
-            CREATE TABLE IF NOT EXISTS session_data (
-                category TEXT NOT NULL,
-                artifact TEXT NOT NULL,
-                record TEXT NOT NULL,
-                session_id TEXT NOT NULL
-            )"""
-            )
-
-    def insert_session_data(
-        self, category: str, artifact: str, record: str, session_id: str
-    ):
-        with self.conn:
-            self.c.execute(
-                """
-            INSERT INTO session_data (category, artifact, record, session_id)
-            VALUES (?, ?, ?)
-            """,
-                (category, artifact, record, session_id),
-            )
-
     # create/insert artifact table
     def create_artifact_table_from_yaml(self, yaml_file: Path):
         with open(yaml_file, "r", encoding="utf-8") as f:
@@ -192,13 +159,17 @@ class DatabaseManager:
                 with self.conn:
                     self.c.execute(create_statement)
 
-    def insert_artifact_data(self, artifact: str, data: dict):
+    def insert_artifact_data(self, artifact: str, data: dict, evidence_id: str):
+        # convert python data type to sqlite data type
         for attribute, value in data.items():
             if type(value) == list:
                 for i, v in enumerate(value):
                     if type(v) == datetime:
                         value[i] = v.isoformat()
                 data[attribute] = json.dumps(value)
+
+        # add evidence_id
+        data["evidence_id"] = evidence_id
 
         with self.conn:
             self.c.execute(
