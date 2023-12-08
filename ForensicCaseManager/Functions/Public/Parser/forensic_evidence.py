@@ -18,6 +18,7 @@ from database_manager import DatabaseManager
 
 @dataclass(kw_only=True)
 class ForensicEvidence:
+    evidence_number: int
     _local: Optional[bool] = False
     _container: Optional[str] = None
     _artifacts: Optional[list] = None
@@ -50,11 +51,11 @@ class ForensicEvidence:
                         )
 
     @property
-    def _evidence_label(self):
+    def evidence_label(self):
         return extract_basename(path=self.src.source_path)
 
     @property
-    def _computer_name(self):
+    def computer_name(self):
         computer_name = self.src.source.name
         try:
             # 'ComputerName' Registry value is stored by "UTF-16" encoding
@@ -71,7 +72,7 @@ class ForensicEvidence:
             )
 
     @property
-    def _registered_owner(self):
+    def registered_owner(self):
         reg_path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
         registered_owner = (
             self.src.source.registry.key(reg_path).value("RegisteredOwner").value
@@ -99,4 +100,7 @@ class ForensicEvidence:
 
     def export_artifacts(self, db_manager: DatabaseManager = None):
         for artifact in self.forensic_artifacts:
-            artifact.export(db_manager=db_manager)
+            print(f"exporting {artifact.artifact} artifact data...")
+            artifact.export(
+                db_manager=db_manager,
+            )

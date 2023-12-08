@@ -9,8 +9,8 @@ Table:
       - linkedfiles
       - runcount
       - previousruns
-      # - source_evidence
-      - session_id
+      # - case_id
+      # - evidence_number
     Types:
       - [INTEGER]
       - [TEXT]
@@ -19,4 +19,4 @@ Table:
       - [INTEGER]
       - [TEXT]
       # - [TEXT]
-      - [TEXT]
+      # - [INTEGER]

@@ -14,14 +14,14 @@ from config import DATABASE_NAME, ARTIFACT_CATEGORIES
 
 @dataclass(kw_only=True)
 class CaseManager:
+    case_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     case_name: str
     root_directory: Path
-    forensic_evidences: list[ForensicEvidence] = field(default_factory=list)
+    forensic_evidences: list[ForensicEvidence]
     db_manager: DatabaseManager = field(init=False)
 
     def __post_init__(self):
         self.db_manager = DatabaseManager(database=self.database)
-        self.case_id = str(uuid.uuid4())
 
     @property
     def case_directory(self):
@@ -82,7 +82,7 @@ class CaseManager:
         self.db_manager.close()
 
     def _init_table_evidences(self):
-        for index, forensic_evidence in enumerate(self.forensic_evidences):
+        for evidence in self.forensic_evidences:
             self.db_manager.connect()
             # create "evidences" table
             if not self.db_manager.is_table_exist("evidences"):
@@ -90,11 +90,11 @@ class CaseManager:
 
             # insert "evidences" table
             self.db_manager.insert_evidences(
-                evidence_number=index,
-                evidence_label=forensic_evidence._evidence_label,
-                computer_name=forensic_evidence._computer_name,
-                registered_owner=forensic_evidence._registered_owner,
-                source=forensic_evidence.src.source_path,
+                evidence_number=evidence.evidence_number,
+                evidence_label=evidence.evidence_label,
+                computer_name=evidence.computer_name,
+                registered_owner=evidence.registered_owner,
+                source=evidence.src.source_path,
                 case_id=self.case_id,
             )
             self.db_manager.close()

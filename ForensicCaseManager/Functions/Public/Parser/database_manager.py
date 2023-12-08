@@ -136,6 +136,18 @@ class DatabaseManager:
                 ),
             )
 
+    # create/insert artifacts table
+    def create_artifacts_table(self):
+        with self.conn:
+            self.c.execute(
+                """
+            CREATE TABLE IF NOT EXISTS artifacts (
+                artifact TEXT NOT NULL,
+                category TEXT NOT NULL,
+                record TEXT NOT NULL,
+            )"""
+            )
+
     # create/insert session_data table
     def create_session_data_table(self):
         with self.conn:

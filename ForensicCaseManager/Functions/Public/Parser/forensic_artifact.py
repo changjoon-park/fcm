@@ -118,16 +118,20 @@ class ForensicArtifact:
         """
         raise NotImplementedError
 
-    def export(self, db_manager: DatabaseManager = None):
+    def export(
+        self,
+        db_manager: DatabaseManager = None,
+    ) -> None:
         db_manager.connect()
 
         # create artifact table
         db_manager.create_artifact_table_from_yaml(ARTIFACT_SCHEMA.get(self.artifact))
 
         # insert artifact data
-        # for artifact_name, artifact_data in self.result.items():
-
-        # self.db_manager.insert_artifact_data(
-
-        # )
-        self.db_manager.close()
+        for artifact, data_list in self.result.items():
+            for data in data_list:
+                db_manager.insert_artifact_data(
+                    artifact=artifact,
+                    data=data,
+                )
+        db_manager.close()

@@ -52,12 +52,13 @@ if __name__ == "__main__":
         root_directory=root_directory,
         forensic_evidences=[
             ForensicEvidence(
+                evidence_number=index,
                 _local=local,
                 _container=container,
-                _artifacts=args.artifact,
-                _categories=args.category,
+                _artifacts=artifacts,
+                _categories=categories,
             )
-            for container in containers
+            for index, container in enumerate(containers)
         ],
     )
     case.investigate_case()
