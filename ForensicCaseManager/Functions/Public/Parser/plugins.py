@@ -56,7 +56,9 @@ PLUGINS = {
     # "SRU(App)": Plugin(artifact=SRU, category=CATEGORY_APPLICATION_EXECUTION),
     # "Lnk": Plugin(artifact=LinkFile, category=CATEGORY_FILE_FOLDER_OPENING),
     "JumpList": Plugin(artifact=JumpList, category=CATEGORY_FILE_FOLDER_OPENING),
-    # "WindowsTimeline": Plugin(artifact=WindowsTimeline, category=CATEGORY_APPLICATION_EXECUTION),
+    "WindowsTimeline": Plugin(
+        artifact=WindowsTimeline, category=CATEGORY_APPLICATION_EXECUTION
+    ),
     "LogonEvent": Plugin(
         artifact=ForensicEvent, category=CATEGORY_ACCOUNT_USAGE
     ),  # ! EventLog

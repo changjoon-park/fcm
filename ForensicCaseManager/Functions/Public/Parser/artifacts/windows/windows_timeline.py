@@ -3,44 +3,10 @@ import datetime
 from pathlib import Path
 from typing import Optional, Generator, Union, Tuple
 
-from dissect.target.helpers.fsutil import TargetPath
-
 from dissect.sql import sqlite3
-from dissect.target.helpers.record import create_extended_descriptor
-from dissect.target.helpers.descriptor_extensions import UserRecordDescriptorExtension
+from dissect.util.ts import from_unix
 
 from forensic_artifact import Source, ForensicArtifact
-
-WindowsTimelineRecord = create_extended_descriptor([UserRecordDescriptorExtension])(
-    "windows/windowstimeline",
-    [
-        ("datetime", "start_time"),
-        ("datetime", "end_time"),
-        ("datetime", "last_modified_time"),
-        ("datetime", "last_modified_on_client"),
-        ("datetime", "original_last_modified_on_client"),
-        ("datetime", "expiration_time"),
-        ("string", "app_id"),
-        ("string", "enterprise_id"),
-        ("string", "app_activity_id"),
-        ("string", "group_app_activity_id"),
-        ("string", "group"),
-        ("uint32", "activity_type"),
-        ("uint32", "activity_status"),
-        ("uint32", "priority"),
-        ("uint32", "match_id"),
-        ("uint32", "etag"),
-        ("string", "tag"),
-        ("boolean", "is_local_only"),
-        ("datetime", "created_in_cloud"),
-        ("string", "platform_device_id"),
-        ("string", "package_id_hash"),
-        ("bytes", "id"),
-        ("string", "payload"),
-        ("string", "original_payload"),
-        ("string", "clipboard_payload"),
-    ],
-)
 
 
 class WindowsTimeline(ForensicArtifact):
@@ -91,55 +57,60 @@ class WindowsTimeline(ForensicArtifact):
             clipboard_payload (string): ClipboardPayload field.
         """
 
+        print(f"Parsing {self.artifact} from {self.src.source_path}")
         windows_timeline = sorted(
-            [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.windows_timeline()
-            ],
+            [record for record in self.windows_timeline()],
+            key=lambda record: record["start_time"],  # Sorting based on the 'ts' field
             reverse=descending,
         )
         self.result = {"windows_timeline": windows_timeline}
 
-    def windows_timeline(self) -> Generator[WindowsTimelineRecord, None, None]:
+    def windows_timeline(self) -> Generator[dict, None, None]:
         for entry in self._iter_entry():
-            try:
-                fh = entry.open("rb")
-                db = sqlite3.SQLite3(fh)
-                for r in db.table("Activity").rows():
-                    yield WindowsTimelineRecord(
-                        start_time=mkts(r["[StartTime]"]),
-                        end_time=mkts(r["[EndTime]"]),
-                        last_modified_time=mkts(r["[LastModifiedTime]"]),
-                        last_modified_on_client=mkts(r["[LastModifiedOnClient]"]),
-                        original_last_modified_on_client=mkts(
-                            r["[OriginalLastModifiedOnClient]"]
-                        ),
-                        expiration_time=mkts(r["[ExpirationTime]"]),
-                        app_id=r["[AppId]"],
-                        enterprise_id=r["[EnterpriseId]"],
-                        app_activity_id=r["[AppActivityId]"],
-                        group_app_activity_id=r["[GroupAppActivityId]"],
-                        group=r["[Group]"],
-                        activity_type=r["[ActivityType]"],
-                        activity_status=r["[ActivityStatus]"],
-                        priority=r["[Priority]"],
-                        match_id=r["[MatchId]"],
-                        etag=r["[ETag]"],
-                        tag=r["[Tag]"],
-                        is_local_only=r["[IsLocalOnly]"],
-                        created_in_cloud=r["[CreatedInCloud]"],
-                        platform_device_id=r["[PlatformDeviceId]"],
-                        package_id_hash=r["[PackageIdHash]"],
-                        id=r["[Id]"],
-                        payload=r["[Payload]"],
-                        original_payload=r["[OriginalPayload]"],
-                        clipboard_payload=r["[ClipboardPayload]"],
-                    )
-            except:
-                print("Error parsing Windows Timeline database")
+            if entry:
+                print(f"parsing {entry}")
+                try:
+                    fh = entry.open("rb")
+                    db = sqlite3.SQLite3(fh)
+                    for r in db.table("Activity").rows():
+                        yield {
+                            "start_time": mkts(r["[StartTime]"]),
+                            "end_time": mkts(r["[EndTime]"]),
+                            # "last_modified_time": mkts(r["[LastModifiedTime]"]),
+                            # "last_modified_on_client": mkts(r["[LastModifiedOnClient]"]),
+                            # "original_last_modified_on_client": mkts(
+                            #     r["[OriginalLastModifiedOnClient]"]
+                            # ),
+                            # "expiration_time": mkts(r["[ExpirationTime]"]),
+                            # "app_id": r["[AppId]"],
+                            # "enterprise_id": r["[EnterpriseId]"],
+                            # "app_activity_id": r["[AppActivityId]"],
+                            # "group_app_activity_id": r["[GroupAppActivityId]"],
+                            # "group": r["[Group]"],
+                            # "activity_type": r["[ActivityType]"],
+                            # "activity_status": r["[ActivityStatus]"],
+                            # "priority": r["[Priority]"],
+                            # "match_id": r["[MatchId]"],
+                            # "etag": r["[ETag]"],
+                            # "tag": r["[Tag]"],
+                            # "is_local_only": r["[IsLocalOnly]"],
+                            # "created_in_cloud": r["[CreatedInCloud]"],
+                            # "platform_device_id": r["[PlatformDeviceId]"],
+                            # "package_id_hash": r["[PackageIdHash]"],
+                            # "id": r["[Id]"],
+                            # "payload": r["[Payload]"],
+                            # "original_payload": r["[OriginalPayload]"],
+                            # "clipboard_payload": r["[ClipboardPayload]"],
+                        }
+                except:
+                    print("Error parsing Windows Timeline database")
+            else:
+                print(f"Error: no {entry} found")
 
 
 def mkts(ts):
-    return datetime.datetime.utcfromtimestamp(ts) if ts else None
+    """Timestamps inside ActivitiesCache.db are stored in a Unix-like format.
+
+    Source: https://salt4n6.com/2018/05/03/windows-10-timeline-forensic-artefacts/
+    """
+    return from_unix(ts) if ts else None

@@ -26,22 +26,16 @@ ARTIFACT_DIRECTORY_FIREFOX = [
 ARTIFACT_DIRECTORY_MFT = [
     "%ROOT%",
 ]
-ARTIFACT_DIRECTORY_USNJRNL = [
-    "%ROOT%/$Extend"
-]
+ARTIFACT_DIRECTORY_USNJRNL = ["%ROOT%/$Extend"]
 
 ## REGISTRY
-ARTIFACT_DIRECTORY_AMCACHE = [
-    "%ROOT%/Windows/appcompat/Programs"  # Amcache
-]
+ARTIFACT_DIRECTORY_AMCACHE = ["%ROOT%/Windows/appcompat/Programs"]  # Amcache
 
 REGISTRY_KEY_USER_ACCOUNT = {
-    "Users": [
-        "HKEY_LOCAL_MACHINE\\SAM\\SAM\\Domains\\Account\\Users"
-    ],
+    "Users": ["HKEY_LOCAL_MACHINE\\SAM\\SAM\\Domains\\Account\\Users"],
     "ProfileList": [
         "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList"
-    ]
+    ],
 }
 REGISTRY_KEY_BAM = [
     "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\bam\\UserSettings",
@@ -74,24 +68,14 @@ REGISTRY_KEY_NETWORK_INFO = {
     ],
     "Interfaces": [
         "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces"
-    ]
+    ],
 }
 REGISTRY_KEY_USB = {
-    "USB": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB"
-    ],
-    "USBSTOR": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR"
-    ],
-    "DeviceContainers": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceContainers"
-    ],
-    "HID": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\HID"
-    ],
-    "SCSI": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\SCSI"
-    ]
+    "USB": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB"],
+    "USBSTOR": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR"],
+    "DeviceContainers": ["HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceContainers"],
+    "HID": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\HID"],
+    "SCSI": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\SCSI"],
 }
 REGISTRY_KEY_AUTORUN = [
     "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run",
@@ -113,27 +97,19 @@ REGISTRY_KEY_AUTORUN = [
     "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Run",
     "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
     "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\Setup",
-    "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx",    
+    "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx",
 ]
 REGISTRY_KEY_SYSTEM_INFO = {
     "ComputerName": [
         "HKLM\\SYSTEM\\ControlSet001\\Control\\ComputerName\\ComputerName"
     ],
-    "CurrentVersion": [
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
-    ],
+    "CurrentVersion": ["HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"],
     "Environment": [
         "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
     ],
-    "CodePage": [
-        "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Nls\\CodePage"
-    ],
-    "FileSystem": [
-        "HKLM\\SYSTEM\\ControlSet001\\Control\\FileSystem"
-    ],
-    "Windows": [
-        "HKLM\\SYSTEM\\ControlSet001\\Control\\Windows"
-    ],
+    "CodePage": ["HKLM\\SYSTEM\\CurrentControlSet\\Control\\Nls\\CodePage"],
+    "FileSystem": ["HKLM\\SYSTEM\\ControlSet001\\Control\\FileSystem"],
+    "Windows": ["HKLM\\SYSTEM\\ControlSet001\\Control\\Windows"],
 }
 
 ## WINDOWS
@@ -143,57 +119,61 @@ ARTIFACT_DIRECTORY_RECYCLEBIN = [
 ARTIFACT_DIRECTORY_PREFETCH = [
     "%ROOT%/windows/prefetch",
 ]
-ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
-    "%USER%/AppData/Local/ConnectedDevicesPlatform"
-]
+ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = ["%USER%/AppData/Local/ConnectedDevicesPlatform"]
 ARTIFACT_DIRECTORY_LNK = [
     "%USER%/Desktop",
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent",
     "%USER%/AppData/Roaming/Microsoft/Office/Recent",
-    "%ROOT%/ProgramData/Microsoft/Windows/Start Menu/Programs",    
+    "%ROOT%/ProgramData/Microsoft/Windows/Start Menu/Programs",
 ]
 ARTIFACT_DIRECTORY_JUMPLIST = [
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations",
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations",
 ]
-ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
-    "%USER%/AppData/Local/ConnectedDevicesPlatform"
-]
-ARTIFACT_DIRECTORY_SRU = [
-    "%ROOT%/Windows/System32/sru"
-]
-ARTIFACT_DIRECTORY_THUMBCACHE = [
-    "%USER%/AppData/Local/Microsoft/Windows/Explorer"
-]
+ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = ["%USER%/AppData/Local/ConnectedDevicesPlatform"]
+ARTIFACT_DIRECTORY_SRU = ["%ROOT%/Windows/System32/sru"]
+ARTIFACT_DIRECTORY_THUMBCACHE = ["%USER%/AppData/Local/Microsoft/Windows/Explorer"]
 ARTIFACT_DIRECTORY_FILEHISTORY = [
     "%USER%/AppData/Local/Microsoft/Edge/User Data/Default",
     "%USER%/Library/Application Support/Microsoft Edge/Default",
     "%USER%/AppData/Local/Microsoft/Windows/WebCache",
 ]
-ARTIFACT_DIRECTORY_EVENTLOG = [
-    "%ROOT%/Windows/System32/winevt/Logs"
-]
+ARTIFACT_DIRECTORY_EVENTLOG = ["%ROOT%/Windows/System32/winevt/Logs"]
 
 
 ARTIFACT_PATH = {
-    "Chrome": ArtifactPath(directory=ARTIFACT_DIRECTORY_CHROME, entry=None),  # ! Browser
+    "Chrome": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_CHROME, entry=None
+    ),  # ! Browser
     "Edge": ArtifactPath(directory=ARTIFACT_DIRECTORY_EDGE, entry=None),
-    "iExplorer": ArtifactPath(directory=ARTIFACT_DIRECTORY_INTERNET_EXPLORER, entry="WebCacheV01.dat"),
+    "iExplorer": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_INTERNET_EXPLORER, entry="WebCacheV01.dat"
+    ),
     # "MFT": ArtifactPath(directory=ARTIFACT_DIRECTORY_MFT, entry="$MFT"),  # ! FileSystem
     "UsnJrnl": ArtifactPath(directory=ARTIFACT_DIRECTORY_USNJRNL, entry="$J"),
-    "RecycleBin": ArtifactPath(directory=ARTIFACT_DIRECTORY_RECYCLEBIN, entry="$I*"),  # ! Windows
+    "RecycleBin": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_RECYCLEBIN, entry="$I*"
+    ),  # ! Windows
     "Prefetch": ArtifactPath(directory=ARTIFACT_DIRECTORY_PREFETCH, entry="*.pf"),
     "SRU(Network)": ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
     # "SRU(App)": ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
     "FileHistory": ArtifactPath(directory=ARTIFACT_DIRECTORY_FILEHISTORY, entry=None),
     # "ThumbCache": ArtifactPath(directory=ARTIFACT_DIRECTORY_THUMBCACHE, entry=None),
     # "Lnk": ArtifactPath(directory=ARTIFACT_DIRECTORY_LNK, entry="*.lnk"),
-    "JumpList": ArtifactPath(directory=ARTIFACT_DIRECTORY_JUMPLIST, entry="*.automaticDestinations-ms"),
-    # "WindowsTimeline": ArtifactPath(directory=ARTIFACT_DIRECTORY_WINDOWS_TIMELINE, entry="ActivitiesCache.db"),
-    "LogonEvent": ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),  # ! EventLog
+    "JumpList": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_JUMPLIST, entry="*.automaticDestinations-ms"
+    ),
+    "WindowsTimeline": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_WINDOWS_TIMELINE, entry="ActivitiesCache.db"
+    ),
+    "LogonEvent": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None
+    ),  # ! EventLog
     "USB(EventLog)": ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
     "WLAN": ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
-    "Amcache": ArtifactPath(directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"),  # ! Registry
+    "Amcache": ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
+    ),  # ! Registry
     "UserAssist": ArtifactPath(directory=None, entry=REGISTRY_KEY_USERASSIST),
     "ShimCache": ArtifactPath(directory=None, entry=REGISTRY_KEY_SHIMCACHE),
     "BAM": ArtifactPath(directory=None, entry=REGISTRY_KEY_BAM),

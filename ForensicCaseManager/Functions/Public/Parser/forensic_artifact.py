@@ -129,6 +129,7 @@ class ForensicArtifact:
         # insert artifact data
         # result: {name: [data, ...]}
         for artifact, entry_data in self.result.items():
+            print(f"artifact: {artifact}, entry_data: {entry_data}")
             for data in entry_data:
                 db_manager.insert_artifact_data(
                     artifact=artifact,

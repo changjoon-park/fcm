@@ -33,7 +33,11 @@ class ForensicEvidence:
             ForensicArtifact, category = plugin
             if self._artifacts:
                 for artifact_entry in self._artifacts:
+                    print(
+                        f"input artifact: {artifact_entry}, matching artifact: {artifact}"
+                    )
                     if artifact == artifact_entry:
+                        print(f"matched artifact: {artifact}, category: {category}")
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src, artifact=artifact, category=category
