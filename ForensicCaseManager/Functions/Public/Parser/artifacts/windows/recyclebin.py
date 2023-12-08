@@ -1,12 +1,10 @@
 import os
-import json
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Generator
 
 from dissect import cstruct
 from flow.record.fieldtypes import uri
-from dissect.target.helpers.record import TargetRecordDescriptor
 from dissect.target.helpers.fsutil import TargetPath
 
 from forensic_artifact import Source, ForensicArtifact

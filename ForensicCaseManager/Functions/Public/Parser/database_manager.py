@@ -1,6 +1,7 @@
 import sqlite3
 import yaml
 import json
+from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -192,6 +193,13 @@ class DatabaseManager:
                     self.c.execute(create_statement)
 
     def insert_artifact_data(self, artifact: str, data: dict):
+        for attribute, value in data.items():
+            if type(value) == list:
+                for i, v in enumerate(value):
+                    if type(v) == datetime:
+                        value[i] = v.isoformat()
+                data[attribute] = json.dumps(value)
+
         with self.conn:
             self.c.execute(
                 f"""

@@ -10,8 +10,8 @@ Table:
       - source
       - filesize
       - deleted_path
-      - case_id
-      - evidence_number
+      # - case_id
+      # - evidence_number
     Types:
       - [INTEGER PRIMARY KEY AUTOINCREMENT]
       - [INTEGER]
@@ -20,5 +20,5 @@ Table:
       - [TEXT]
       - [INTEGER]
       - [TEXT]
-      - [TEXT]
-      - [INTEGER]
+      # - [TEXT]
+      # - [INTEGER]
