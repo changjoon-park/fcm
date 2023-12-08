@@ -151,7 +151,7 @@ class DatabaseManager:
                 types = table.get("Types", [])
 
                 column_defs = ",".join(
-                    [f"{column} {type}" for column, type in zip(columns, types)]
+                    [f"{column} {type[0]}" for column, type in zip(columns, types)]
                 )
                 create_statement = (
                     f"CREATE TABLE IF NOT EXISTS {table_name} ({column_defs})"

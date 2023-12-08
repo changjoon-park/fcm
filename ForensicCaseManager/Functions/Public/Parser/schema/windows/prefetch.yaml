@@ -3,6 +3,7 @@ Desc: Data extracted from the Prefetch folder
 Table:
   - TableName: prefetch
     Columns:
+      - id
       - ts
       - filename
       - prefetch
@@ -11,6 +12,7 @@ Table:
       - previousruns
       - evidence_id
     Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
       - [INTEGER]
       - [TEXT]
       - [TEXT]
