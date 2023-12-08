@@ -1,8 +1,7 @@
-import os
-import json
+import logging
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-from typing import Generator, Union, Annotated
+from datetime import timedelta, timezone
+from typing import Generator
 from dataclasses import dataclass, field
 
 from dissect.target import Target
@@ -12,7 +11,6 @@ from path_finder import ARTIFACT_PATH
 from util.ts import TimeStamp
 from database_manager import DatabaseManager
 from schema.artifact_schema import ARTIFACT_SCHEMA
-from config import DATABASE_NAME
 
 SOURCE_TYPE_LOCAL = "Local"
 SOURCE_TYPE_CONTAINER = "Container"
@@ -53,6 +51,14 @@ class ForensicArtifact:
     def __post_init__(self):
         self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)
         self._target = self.src._target  #
+
+    @property
+    def evidence_id(self):
+        return self._evidence_id
+
+    @evidence_id.setter
+    def evidence_id(self, value):
+        self._evidence_id = value
 
     @property
     def ts(self) -> TimeStamp:
@@ -116,6 +122,17 @@ class ForensicArtifact:
         """
         raise NotImplementedError
 
+    def check_empty_entry(self, entry: Generator) -> Generator:
+        try:
+            first = next(entry)
+        except StopIteration:
+            logging.info(
+                f"No entries found in the {self.artifact} from {self.src.source}"
+            )
+        else:
+            yield first
+            yield from entry
+
     def export(
         self,
         db_manager: DatabaseManager = None,
@@ -126,10 +143,11 @@ class ForensicArtifact:
         # create artifact table
         db_manager.create_artifact_table_from_yaml(ARTIFACT_SCHEMA.get(self.artifact))
 
-        # insert artifact data
-        # result: {name: [data, ...]}
+        # insert artifact data / result: {name: [data, ...]}
         for artifact, entry_data in self.result.items():
-            print(f"artifact: {artifact}, entry_data: {entry_data}")
+            logging.info(
+                f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
+            )
             for data in entry_data:
                 db_manager.insert_artifact_data(
                     artifact=artifact,

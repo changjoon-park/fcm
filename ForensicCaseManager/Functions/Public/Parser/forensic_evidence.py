@@ -1,4 +1,4 @@
-import json
+import logging
 from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass, field
@@ -29,15 +29,12 @@ class ForensicEvidence:
             _local=self._local,
             _container=self._container,
         )
+        # set forensic_artifacts
         for artifact, plugin in PLUGINS.items():
             ForensicArtifact, category = plugin
             if self._artifacts:
                 for artifact_entry in self._artifacts:
-                    print(
-                        f"input artifact: {artifact_entry}, matching artifact: {artifact}"
-                    )
                     if artifact == artifact_entry:
-                        print(f"matched artifact: {artifact}, category: {category}")
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src, artifact=artifact, category=category
@@ -51,6 +48,9 @@ class ForensicEvidence:
                                 src=self.src, artifact=artifact, category=category
                             )
                         )
+            # # set evidence_id to forensic_artifacts
+            # for artifact in self.forensic_artifacts:
+            #     artifact.evidence_id = self.evidence_id
 
     @property
     def case_id(self):
@@ -63,13 +63,10 @@ class ForensicEvidence:
     @property
     def evidence_id(self):
         evidence_id = [
-            str(self.evidence_label),
-            str(self.computer_name),
-            str(self.registered_owner),
             str(self.case_id),
             str(self.evidence_number),
         ]
-        return "|".join(evidence_id)
+        return "-".join(evidence_id)
 
     @property
     def evidence_label(self):

@@ -1,4 +1,5 @@
 import argparse
+import logging
 from pathlib import Path
 
 from case_manager import CaseManager
@@ -48,6 +49,13 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s|%(name)s|%(levelname)s|%(message)s",
+        filename="test.log",
+        encoding="utf-8",
+    )
 
     # Assigning values to case_name
     case_name = args.case_name

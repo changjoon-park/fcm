@@ -1,3 +1,4 @@
+import logging
 from typing import Generator, BinaryIO
 from pathlib import Path
 
@@ -244,7 +245,7 @@ class Prefetch(ForensicArtifact):
         self.result = {"prefetch": prefetch}
 
     def prefetch(self) -> Generator[dict, None, None]:
-        for entry in self._iter_entry():
+        for entry in self.check_empty_entry(self._iter_entry()):
             try:
                 prefetch = PrefetchParser(fh=entry.open("rb"))
                 filename = prefetch.header.name.decode(
@@ -264,4 +265,4 @@ class Prefetch(ForensicArtifact):
                     "previousruns": previousruns,
                 }
             except:
-                pass
+                logging.error(f"Error: Unable to parse {entry}")

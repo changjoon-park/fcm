@@ -1,11 +1,7 @@
-import json
 import uuid
-from datetime import datetime
-from typing import Optional
+import logging
 from dataclasses import dataclass, field
 
-from util.converter import convertfrom_extended_ascii
-from util.extractor import extract_basename
 from pathlib import Path
 from database_manager import DatabaseManager
 from forensic_evidence import ForensicEvidence
@@ -58,7 +54,10 @@ class CaseManager:
         self._export_artifacts()
 
     def _create_case_directory(self):
-        self.case_directory.mkdir(parents=True, exist_ok=True)
+        try:
+            self.case_directory.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logging.error(f"Error: {e}")
 
     def _init_database(self):
         # set forensic case table
@@ -123,9 +122,6 @@ class CaseManager:
     def _export_artifacts(self):
         for forensic_evidence in self.forensic_evidences:
             for artifact in forensic_evidence.forensic_artifacts:
-                print(
-                    f"exporting {artifact.artifact} artifact data in {forensic_evidence.evidence_id}"
-                )
                 artifact.export(
                     db_manager=self.db_manager,
                     evidence_id=forensic_evidence.evidence_id,

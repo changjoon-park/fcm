@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Generator
@@ -92,7 +93,7 @@ class RecycleBin(ForensicArtifact):
         self.result = {"recyclebin": recyclebin}
 
     def recyclebin(self) -> Generator[dict, None, None]:
-        for entry in self._iter_entry(recurse=True):
+        for entry in self.check_empty_entry(self._iter_entry(recurse=True)):
             try:
                 recyclebin = RecycleBinParser(path=entry)
                 path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
@@ -107,4 +108,5 @@ class RecycleBin(ForensicArtifact):
                     "source": uri.from_windows(recyclebin.source_path),
                 }
             except:
-                pass
+                logging.error(f"Error: Unable to parse {entry}")
+                continue
