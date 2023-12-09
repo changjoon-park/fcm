@@ -4,8 +4,7 @@ from pathlib import Path
 
 from forensic_case import ForensicCase
 from forensic_evidence import ForensicEvidence
-
-ROOT_DIRECTORY_NAME = "_fcm"
+from settings import ROOT_DIRECTORY_NAME
 
 
 def get_container_files(container_input):
@@ -101,4 +100,6 @@ if __name__ == "__main__":
         case_name=case_name,
         forensic_evidences=forensic_evidences,
     )
+
+    # Investigate case
     case.investigate_case()

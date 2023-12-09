@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 
 from util.converter import convertfrom_extended_ascii
 from pathlib import Path
-from plugins import PLUGINS
 from forensic_artifact import (
     Source,
     ForensicArtifact,
@@ -34,7 +33,7 @@ class ForensicEvidence(CaseConfig):
             _container=self._container,
         )
         # set forensic_artifacts
-        for artifact, plugin in PLUGINS.items():
+        for artifact, plugin in self.PLUGINS.items():
             ForensicArtifact, category = plugin
             if self._artifacts:
                 for artifact_entry in self._artifacts:

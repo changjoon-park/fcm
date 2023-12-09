@@ -1,4 +1,32 @@
 from collections import namedtuple
+from settings import (
+    ART_CHROME,  # artifact
+    ART_EDGE,
+    ART_IEXPLORER,
+    ART_MFT,
+    ART_USNJRNL,
+    ART_RECYCLEBIN,
+    ART_PREFETCH,
+    ART_SRU_NETWORK,
+    ART_FILE_HISTORY,
+    ART_THUMBCACHE,
+    ART_JUMPLIST,
+    ART_WINDOWS_TIMELINE,
+    ART_LOGON_EVENT,
+    ART_USB_EVENT,
+    ART_WLAN,
+    ART_AMCACHE,
+    ART_USER_ACCOUNT,
+    ART_USER_ASSIST,
+    ART_SHIMCACHE,
+    ART_BAM,
+    ART_NETWORK_INFO,
+    ART_SHELLBAGS,
+    ART_USB_REGISTRY,
+    ART_AUTORUN,
+    ART_SYSTEM_INFO,
+    ART_MRU,
+)
 
 ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 
@@ -142,45 +170,47 @@ ARTIFACT_DIRECTORY_EVENTLOG = ["%ROOT%/Windows/System32/winevt/Logs"]
 
 
 ARTIFACT_PATH = {
-    "Chrome": ArtifactPath(
+    ART_CHROME: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_CHROME, entry=None
     ),  # ! Browser
-    "Edge": ArtifactPath(directory=ARTIFACT_DIRECTORY_EDGE, entry=None),
-    "iExplorer": ArtifactPath(
+    ART_EDGE: ArtifactPath(directory=ARTIFACT_DIRECTORY_EDGE, entry=None),
+    ART_IEXPLORER: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_INTERNET_EXPLORER, entry="WebCacheV01.dat"
     ),
     # "MFT": ArtifactPath(directory=ARTIFACT_DIRECTORY_MFT, entry="$MFT"),  # ! FileSystem
-    "UsnJrnl": ArtifactPath(directory=ARTIFACT_DIRECTORY_USNJRNL, entry="$J"),
-    "RecycleBin": ArtifactPath(
+    # "UsnJrnl": ArtifactPath(directory=ARTIFACT_DIRECTORY_USNJRNL, entry="$J"),
+    ART_RECYCLEBIN: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_RECYCLEBIN, entry="$I*"
     ),  # ! Windows
-    "Prefetch": ArtifactPath(directory=ARTIFACT_DIRECTORY_PREFETCH, entry="*.pf"),
-    "SRU(Network)": ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
+    ART_PREFETCH: ArtifactPath(directory=ARTIFACT_DIRECTORY_PREFETCH, entry="*.pf"),
+    ART_SRU_NETWORK: ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
     # "SRU(App)": ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
-    "FileHistory": ArtifactPath(directory=ARTIFACT_DIRECTORY_FILEHISTORY, entry=None),
+    ART_FILE_HISTORY: ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_FILEHISTORY, entry=None
+    ),
     # "ThumbCache": ArtifactPath(directory=ARTIFACT_DIRECTORY_THUMBCACHE, entry=None),
     # "Lnk": ArtifactPath(directory=ARTIFACT_DIRECTORY_LNK, entry="*.lnk"),
-    "JumpList": ArtifactPath(
+    ART_JUMPLIST: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_JUMPLIST, entry="*.automaticDestinations-ms"
     ),
-    "WindowsTimeline": ArtifactPath(
+    ART_WINDOWS_TIMELINE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_WINDOWS_TIMELINE, entry="ActivitiesCache.db"
     ),
-    "LogonEvent": ArtifactPath(
+    ART_LOGON_EVENT: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None
     ),  # ! EventLog
-    "USB(EventLog)": ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
-    "WLAN": ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
-    "Amcache": ArtifactPath(
+    ART_USB_EVENT: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
+    ART_WLAN: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
+    ART_AMCACHE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry
-    "UserAssist": ArtifactPath(directory=None, entry=REGISTRY_KEY_USERASSIST),
-    "ShimCache": ArtifactPath(directory=None, entry=REGISTRY_KEY_SHIMCACHE),
-    "BAM": ArtifactPath(directory=None, entry=REGISTRY_KEY_BAM),
-    "UserAccount": ArtifactPath(directory=None, entry=REGISTRY_KEY_USER_ACCOUNT),
-    "NetworkInfo": ArtifactPath(directory=None, entry=REGISTRY_KEY_NETWORK_INFO),
-    "ShellBags": ArtifactPath(directory=None, entry=REGISTRY_KEY_SHELLBAGS),
-    "USB(Registry)": ArtifactPath(directory=None, entry=REGISTRY_KEY_USB),
-    "AutoRun": ArtifactPath(directory=None, entry=REGISTRY_KEY_AUTORUN),
-    "SystemInfo": ArtifactPath(directory=None, entry=REGISTRY_KEY_SYSTEM_INFO),
+    ART_USER_ASSIST: ArtifactPath(directory=None, entry=REGISTRY_KEY_USERASSIST),
+    ART_SHIMCACHE: ArtifactPath(directory=None, entry=REGISTRY_KEY_SHIMCACHE),
+    ART_BAM: ArtifactPath(directory=None, entry=REGISTRY_KEY_BAM),
+    ART_USER_ACCOUNT: ArtifactPath(directory=None, entry=REGISTRY_KEY_USER_ACCOUNT),
+    ART_NETWORK_INFO: ArtifactPath(directory=None, entry=REGISTRY_KEY_NETWORK_INFO),
+    ART_SHELLBAGS: ArtifactPath(directory=None, entry=REGISTRY_KEY_SHELLBAGS),
+    ART_USB_REGISTRY: ArtifactPath(directory=None, entry=REGISTRY_KEY_USB),
+    ART_AUTORUN: ArtifactPath(directory=None, entry=REGISTRY_KEY_AUTORUN),
+    ART_SYSTEM_INFO: ArtifactPath(directory=None, entry=REGISTRY_KEY_SYSTEM_INFO),
 }
