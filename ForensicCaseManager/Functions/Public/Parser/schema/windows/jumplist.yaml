@@ -1,0 +1,38 @@
+Name: JumpList
+Desc: Data extracted from the JumpList
+Table:
+  - TableName: jumplist
+    Columns:
+      - id
+      - last_opened
+      - file_name
+      - file_ext
+      - path
+      - size
+      - volume_label
+      - volume_serial_number
+      - drive_type
+      - app_id
+      - app_name
+      - access_count
+      - entry_id
+      - machine_id
+      - mac_address
+      - evidence_id
+    Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]

@@ -134,7 +134,7 @@ class DatabaseManager:
                     ),
                 )
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: Unable to insert evidences table: {e}")
 
     # create/insert artifact category table
     def create_artifact_category_table(self):
@@ -148,7 +148,7 @@ class DatabaseManager:
                 )"""
                 )
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: Unable to create artifact_category table: {e}")
 
     def insert_artifact_category(self, id: int, category: str):
         try:
@@ -164,7 +164,7 @@ class DatabaseManager:
                     ),
                 )
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: Unable to insert artifact_category table: {e}")
 
     # create/insert artifact table
     def create_artifact_table_from_yaml(self, yaml_file: Path):
@@ -185,7 +185,7 @@ class DatabaseManager:
                     with self.conn:
                         self.c.execute(create_statement)
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: Unable to create artifact table: {e}")
 
     def insert_artifact_data(self, artifact: str, data: dict, evidence_id: str):
         try:
@@ -209,4 +209,4 @@ class DatabaseManager:
                     tuple(data.values()),
                 )
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: Unable to insert artifact data: {e}")

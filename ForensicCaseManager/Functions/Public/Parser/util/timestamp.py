@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, tzinfo, timezone
 from platform import system
 from typing import Dict
 
-class TimeStamp:
+
+class Timestamp:
     def __init__(self, tzinfo: timezone) -> None:
         self.tzinfo: timezone = tzinfo
-    
+
     def _calculate_timestamp(self, ts: float) -> datetime:
         try:
             if system().lower() in ("windows", "emscripten"):
@@ -24,12 +25,12 @@ class TimeStamp:
             return self.to_localtime(dt=dt)
         except:
             """
-                'datetime' data type of <TargetRecordDescriptor>
-                can only receive datetime except for 'None' type.
-                Thus, empty string("") occurs error so this function returns None.
+            'datetime' data type of <TargetRecordDescriptor>
+            can only receive datetime except for 'None' type.
+            Thus, empty string("") occurs error so this function returns None.
             """
             return None
-        
+
     def to_localtime(self, dt: datetime) -> datetime:
         return datetime.fromtimestamp(dt.timestamp(), tz=self.tzinfo)
 
@@ -171,7 +172,9 @@ class TimeStamp:
         Returns:
             Datetime object from the passed timestamp.
         """
-        return self._calculate_timestamp(float(ts) * 1e-7 - 11644473600)  # Thanks FireEye
+        return self._calculate_timestamp(
+            float(ts) * 1e-7 - 11644473600
+        )  # Thanks FireEye
 
     def oatimestamp(self, ts: float) -> datetime:
         """Converts OLE Automation timestamps to aware datetime objects in UTC.
@@ -222,7 +225,9 @@ class TimeStamp:
         """
         return self._calculate_timestamp(float(ts) * 1e-7 - 12219292800)
 
-    def dostimestamp(self, ts: int, centiseconds: int = 0, swap: bool = False) -> datetime:
+    def dostimestamp(
+        self, ts: int, centiseconds: int = 0, swap: bool = False
+    ) -> datetime:
         """Converts MS-DOS timestamps to naive datetime objects.
 
         MS-DOS timestamps are recorded in local time, so we leave it up to the
@@ -264,7 +269,9 @@ class TimeStamp:
         # extra_seconds will be at most 1.
         extra_seconds, centiseconds = divmod(centiseconds, 100)
         microseconds = centiseconds * 10000
-        timestamp = datetime(year, month, day, hours, minutes, seconds + extra_seconds, microseconds)
+        timestamp = datetime(
+            year, month, day, hours, minutes, seconds + extra_seconds, microseconds
+        )
 
         return timestamp
 

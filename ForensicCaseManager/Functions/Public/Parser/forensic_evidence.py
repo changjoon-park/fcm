@@ -1,9 +1,9 @@
 import logging
+from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field
 
 from util.converter import convertfrom_extended_ascii
-from util.extractor import extract_basename
 from pathlib import Path
 from plugins import PLUGINS
 from forensic_artifact import (
@@ -72,7 +72,7 @@ class ForensicEvidence(CaseConfig):
 
     @property
     def evidence_label(self):
-        return extract_basename(path=self.src.source_path)
+        return Path(self.src.source_path).stem
 
     @property
     def computer_name(self):
@@ -104,15 +104,6 @@ class ForensicEvidence(CaseConfig):
             return convertfrom_extended_ascii(
                 string=registered_owner, encoding="UTF-16-LE"
             )
-
-    @property
-    def evidence_information(self):
-        return {
-            "evidence_label": self._evidence_label,
-            "computer_name": self._computer_name,
-            "registered_owner": self._registered_owner,
-            "forensic_artifacts": self.forensic_artifacts,
-        }
 
     def parse_evidence(self, descending: bool = False) -> Path:
         """Return the content of all forensic artifacts."""

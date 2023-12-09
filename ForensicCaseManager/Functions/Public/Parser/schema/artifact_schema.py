@@ -7,4 +7,6 @@ ARTIFACT_SCHEMA = {
     "RecycleBin": current_directory / "windows" / "recyclebin.yaml",
     "Prefetch": current_directory / "windows" / "prefetch.yaml",
     "WindowsTimeline": current_directory / "windows" / "windows_timeline.yaml",
+    "JumpList": current_directory / "windows" / "jumplist.yaml",
+    "FileHistory": current_directory / "windows" / "file_history.yaml",
 }

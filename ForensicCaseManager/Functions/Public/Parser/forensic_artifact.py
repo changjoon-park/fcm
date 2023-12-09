@@ -8,7 +8,8 @@ from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
 from path_finder import ARTIFACT_PATH
-from util.ts import TimeStamp
+from util.timestamp import Timestamp
+from util.file_extractor import FileExtractor
 
 SOURCE_TYPE_LOCAL = "Local"
 SOURCE_TYPE_CONTAINER = "Container"
@@ -51,20 +52,16 @@ class ForensicArtifact:
         self._target = self.src._target  #
 
     @property
-    def evidence_id(self):
-        return self._evidence_id
-
-    @evidence_id.setter
-    def evidence_id(self, value):
-        self._evidence_id = value
-
-    @property
-    def ts(self) -> TimeStamp:
+    def ts(self) -> Timestamp:
         try:
             bias: timedelta = self.src.source.datetime.tzinfo.bias
         except:
             bias: timedelta = timedelta(hours=9)  # KST(+09:00)
-        return TimeStamp(tzinfo=timezone(bias))
+        return Timestamp(tzinfo=timezone(bias))
+
+    @property
+    def fe(self) -> FileExtractor:
+        return FileExtractor()
 
     def _iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)

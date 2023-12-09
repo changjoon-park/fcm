@@ -265,4 +265,4 @@ class Prefetch(ForensicArtifact):
                     "previousruns": previousruns,
                 }
             except:
-                logging.error(f"Error: Unable to parse {entry}")
+                logging.exception(f"Error: Unable to parse {entry}")

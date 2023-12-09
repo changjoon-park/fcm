@@ -9,7 +9,7 @@ from artifacts.windows.jumplist import JumpList
 from artifacts.windows.thumbcache import Thumbcache
 from artifacts.windows.sru import SRU
 from artifacts.windows.windows_timeline import WindowsTimeline
-from artifacts.windows.filehistory import FileHistory
+from artifacts.windows.file_history import FileHistory
 from artifacts.windows.eventlog import ForensicEvent
 
 from artifacts.windows.registry.amcache import Amcache
