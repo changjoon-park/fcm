@@ -1,13 +1,11 @@
 import logging
-import uuid
 from dataclasses import dataclass, field
-from pathlib import Path
 
-from forensic_base import ForensicBase
+from case_config import CaseConfig
 
 
 @dataclass(kw_only=True)
-class CaseManager(ForensicBase):
+class ForensicCase(CaseConfig):
     case_name: str
     forensic_evidences: list
 

@@ -8,18 +8,18 @@ from schema.artifact_schema import ARTIFACT_SCHEMA
 
 
 @dataclass(kw_only=True)
-class ForensicBase:
+class CaseConfig:
     root_directory: Path
     case_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     case_name: str
     database: Path = field(init=False)
     db_manager: DatabaseManager = field(init=False)
 
-    # Class-level constant for artifact schema
-    ARTIFACT_SCHEMA = ARTIFACT_SCHEMA
-
     # Class-level constant for database name
     DATABASE_NAME = "forensic_data.sqlite"
+
+    # Class-level constant for artifact schema
+    ARTIFACT_SCHEMA = ARTIFACT_SCHEMA
 
     # Class-level constant for artifact categories
     ARTIFACT_CATEGORIES = [

@@ -2,10 +2,8 @@ import argparse
 import logging
 from pathlib import Path
 
-from case_manager import CaseManager
-from forensic_base import ForensicBase
+from forensic_case import ForensicCase
 from forensic_evidence import ForensicEvidence
-from database_manager import DatabaseManager
 
 ROOT_DIRECTORY_NAME = "_fcm"
 
@@ -81,7 +79,7 @@ if __name__ == "__main__":
     else:
         root_directory = Path.home() / ROOT_DIRECTORY_NAME
 
-    # Set ForensicEvidence
+    # Set ForensicEvidence list
     forensic_evidences = [
         ForensicEvidence(
             root_directory=root_directory,
@@ -95,8 +93,8 @@ if __name__ == "__main__":
         for index, container in enumerate(containers)
     ]
 
-    # Set CaseManager
-    case = CaseManager(
+    # Set ForensicCase instance
+    case = ForensicCase(
         root_directory=root_directory,
         case_name=case_name,
         forensic_evidences=forensic_evidences,

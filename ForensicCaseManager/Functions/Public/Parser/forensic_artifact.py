@@ -9,9 +9,6 @@ from dissect.target.filesystem import Filesystem
 
 from path_finder import ARTIFACT_PATH
 from util.ts import TimeStamp
-from database_manager import DatabaseManager
-from forensic_base import ForensicBase
-from schema.artifact_schema import ARTIFACT_SCHEMA
 
 SOURCE_TYPE_LOCAL = "Local"
 SOURCE_TYPE_CONTAINER = "Container"

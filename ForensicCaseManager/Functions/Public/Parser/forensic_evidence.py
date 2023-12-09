@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass, field
 
@@ -11,11 +10,11 @@ from forensic_artifact import (
     Source,
     ForensicArtifact,
 )
-from forensic_base import ForensicBase
+from case_config import CaseConfig
 
 
 @dataclass(kw_only=True)
-class ForensicEvidence(ForensicBase):
+class ForensicEvidence(CaseConfig):
     evidence_number: int
     _local: Optional[bool] = False
     _container: Optional[str] = None
