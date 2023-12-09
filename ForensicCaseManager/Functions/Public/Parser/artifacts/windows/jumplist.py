@@ -8,6 +8,8 @@ from lib.jumplist.jumplist import TJumpListParser
 
 from forensic_artifact import Source, ForensicArtifact
 
+logger = logging.getLogger(__name__)
+
 
 class JumpList(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
@@ -69,5 +71,5 @@ class JumpList(ForensicArtifact):
                         "mac_address": str(result[17]),
                     }
             except:
-                logging.exception("Error parsing JumpList entry: %s", entry)
+                logger.exception("Error parsing JumpList entry: %s", entry)
                 continue

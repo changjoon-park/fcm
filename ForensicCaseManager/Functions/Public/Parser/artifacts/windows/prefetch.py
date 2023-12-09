@@ -8,6 +8,8 @@ from flow.record.fieldtypes import uri
 from util.lzxpress_huffman import LZXpressHuffman
 from forensic_artifact import Source, ForensicArtifact
 
+logger = logging.getLogger(__name__)
+
 c_prefetch = """
     struct PREFETCH_HEADER_DETECT {
         char signature[4];
@@ -265,4 +267,4 @@ class Prefetch(ForensicArtifact):
                     "previousruns": previousruns,
                 }
             except:
-                logging.exception(f"Error: Unable to parse {entry}")
+                logger.exception(f"Error: Unable to parse {entry}")

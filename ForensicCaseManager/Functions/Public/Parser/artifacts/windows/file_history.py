@@ -9,6 +9,8 @@ from dissect.esedb import esedb, record, table
 
 from forensic_artifact import Source, ForensicArtifact
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(kw_only=True)
 class WebCache:
@@ -33,7 +35,7 @@ class WebCache:
             try:
                 yield from container.records()
             except:
-                logging.exception(f"Error: Unable to parse records from {container}")
+                logger.exception(f"Error: Unable to parse records from {container}")
 
     def history(self) -> Generator[record.Record, None, None]:
         """Yield records from the history webcache container."""
@@ -86,11 +88,11 @@ class FileHistory(ForensicArtifact):
                                 "source": str(db_file),
                             }
                 except SQLError as e:
-                    logging.exception(
+                    logger.exception(
                         f"Error processing Edge history file: {db_file} / exc_info={e}"
                     )
             except Exception as e:
-                logging.exception(
+                logger.exception(
                     f"Error opening Edge history file: {db_file} / exc_info={e}"
                 )
 
@@ -128,10 +130,10 @@ class FileHistory(ForensicArtifact):
                                 "source": str(db_file),
                             }
                 except Exception as e:
-                    logging.exception(
+                    logger.exception(
                         f"Error processing IE history file: {db_file} / exc_info={e}"
                     )
             except Exception as e:
-                logging.exception(
+                logger.exception(
                     f"Error opening IE history file: {db_file} / exc_info={e}"
                 )

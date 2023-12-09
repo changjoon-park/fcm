@@ -3,6 +3,8 @@ from dataclasses import dataclass, field
 
 from case_config import CaseConfig
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(kw_only=True)
 class ForensicCase(CaseConfig):
@@ -36,7 +38,7 @@ class ForensicCase(CaseConfig):
         try:
             self.case_directory.mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            logging.exception(f"Error: {e}")
+            logger.exception(f"Unable to create case directory: {e}")
 
     def _init_database(self):
         # set forensic case table

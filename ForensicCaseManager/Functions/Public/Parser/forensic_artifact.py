@@ -14,6 +14,8 @@ from util.file_extractor import FileExtractor
 SOURCE_TYPE_LOCAL = "Local"
 SOURCE_TYPE_CONTAINER = "Container"
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Source:
@@ -121,7 +123,7 @@ class ForensicArtifact:
         try:
             first = next(entry)
         except StopIteration:
-            logging.info(
+            logger.info(
                 f"No entries found in the {self.artifact} from {self.src.source}"
             )
         else:

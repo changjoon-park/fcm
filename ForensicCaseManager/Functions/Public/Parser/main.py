@@ -24,6 +24,15 @@ def get_container_files(container_input):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s|%(name)s|%(levelname)s|%(message)s",
+        filename="test.log",
+        encoding="utf-8",
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("Starting Forensic Case Manager")
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-n", "--case_name", default=None, help="case name", dest="case_name"
@@ -50,13 +59,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s|%(name)s|%(levelname)s|%(message)s",
-        filename="test.log",
-        encoding="utf-8",
-    )
 
     # Assigning values to case_name
     case_name = args.case_name

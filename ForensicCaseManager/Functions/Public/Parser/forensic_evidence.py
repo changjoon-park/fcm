@@ -12,6 +12,8 @@ from forensic_artifact import (
 )
 from case_config import CaseConfig
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(kw_only=True)
 class ForensicEvidence(CaseConfig):
@@ -120,7 +122,7 @@ class ForensicEvidence(CaseConfig):
 
             # insert artifact data / result: {name: [data, ...]}
             for artifact, entry_data in forensic_artifact.result.items():
-                logging.info(
+                logger.info(
                     f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
                 )
                 for data in entry_data:
