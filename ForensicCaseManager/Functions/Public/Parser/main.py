@@ -3,8 +3,11 @@ import logging
 from pathlib import Path
 
 from case_manager import CaseManager
+from forensic_base import ForensicBase
 from forensic_evidence import ForensicEvidence
-from config import ROOT_DIRECTORY_NAME
+from database_manager import DatabaseManager
+
+ROOT_DIRECTORY_NAME = "_fcm"
 
 
 def get_container_files(container_input):
@@ -78,18 +81,24 @@ if __name__ == "__main__":
     else:
         root_directory = Path.home() / ROOT_DIRECTORY_NAME
 
+    # Set ForensicEvidence
+    forensic_evidences = [
+        ForensicEvidence(
+            root_directory=root_directory,
+            case_name=case_name,
+            evidence_number=index,
+            _local=local,
+            _container=container,
+            _artifacts=artifacts,
+            _categories=categories,
+        )
+        for index, container in enumerate(containers)
+    ]
+
+    # Set CaseManager
     case = CaseManager(
-        case_name=case_name,
         root_directory=root_directory,
-        forensic_evidences=[
-            ForensicEvidence(
-                evidence_number=index,
-                _local=local,
-                _container=container,
-                _artifacts=artifacts,
-                _categories=categories,
-            )
-            for index, container in enumerate(containers)
-        ],
+        case_name=case_name,
+        forensic_evidences=forensic_evidences,
     )
     case.investigate_case()

@@ -11,11 +11,11 @@ from forensic_artifact import (
     Source,
     ForensicArtifact,
 )
-from database_manager import DatabaseManager
+from forensic_base import ForensicBase
 
 
 @dataclass(kw_only=True)
-class ForensicEvidence:
+class ForensicEvidence(ForensicBase):
     evidence_number: int
     _local: Optional[bool] = False
     _container: Optional[str] = None
@@ -25,6 +25,9 @@ class ForensicEvidence:
     forensic_artifacts: list[ForensicArtifact] = field(default_factory=list)
 
     def __post_init__(self):
+        super().__post_init__()
+
+        # set src
         self.src = Source(
             _local=self._local,
             _container=self._container,
@@ -111,3 +114,29 @@ class ForensicEvidence:
             "registered_owner": self._registered_owner,
             "forensic_artifacts": self.forensic_artifacts,
         }
+
+    def parse_evidence(self, descending: bool = False) -> Path:
+        """Return the content of all forensic artifacts."""
+        for forensic_artifact in self.forensic_artifacts:
+            forensic_artifact.parse(descending=descending)
+
+    def export_evidence(self, evidence_id: str = None) -> None:
+        self.db_manager.connect()
+        for forensic_artifact in self.forensic_artifacts:
+            # create artifact table
+            self.db_manager.create_artifact_table_from_yaml(
+                self.ARTIFACT_SCHEMA.get(forensic_artifact.artifact)
+            )
+
+            # insert artifact data / result: {name: [data, ...]}
+            for artifact, entry_data in forensic_artifact.result.items():
+                logging.info(
+                    f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
+                )
+                for data in entry_data:
+                    self.db_manager.insert_artifact_data(
+                        artifact=artifact,
+                        data=data,
+                        evidence_id=evidence_id,
+                    )
+        self.db_manager.close()

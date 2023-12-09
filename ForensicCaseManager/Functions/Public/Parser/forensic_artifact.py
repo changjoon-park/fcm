@@ -10,6 +10,7 @@ from dissect.target.filesystem import Filesystem
 from path_finder import ARTIFACT_PATH
 from util.ts import TimeStamp
 from database_manager import DatabaseManager
+from forensic_base import ForensicBase
 from schema.artifact_schema import ARTIFACT_SCHEMA
 
 SOURCE_TYPE_LOCAL = "Local"
@@ -132,26 +133,3 @@ class ForensicArtifact:
         else:
             yield first
             yield from entry
-
-    def export(
-        self,
-        db_manager: DatabaseManager = None,
-        evidence_id: str = None,
-    ) -> None:
-        db_manager.connect()
-
-        # create artifact table
-        db_manager.create_artifact_table_from_yaml(ARTIFACT_SCHEMA.get(self.artifact))
-
-        # insert artifact data / result: {name: [data, ...]}
-        for artifact, entry_data in self.result.items():
-            logging.info(
-                f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
-            )
-            for data in entry_data:
-                db_manager.insert_artifact_data(
-                    artifact=artifact,
-                    data=data,
-                    evidence_id=evidence_id,
-                )
-        db_manager.close()

@@ -1,44 +1,25 @@
-import uuid
 import logging
+import uuid
 from dataclasses import dataclass, field
-
 from pathlib import Path
-from database_manager import DatabaseManager
-from forensic_evidence import ForensicEvidence
-from config import DATABASE_NAME, ARTIFACT_CATEGORIES
+
+from forensic_base import ForensicBase
 
 
 @dataclass(kw_only=True)
-class CaseManager:
-    case_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+class CaseManager(ForensicBase):
     case_name: str
-    root_directory: Path
-    forensic_evidences: list[ForensicEvidence]
-    db_manager: DatabaseManager = field(init=False)
+    forensic_evidences: list
 
     def __post_init__(self):
-        self.db_manager = DatabaseManager(database=self.database)
+        super().__post_init__()
+
+        # set case_directory
+        self.case_directory = self.root_directory / self.case_name
 
         # set case_id to forensic_evidences
         for evidence in self.forensic_evidences:
             evidence.case_id = self.case_id
-
-    @property
-    def case_directory(self):
-        return self.root_directory / self.case_name
-
-    @property
-    def database(self):
-        return self.root_directory / self.case_name / DATABASE_NAME
-
-    @property
-    def case_information(self):
-        return {
-            "case_name": self.case_name,
-            "case_directory": self.root_directory / self.case_name,
-            "forensic_evidences": self.forensic_evidences,
-            "case_id": self.case_id,
-        }
 
     def investigate_case(self):
         # create case directory
@@ -48,16 +29,16 @@ class CaseManager:
         self._init_database()
 
         # parse artifacts in all forensic evidences
-        self._parse_artifacts()
+        self._parse_case_artifacts()
 
         # export artifacts in all forensic evidences
-        self._export_artifacts()
+        self._export_case_artifacts()
 
     def _create_case_directory(self):
         try:
             self.case_directory.mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            logging.error(f"Error: {e}")
+            logging.exception(f"Error: {e}")
 
     def _init_database(self):
         # set forensic case table
@@ -107,22 +88,19 @@ class CaseManager:
         self.db_manager.connect()
         if not self.db_manager.is_table_exist("artifact_category"):
             self.db_manager.create_artifact_category_table()
-            for id, category in ARTIFACT_CATEGORIES:
+            for id, category in self.ARTIFACT_CATEGORIES:
                 self.db_manager.insert_artifact_category(
                     id=id,
                     category=category,
                 )
         self.db_manager.close()
 
-    def _parse_artifacts(self):
+    def _parse_case_artifacts(self):
         for forensic_evidence in self.forensic_evidences:
-            for artifact in forensic_evidence.forensic_artifacts:
-                artifact.parse(descending=False)
+            forensic_evidence.parse_evidence(descending=False)
 
-    def _export_artifacts(self):
+    def _export_case_artifacts(self):
         for forensic_evidence in self.forensic_evidences:
-            for artifact in forensic_evidence.forensic_artifacts:
-                artifact.export(
-                    db_manager=self.db_manager,
-                    evidence_id=forensic_evidence.evidence_id,
-                )
+            forensic_evidence.export_evidence(
+                evidence_id=forensic_evidence.evidence_id,
+            )
