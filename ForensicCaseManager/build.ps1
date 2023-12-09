@@ -1,44 +1,80 @@
 # ForensicCaseManager(FCM)
-# Dependencies: dissect 3.5
+# Dependencies: dissect 3.9
+
+# User Platform Check
+$Platform = $PSVersionTable.Platform
+
+if ($Platform -eq "Unix") {
+    $Config = Join-Path -Path $env:HOME -ChildPath ".fcm/config.json"
+    $Python = "python3"
+    $pip = "pip3"
+}
+else {
+    $Config = Join-Path -Path $env:USERPROFILE -ChildPath ".fcm/config.json"
+    $Python = "python.exe"
+    $pip = "pip.exe"
+}
+
+$json = @{
+    platform = $Platform
+} | ConvertTo-Json
+
+if (Test-Path -Path $Config) {
+    $json | Set-Content -Path $Config
+}
+else {
+    New-Item -Path $Config -ItemType File -Force
+    $json | Set-Content -Path $Config
+}
+
+$VirtualEnvDirectory = Join-Path -Path $PSScriptRoot -ChildPath ".venv"
 
 # Create Virtual Environment
 if (-not (Test-Path -Path $PSScriptRoot\.venv -PathType Container)) {
     Write-Host ""
     Write-Host ">>> Creating a Virtual Environment for ForensicCaseManager(FCM)" -ForegroundColor DarkBlue
 
+    $VirtualEnvDirectory = Join-Path -Path $PSScriptRoot -ChildPath ".venv"
+
     try {
-        python.exe -m venv $PSScriptRoot\.venv
+        & $Python -m venv $VirtualEnvDirectory
     }
     catch {
-        Write-Warning "Failed to create Python Virtualenv." -ForegroundColor DarkMagenta
+        Write-Warning "Failed to create Python Virtualenv."
         return
     }
 }
 
 # Activate Virtual Environment
 try {
-    & $PSScriptRoot\.venv\Scripts\activate.ps1
+    $VirtualEnvScript = Get-ChildItem -Path $VirtualEnvDirectory -Recurse | Where-Object { $_.Name -eq "activate.ps1" }
+
+    & $VirtualEnvScript.FullName
 }
 catch {
-    Write-Warning "Failed to enter Python Virtualenv." -ForegroundColor DarkMagenta
+    Write-Host ""
+    Write-Warning "Failed to enter Python Virtualenv."
     return
 }
 
 # Check if Dependencies are installed
-$Packages = pip freeze
+$RequiredPackages = Join-Path -Path $PSScriptRoot -ChildPath "requirements.txt"
+$Packages = & $pip freeze
+
 if (-not $Packages) {
     Write-Host ""
     Write-Warning "Dependencies are required. Installing.."
     Write-Host ""
 
-    & $PSScriptRoot\.venv\Scripts\pip install -r $PSScriptRoot\requirements.txt
+    & $pip install -r $RequiredPackages
 }
 
 # Set Virtalenv Information Object
-$Packages = pip freeze
+$Packages = & $pip freeze
+
 $PackageInfo = foreach ($package in $Packages) {
     $obj = [PSCustomObject] @{
-        "Name" = $package.split("==")[0]
+        "Name"    = $package.split("==")[0]
         "Version" = $package.split("==")[1]
     }
     Add-Member -InputObject $obj -MemberType ScriptMethod -Name "ToString" -Value {
@@ -50,7 +86,7 @@ $PackageInfo = foreach ($package in $Packages) {
 
 # Out Virtualenv Information Object
 $venv = [PSCustomObject] @{
-    "Path" = "$PSScriptRoot\.venv"
+    "Path"     = $VirtualEnvDirectory
     "Packages" = $PackageInfo
 }
 
