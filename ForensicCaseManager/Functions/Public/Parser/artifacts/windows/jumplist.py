@@ -1,12 +1,12 @@
 import os
 import logging
-from pathlib import Path
-from typing import Generator, BinaryIO
+from typing import Generator
 
 from lib.jumplist.app_id_list import app_id_list
 from lib.jumplist.jumplist import TJumpListParser
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import ART_JUMPLIST
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class JumpList(ForensicArtifact):
             reverse=descending,
         )
 
-        self.result = {"jumplist": jumplist}
+        self.result = {ART_JUMPLIST: jumplist}
 
     def jumplist(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self._iter_entry()):
