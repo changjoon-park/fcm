@@ -80,41 +80,59 @@ WlanEventRecord = TargetRecordDescriptor(
     ],
 )
 
+
 class ForensicEvent(ForensicArtifact):
-    
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(
             src=src,
             artifact=artifact,
-            category=category
+            category=category,
         )
-        
+
     def parse(self, descending: bool = False):
         if self.artifact == "LogonEvent":
-            logon_event = sorted([
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-                for record in self.logon_event()], reverse=descending)
-            
+            logon_event = sorted(
+                [
+                    json.dumps(
+                        record._packdict(), indent=2, default=str, ensure_ascii=False
+                    )
+                    for record in self.logon_event()
+                ],
+                reverse=descending,
+            )
+
             self.result = {
                 "logon_event": logon_event,
             }
         elif self.artifact == "USB(EventLog)":
-            usb_event = sorted([
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-                for record in self.usb_event()], reverse=descending)
+            usb_event = sorted(
+                [
+                    json.dumps(
+                        record._packdict(), indent=2, default=str, ensure_ascii=False
+                    )
+                    for record in self.usb_event()
+                ],
+                reverse=descending,
+            )
 
             self.result = {
                 "usb_event": usb_event,
             }
         elif self.artifact == "WLAN":
-            wlan_event = sorted([
-                    json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-                    for record in self.wlan_event()], reverse=descending)
+            wlan_event = sorted(
+                [
+                    json.dumps(
+                        record._packdict(), indent=2, default=str, ensure_ascii=False
+                    )
+                    for record in self.wlan_event()
+                ],
+                reverse=descending,
+            )
 
             self.result = {
                 "wlan_event": wlan_event,
             }
-            
+
     def logon_event(self) -> Generator[LogonEventRecord, None, None]:
         logon_event = {
             4624: "Account Logon",
@@ -141,27 +159,31 @@ class ForensicEvent(ForensicArtifact):
             "NT AUTHORITY",
             "NT VIRTUAL MACHINE",
             "Window Manager",
-            "NT Service"
+            "NT Service",
         ]
-        
+
         for entry in self._iter_entry(name="Security.evtx"):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
                 pass
-            
+
             for event in evtx:
                 event_id = event.get("EventID")
-                
-                if (task := logon_event.get(event_id, None)):
-                    if (target_domain_name := event.get("TargetDomainName")) in exclude_list:
+
+                if task := logon_event.get(event_id, None):
+                    if (
+                        target_domain_name := event.get("TargetDomainName")
+                    ) in exclude_list:
                         continue
-                    
+
                     logon_type = event.get("LogonType")
                     logon_type = logon_type_dsecription.get(logon_type)
-                    
+
                     yield LogonEventRecord(
-                        ts=self.ts.to_localtime(event.get("TimeCreated_SystemTime").value),
+                        ts=self.ts.to_localtime(
+                            event.get("TimeCreated_SystemTime").value
+                        ),
                         task=task,
                         event_id=event_id,
                         event_record_id=event.get("EventRecordID"),
@@ -181,20 +203,22 @@ class ForensicEvent(ForensicArtifact):
                         ip_port=event.get("IpPort"),
                         channel=event.get("Channel"),
                         provider=event.get("Provider_Name"),
-                        _target=self._target
+                        _target=self._target,
                     )
                 else:
                     continue
-                
+
     def usb_event(self) -> Generator[UsbEventRecord, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
-        
-        for entry in self._iter_entry(name="Microsoft-Windows-Partition%4Diagnostic.evtx"):
+
+        for entry in self._iter_entry(
+            name="Microsoft-Windows-Partition%4Diagnostic.evtx"
+        ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
                 pass
-            
+
             for event in evtx:
                 if (event_id := event.get("EventID")) == 1006:
                     if capacity := event.get("Capacity"):
@@ -205,7 +229,9 @@ class ForensicEvent(ForensicArtifact):
                         task = "USB Disconnected"
 
                     yield UsbEventRecord(
-                        ts=self.ts.to_localtime(event.get("TimeCreated_SystemTime").value),
+                        ts=self.ts.to_localtime(
+                            event.get("TimeCreated_SystemTime").value
+                        ),
                         task=task,
                         event_id=event_id,
                         event_record_id=event.get("EventRecordID"),
@@ -218,18 +244,20 @@ class ForensicEvent(ForensicArtifact):
                         parent_id=event.get("ParentId"),
                         channel=event.get("Channel"),
                         provider=event.get("Provider_Name"),
-                        _target=self._target
+                        _target=self._target,
                     )
                 else:
                     continue
-    
+
     def wlan_event(self) -> Generator[WlanEventRecord, None, None]:
-        for entry in self._iter_entry(name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"):
+        for entry in self._iter_entry(
+            name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"
+        ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
                 pass
-            
+
             for event in evtx:
                 event_id = event.get("EventID")
                 if event_id == 8001:
@@ -260,5 +288,5 @@ class ForensicEvent(ForensicArtifact):
                     connection_id=event.get("ConnectionId"),
                     channel=event.get("Channel"),
                     provider=event.get("Provider_Name"),
-                    _target=self._target
+                    _target=self._target,
                 )
