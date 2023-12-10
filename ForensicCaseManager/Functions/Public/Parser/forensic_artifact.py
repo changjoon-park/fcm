@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
-from path_finder import ARTIFACT_PATH
+from lib.path_finder import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
 
@@ -37,7 +37,7 @@ class Source:
             self.type = SOURCE_TYPE_CONTAINER
             self._target = self.source  #
         else:
-            raise ValueError(f"Error :(")
+            logger.error(f"Invalid source: {self._container}")
 
 
 @dataclass(kw_only=True)

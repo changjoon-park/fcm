@@ -121,13 +121,18 @@ class ForensicEvidence(CaseConfig):
         self.db_manager.connect()
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
-            schema_files = self.ARTIFACT_SCHEMA.get(
-                forensic_artifact.artifact,
-            )  # ? parameter: ART_ARTIFACT (same as user input data), e.g., 'prefetch', 'sru_network', 'chrome'
-            for schema_file in schema_files:
-                self.db_manager.create_artifact_table_from_yaml(
-                    schema_file=schema_file,
+            if schema_files := self.ARTIFACT_SCHEMA.get(
+                forensic_artifact.artifact,  # ? parameter: ART_ARTIFACT, e.g., 'prefetch', 'sru_network', 'chrome'
+            ):
+                for schema_file in schema_files:
+                    self.db_manager.create_artifact_table_from_yaml(
+                        schema_file=schema_file,
+                    )
+            else:
+                logger.error(
+                    f"Invalid artifact: Unable to find schema file - {forensic_artifact.artifact} in {evidence_id}"
                 )
+                continue
 
             # insert artifact data / result: {name: [data, ...]}
             for artifact, entry_data in forensic_artifact.result.items():
@@ -136,7 +141,7 @@ class ForensicEvidence(CaseConfig):
                 )
                 for data in entry_data:
                     self.db_manager.insert_artifact_data(
-                        artifact=artifact,  # ? parameter: RSLT_ARTIFACT (parse result name), e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
+                        artifact=artifact,  # ? parameter: RSLT_ARTIFACT, e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
                         data=data,
                         evidence_id=evidence_id,
                     )

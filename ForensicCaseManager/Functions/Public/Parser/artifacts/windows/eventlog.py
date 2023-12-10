@@ -1,37 +1,21 @@
-import json
+import logging
 from typing import Generator
 
 from dissect.eventlog.evtx import Evtx
 from dissect.target.helpers.record import TargetRecordDescriptor
 
 from forensic_artifact import Source, ForensicArtifact
-
-
-LogonEventRecord = TargetRecordDescriptor(
-    "eventlog/logonoff",
-    [
-        ("datetime", "ts"),
-        ("string", "task"),
-        ("string", "subject_user_sid"),
-        ("string", "subject_user_name"),
-        ("string", "subject_domain_name"),
-        ("string", "subject_logon_id"),
-        ("string", "target_user_sid"),
-        ("string", "target_user_name"),
-        ("string", "target_domain_name"),
-        ("string", "target_server_name"),
-        ("string", "target_info"),
-        ("string", "target_logon_id"),
-        ("string", "logon_type"),
-        ("string", "workstation_name"),
-        ("string", "ip_address"),
-        ("string", "ip_port"),
-        ("uint32", "event_id"),
-        ("uint32", "event_record_id"),
-        ("string", "channel"),
-        ("string", "provider"),
-    ],
+from settings import (
+    ART_EVENT_LOGON,
+    ART_EVENT_USB,
+    ART_EVENT_WLAN,
+    RSLT_EVENT_LOGON,
+    RSLT_EVENT_USB,
+    RSLT_EVENT_WLAN,
 )
+
+logger = logging.getLogger(__name__)
+
 
 UsbEventRecord = TargetRecordDescriptor(
     "eventlog/usb",
@@ -90,51 +74,39 @@ class ForensicEvent(ForensicArtifact):
         )
 
     def parse(self, descending: bool = False):
-        if self.artifact == "LogonEvent":
-            logon_event = sorted(
-                [
-                    json.dumps(
-                        record._packdict(), indent=2, default=str, ensure_ascii=False
-                    )
-                    for record in self.logon_event()
-                ],
+        if self.artifact == ART_EVENT_LOGON:
+            event_logon = sorted(
+                [record for record in self.event_logon()],
+                key=lambda record: record["ts"],
                 reverse=descending,
             )
 
             self.result = {
-                "logon_event": logon_event,
+                RSLT_EVENT_LOGON: event_logon,
             }
-        elif self.artifact == "USB(EventLog)":
-            usb_event = sorted(
-                [
-                    json.dumps(
-                        record._packdict(), indent=2, default=str, ensure_ascii=False
-                    )
-                    for record in self.usb_event()
-                ],
+        elif self.artifact == ART_EVENT_USB:
+            event_usb = sorted(
+                [record for record in self.event_usb()],
+                key=lambda record: record["ts"],
                 reverse=descending,
             )
 
             self.result = {
-                "usb_event": usb_event,
+                RSLT_EVENT_USB: event_usb,
             }
-        elif self.artifact == "WLAN":
-            wlan_event = sorted(
-                [
-                    json.dumps(
-                        record._packdict(), indent=2, default=str, ensure_ascii=False
-                    )
-                    for record in self.wlan_event()
-                ],
+        elif self.artifact == ART_EVENT_WLAN:
+            event_wlan = sorted(
+                [record for record in self.event_wlan()],
+                key=lambda record: record["ts"],
                 reverse=descending,
             )
 
             self.result = {
-                "wlan_event": wlan_event,
+                RSLT_EVENT_WLAN: event_wlan,
             }
 
-    def logon_event(self) -> Generator[LogonEventRecord, None, None]:
-        logon_event = {
+    def event_logon(self) -> Generator[dict, None, None]:
+        event_logon = {
             4624: "Account Logon",
             4625: "Account Logon Failed",
             4634: "Account Logoff",
@@ -171,7 +143,7 @@ class ForensicEvent(ForensicArtifact):
             for event in evtx:
                 event_id = event.get("EventID")
 
-                if task := logon_event.get(event_id, None):
+                if task := event_logon.get(event_id, None):
                     if (
                         target_domain_name := event.get("TargetDomainName")
                     ) in exclude_list:
@@ -180,35 +152,34 @@ class ForensicEvent(ForensicArtifact):
                     logon_type = event.get("LogonType")
                     logon_type = logon_type_dsecription.get(logon_type)
 
-                    yield LogonEventRecord(
-                        ts=self.ts.to_localtime(
+                    yield {
+                        "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
-                        task=task,
-                        event_id=event_id,
-                        event_record_id=event.get("EventRecordID"),
-                        subject_user_sid=event.get("SubjectUserSid"),
-                        subject_user_name=event.get("SubjectUserName"),
-                        subject_domain_name=event.get("SubjectDomainName"),
-                        subject_logon_id=event.get("SubjectLogonId"),
-                        target_user_sid=event.get("TargetUserSid"),
-                        target_user_name=event.get("TargetUserName"),
-                        target_domain_name=target_domain_name,
-                        target_server_name=event.get("TargetServerName"),
-                        target_info=event.get("TargetInfo"),
-                        target_logon_id=event.get("TargetLogonId"),
-                        logon_type=logon_type,
-                        workstation_name=event.get("WorkstationName"),
-                        ip_address=event.get("IpAddress"),
-                        ip_port=event.get("IpPort"),
-                        channel=event.get("Channel"),
-                        provider=event.get("Provider_Name"),
-                        _target=self._target,
-                    )
+                        "task": task,
+                        "event_id": event_id,
+                        "event_record_id": event.get("EventRecordID"),
+                        "subject_user_sid": event.get("SubjectUserSid"),
+                        "subject_user_name": event.get("SubjectUserName"),
+                        "subject_domain_name": event.get("SubjectDomainName"),
+                        "subject_logon_id": event.get("SubjectLogonId"),
+                        "target_user_sid": event.get("TargetUserSid"),
+                        "target_user_name": event.get("TargetUserName"),
+                        "target_domain_name": target_domain_name,
+                        "target_server_name": event.get("TargetServerName"),
+                        "target_info": event.get("TargetInfo"),
+                        "target_logon_id": event.get("TargetLogonId"),
+                        "logon_type": logon_type,
+                        "workstation_name": event.get("WorkstationName"),
+                        "ip_address": event.get("IpAddress"),
+                        "ip_port": event.get("IpPort"),
+                        "channel": event.get("Channel"),
+                        "provider": str(event.get("Provider_Name")),
+                    }
                 else:
-                    continue
+                    logger.debug(f"Unable to parse event: {event_id}")
 
-    def usb_event(self) -> Generator[UsbEventRecord, None, None]:
+    def event_usb(self) -> Generator[UsbEventRecord, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
 
         for entry in self._iter_entry(
@@ -249,7 +220,7 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     continue
 
-    def wlan_event(self) -> Generator[WlanEventRecord, None, None]:
+    def event_wlan(self) -> Generator[WlanEventRecord, None, None]:
         for entry in self._iter_entry(
             name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"
         ):

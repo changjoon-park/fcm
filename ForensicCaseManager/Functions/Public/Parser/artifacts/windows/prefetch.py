@@ -7,7 +7,7 @@ from flow.record.fieldtypes import uri
 
 from util.lzxpress_huffman import LZXpressHuffman
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_PREFETCH
+from settings import ART_PREFETCH, RSLT_PREFETCH
 
 logger = logging.getLogger(__name__)
 
@@ -245,7 +245,7 @@ class Prefetch(ForensicArtifact):
             reverse=descending,
         )
 
-        self.result = {ART_PREFETCH: prefetch}
+        self.result = {RSLT_PREFETCH: prefetch}
 
     def prefetch(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self._iter_entry()):

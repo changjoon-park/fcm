@@ -205,18 +205,18 @@ class DatabaseManager:
         data: dict,
         evidence_id: str,
     ):
+        # convert python data type to sqlite data type
+        for attribute, value in data.items():
+            if type(value) == list:
+                for i, v in enumerate(value):
+                    if type(v) == datetime:
+                        value[i] = v.isoformat()
+                data[attribute] = json.dumps(value)
+
+        # add evidence_id
+        data["evidence_id"] = evidence_id
+
         try:
-            # convert python data type to sqlite data type
-            for attribute, value in data.items():
-                if type(value) == list:
-                    for i, v in enumerate(value):
-                        if type(v) == datetime:
-                            value[i] = v.isoformat()
-                    data[attribute] = json.dumps(value)
-
-            # add evidence_id
-            data["evidence_id"] = evidence_id
-
             with self.conn:
                 self.c.execute(
                     f"""
@@ -226,4 +226,6 @@ class DatabaseManager:
                     tuple(data.values()),
                 )
         except Exception as e:
-            logger.exception(f"Error: Unable to insert artifact data: {e}")
+            logger.exception(
+                f"{e} / attribute: {attribute}, value: {value}, type {type(value)}"
+            )

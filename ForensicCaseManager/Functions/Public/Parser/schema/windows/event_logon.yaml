@@ -1,0 +1,51 @@
+Name: EventLogon
+Desc: Logon/Logoff events from the Windows Event Log
+Table:
+  - TableName: event_logon
+    Columns:
+      - id
+      - ts
+      - task
+      - subject_user_sid
+      - subject_user_name
+      - subject_domain_name
+      - subject_logon_id
+      - target_user_sid
+      - target_user_name
+      - target_domain_name
+      - target_server_name
+      - target_info
+      - target_logon_id
+      - logon_type
+      - workstation_name
+      - ip_address
+      - ip_port
+      - event_id
+      - event_record_id
+      - channel
+      - provider
+      - evidence_id
+    Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]

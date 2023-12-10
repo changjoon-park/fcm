@@ -9,7 +9,7 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers.fsutil import TargetPath
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_RECYCLEBIN
+from settings import ART_RECYCLEBIN, RSLT_RECYCLEBIN
 
 c_recyclebin_i = """
 struct header_v1 {
@@ -91,7 +91,7 @@ class RecycleBin(ForensicArtifact):
             key=lambda record: record["ts"],  # Sorting based on the 'ts' field
             reverse=descending,
         )
-        self.result = {ART_RECYCLEBIN: recyclebin}
+        self.result = {RSLT_RECYCLEBIN: recyclebin}
 
     def recyclebin(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self._iter_entry(recurse=True)):

@@ -29,10 +29,10 @@ class ForensicCase(CaseConfig):
         self._init_database()
 
         # parse artifacts in all forensic evidences
-        self._parse_case_artifacts()
+        self._parse_evidences_all()
 
         # export artifacts in all forensic evidences
-        self._export_case_artifacts()
+        self._export_evidences_all()
 
     def _create_case_directory(self):
         try:
@@ -98,11 +98,11 @@ class ForensicCase(CaseConfig):
                 )
         self.db_manager.close()
 
-    def _parse_case_artifacts(self):
+    def _parse_evidences_all(self):
         for forensic_evidence in self.forensic_evidences:
             forensic_evidence.parse_evidence(descending=False)
 
-    def _export_case_artifacts(self):
+    def _export_evidences_all(self):
         for forensic_evidence in self.forensic_evidences:
             forensic_evidence.export_evidence(
                 evidence_id=forensic_evidence.evidence_id,

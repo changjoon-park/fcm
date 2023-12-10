@@ -1,32 +1,5 @@
 from collections import namedtuple
-from settings import (
-    ART_CHROME,  # artifact
-    ART_EDGE,
-    ART_IEXPLORER,
-    ART_MFT,
-    ART_USNJRNL,
-    ART_RECYCLEBIN,
-    ART_PREFETCH,
-    ART_SRU_NETWORK,
-    ART_FILE_HISTORY,
-    ART_THUMBCACHE,
-    ART_JUMPLIST,
-    ART_WINDOWS_TIMELINE,
-    ART_LOGON_EVENT,
-    ART_USB_EVENT,
-    ART_WLAN,
-    ART_AMCACHE,
-    ART_USER_ACCOUNT,
-    ART_USER_ASSIST,
-    ART_SHIMCACHE,
-    ART_BAM,
-    ART_NETWORK_INFO,
-    ART_SHELLBAGS,
-    ART_USB_REGISTRY,
-    ART_AUTORUN,
-    ART_SYSTEM_INFO,
-    ART_MRU,
-)
+from settings import *
 
 ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 
@@ -196,11 +169,11 @@ ARTIFACT_PATH = {
     ART_WINDOWS_TIMELINE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_WINDOWS_TIMELINE, entry="ActivitiesCache.db"
     ),
-    ART_LOGON_EVENT: ArtifactPath(
+    ART_EVENT_LOGON: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None
     ),  # ! EventLog
-    ART_USB_EVENT: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
-    ART_WLAN: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
+    ART_EVENT_USB: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
+    ART_EVENT_WLAN: ArtifactPath(directory=ARTIFACT_DIRECTORY_EVENTLOG, entry=None),
     ART_AMCACHE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry

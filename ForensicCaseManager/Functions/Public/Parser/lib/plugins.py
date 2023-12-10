@@ -69,6 +69,9 @@ ARTIFACT_SCHEMA = {
     ART_WINDOWS_TIMELINE: [
         ARTIFACT_SCHEMA_WINDOWS / "windows_timeline.yaml",
     ],
+    ART_EVENT_LOGON: [
+        ARTIFACT_SCHEMA_WINDOWS / "event_logon.yaml",
+    ],
 }
 
 
@@ -121,15 +124,15 @@ WINDOWS_PLUGINS = {
         category=CAT_APPLICATION_EXECUTION,
     ),
     # ? Event Log
-    ART_LOGON_EVENT: Plugin(
+    ART_EVENT_LOGON: Plugin(
         artifact=eventlog.ForensicEvent,
         category=CAT_ACCOUNT_USAGE,
     ),
-    ART_USB_EVENT: Plugin(
+    ART_EVENT_USB: Plugin(
         artifact=eventlog.ForensicEvent,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    ART_WLAN: Plugin(
+    ART_EVENT_WLAN: Plugin(
         artifact=eventlog.ForensicEvent,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
