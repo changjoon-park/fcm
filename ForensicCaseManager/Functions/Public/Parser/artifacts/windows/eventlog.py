@@ -17,31 +17,6 @@ from settings import (
 logger = logging.getLogger(__name__)
 
 
-WlanEventRecord = TargetRecordDescriptor(
-    "eventlog/wlan",
-    [
-        ("datetime", "ts"),
-        ("string", "task"),
-        ("string", "interface_guid"),
-        ("string", "interface_description"),
-        ("string", "connection_mode"),
-        ("string", "profile_name"),
-        ("string", "ssid"),
-        ("string", "failure_reason"),
-        ("string", "reason_code"),
-        ("string", "bsstype"),
-        ("string", "phytype"),
-        ("string", "authentication_algorithm"),
-        ("string", "cipher_algorithm"),
-        ("string", "connection_id"),
-        ("uint32", "event_id"),
-        ("uint32", "event_record_id"),
-        ("string", "channel"),
-        ("string", "provider"),
-    ],
-)
-
-
 class ForensicEvent(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(
@@ -196,7 +171,7 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
-    def event_wlan(self) -> Generator[WlanEventRecord, None, None]:
+    def event_wlan(self) -> Generator[dict, None, None]:
         for entry in self._iter_entry(
             name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"
         ):
@@ -216,24 +191,25 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     continue
 
-                yield WlanEventRecord(
-                    ts=self.ts.to_localtime(event.get("TimeCreated_SystemTime").value),
-                    task=task,
-                    event_id=event_id,
-                    event_record_id=event.get("EventRecordID"),
-                    interface_guid=event.get("InterfaceGuid"),
-                    interface_description=event.get("InterfaceDescription"),
-                    connection_mode=event.get("ConnectionMode"),
-                    profile_name=event.get("ProfileName"),
-                    failure_reason=event.get("FailureReason"),
-                    reason_code=event.get("ReasonCode"),
-                    ssid=event.get("SSID"),
-                    bsstype=event.get("BSSType"),
-                    phytype=event.get("PHYType"),
-                    authentication_algorithm=event.get("AuthenticationAlgorithm"),
-                    cipher_algorithm=event.get("CipherAlgorithm"),
-                    connection_id=event.get("ConnectionId"),
-                    channel=event.get("Channel"),
-                    provider=event.get("Provider_Name"),
-                    _target=self._target,
-                )
+                yield {
+                    "ts": self.ts.to_localtime(
+                        event.get("TimeCreated_SystemTime").value
+                    ),
+                    "task": task,
+                    "event_id": event_id,
+                    "event_record_id": event.get("EventRecordID"),
+                    "interface_guid": event.get("InterfaceGuid"),
+                    "interface_description": event.get("InterfaceDescription"),
+                    "connection_mode": event.get("ConnectionMode"),
+                    "profile_name": event.get("ProfileName"),
+                    "failure_reason": event.get("FailureReason"),
+                    "reason_code": event.get("ReasonCode"),
+                    "ssid": event.get("SSID"),
+                    "bsstype": event.get("BSSType"),
+                    "phytype": event.get("PHYType"),
+                    "authentication_algorithm": event.get("AuthenticationAlgorithm"),
+                    "cipher_algorithm": event.get("CipherAlgorithm"),
+                    "connection_id": event.get("ConnectionId"),
+                    "channel": event.get("Channel"),
+                    "provider": str(event.get("Provider_Name")),
+                }

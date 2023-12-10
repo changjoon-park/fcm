@@ -75,6 +75,9 @@ ARTIFACT_SCHEMA = {
     ART_EVENT_USB: [
         ARTIFACT_SCHEMA_WINDOWS / "event_usb.yaml",
     ],
+    ART_EVENT_WLAN: [
+        ARTIFACT_SCHEMA_WINDOWS / "event_wlan.yaml",
+    ],
 }
 
 
