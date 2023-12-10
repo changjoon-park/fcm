@@ -1,0 +1,44 @@
+Name: EventUSB
+Desc: USB events from the Windows Event Log
+Table:
+  - TableName: event_usb
+    Columns:
+      - id
+      - ts
+      - task
+      - capacity_gb
+      - manufacturer
+      - model
+      - revision
+      - serialnumber
+      - parent_id
+      - mbr
+      # - vbr0
+      # - vbr1
+      # - vbr2
+      # - vbr3
+      - event_id
+      - event_record_id
+      - channel
+      - provider
+      - evidence_id
+    Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - [TEXT]
+      - [TEXT]
+      - [REAL]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]
+      - [BLOB]
+      # - [BLOB]
+      # - [BLOB]
+      # - [BLOB]
+      # - [BLOB]
+      - [INTEGER]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [TEXT]

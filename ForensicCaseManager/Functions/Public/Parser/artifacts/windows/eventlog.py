@@ -17,29 +17,6 @@ from settings import (
 logger = logging.getLogger(__name__)
 
 
-UsbEventRecord = TargetRecordDescriptor(
-    "eventlog/usb",
-    [
-        ("datetime", "ts"),
-        ("string", "task"),
-        ("float", "capacity_gb"),
-        ("string", "manufacturer"),
-        ("string", "model"),
-        ("string", "revision"),
-        ("string", "serialnumber"),
-        ("string", "parent_id"),
-        ("bytes", "mbr"),
-        # ("bytes", "vbr0"),
-        # ("bytes", "vbr1"),
-        # ("bytes", "vbr2"),
-        # ("bytes", "vbr3"),
-        ("uint32", "event_id"),
-        ("uint32", "event_record_id"),
-        ("string", "channel"),
-        ("string", "provider"),
-    ],
-)
-
 WlanEventRecord = TargetRecordDescriptor(
     "eventlog/wlan",
     [
@@ -179,7 +156,7 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
-    def event_usb(self) -> Generator[UsbEventRecord, None, None]:
+    def event_usb(self) -> Generator[dict, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
 
         for entry in self._iter_entry(
@@ -199,26 +176,25 @@ class ForensicEvent(ForensicArtifact):
                     else:
                         task = "USB Disconnected"
 
-                    yield UsbEventRecord(
-                        ts=self.ts.to_localtime(
+                    yield {
+                        "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
-                        task=task,
-                        event_id=event_id,
-                        event_record_id=event.get("EventRecordID"),
-                        capacity_gb=capacity_gb,
-                        manufacturer=event.get("Manufacturer"),
-                        model=event.get("Model"),
-                        revision=event.get("Revision"),
-                        serialnumber=event.get("SerialNumber"),
-                        mbr=event.get("Mbr"),
-                        parent_id=event.get("ParentId"),
-                        channel=event.get("Channel"),
-                        provider=event.get("Provider_Name"),
-                        _target=self._target,
-                    )
+                        "task": task,
+                        "event_id": event_id,
+                        "event_record_id": event.get("EventRecordID"),
+                        "capacity_gb": capacity_gb,
+                        "manufacturer": event.get("Manufacturer"),
+                        "model": event.get("Model"),
+                        "revision": event.get("Revision"),
+                        "serialnumber": event.get("SerialNumber"),
+                        "mbr": event.get("Mbr"),
+                        "parent_id": event.get("ParentId"),
+                        "channel": event.get("Channel"),
+                        "provider": str(event.get("Provider_Name")),
+                    }
                 else:
-                    continue
+                    logger.debug(f"Unable to parse event: {event_id}")
 
     def event_wlan(self) -> Generator[WlanEventRecord, None, None]:
         for entry in self._iter_entry(

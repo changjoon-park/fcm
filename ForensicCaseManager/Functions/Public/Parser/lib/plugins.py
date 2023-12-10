@@ -72,6 +72,9 @@ ARTIFACT_SCHEMA = {
     ART_EVENT_LOGON: [
         ARTIFACT_SCHEMA_WINDOWS / "event_logon.yaml",
     ],
+    ART_EVENT_USB: [
+        ARTIFACT_SCHEMA_WINDOWS / "event_usb.yaml",
+    ],
 }
 
 
