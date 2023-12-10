@@ -1,0 +1,26 @@
+Name: SRU Network
+Desc: Network Data extracted from the SRU Database
+Table:
+  - TableName: sru_network_connectivity
+    Columns:
+      - id
+      - ts
+      - app
+      - user
+      - interface_luid
+      - l2_profile_id
+      - connected_time
+      - connect_start_time
+      - l2_profile_flags
+      - evidence_id
+    Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [TEXT]

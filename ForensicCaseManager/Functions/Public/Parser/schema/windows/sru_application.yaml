@@ -1,0 +1,46 @@
+Name: SRU Application
+Desc: Application Data extracted from the SRU Database
+Table:
+  - TableName: sru_application
+    Columns:
+      - id
+      - ts
+      - app
+      - user
+      - foreground_cycle_time
+      - background_cycle_time
+      - face_time
+      - foreground_context_switches
+      - background_context_switches
+      - foreground_bytes_read
+      - foreground_bytes_written
+      - foreground_num_read_operations
+      - foreground_num_write_operations
+      - foreground_number_of_flushes
+      - background_bytes_read
+      - background_bytes_written
+      - background_num_read_operations
+      - background_num_write_operations
+      - background_number_of_flushes
+      - evidence_id
+    Types:
+      - [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - [INTEGER]
+      - [TEXT]
+      - [TEXT]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [INTEGER]
+      - [TEXT]

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from database_manager import DatabaseManager
-from settings import *  # database name, schema, categories, artifact, plugins
+from settings import *  # database name, schema, categories, artifacts,
 from artifacts.windows import (
     recyclebin,
     prefetch,
@@ -59,22 +59,43 @@ class CaseConfig:
 
     # Class-level constant for artifact schema
     ARTIFACT_SCHEMA = {
-        # ART_EDGE: ARTIFACT_SCHEMA_BROWSER / "edge.yaml",
-        ART_RECYCLEBIN: ARTIFACT_SCHEMA_WINDOWS / "recyclebin.yaml",
-        ART_PREFETCH: ARTIFACT_SCHEMA_WINDOWS / "prefetch.yaml",
-        ART_WINDOWS_TIMELINE: ARTIFACT_SCHEMA_WINDOWS / "windows_timeline.yaml",
-        ART_JUMPLIST: ARTIFACT_SCHEMA_WINDOWS / "jumplist.yaml",
-        ART_FILE_HISTORY: ARTIFACT_SCHEMA_WINDOWS / "file_history.yaml",
+        ART_RECYCLEBIN: [
+            ARTIFACT_SCHEMA_WINDOWS / "recyclebin.yaml",
+        ],
+        ART_PREFETCH: [
+            ARTIFACT_SCHEMA_WINDOWS / "prefetch.yaml",
+        ],
+        ART_SRU_NETWORK: [
+            ARTIFACT_SCHEMA_WINDOWS / "sru_network_data.yaml",
+            ARTIFACT_SCHEMA_WINDOWS / "sru_network_connectivity.yaml",
+        ],
+        ART_SRU_APPLICATION: [
+            ARTIFACT_SCHEMA_WINDOWS / "sru_application.yaml",
+        ],
+        ART_FILE_HISTORY: [
+            ARTIFACT_SCHEMA_WINDOWS / "file_history.yaml",
+        ],
+        ART_JUMPLIST: [
+            ARTIFACT_SCHEMA_WINDOWS / "jumplist.yaml",
+        ],
+        ART_WINDOWS_TIMELINE: [
+            ARTIFACT_SCHEMA_WINDOWS / "windows_timeline.yaml",
+        ],
     }
 
     # Class-level constant for plugins
     PLUGINS = {
         ART_CHROME: Plugin(
-            artifact=chrome.Chrome, category=CAT_BROWSER_ACTIVITY
+            artifact=chrome.Chrome,
+            category=CAT_BROWSER_ACTIVITY,
         ),  # ! Browser
-        ART_EDGE: Plugin(artifact=edge.Edge, category=CAT_BROWSER_ACTIVITY),
+        ART_EDGE: Plugin(
+            artifact=edge.Edge,
+            category=CAT_BROWSER_ACTIVITY,
+        ),
         ART_IEXPLORER: Plugin(
-            artifact=iexplore.InternetExplorer, category=CAT_BROWSER_ACTIVITY
+            artifact=iexplore.InternetExplorer,
+            category=CAT_BROWSER_ACTIVITY,
         ),
         # "MFT": Plugin(artifact=mft.MFT, category="todo"),  # FileSystem
         # "UsnJrnl": Plugin(artifact=UsnJrnl, category=CAT_DELETED_ITEMS_FILE_EXISTENCE),
@@ -83,23 +104,33 @@ class CaseConfig:
             category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
         ),  # ! Windows
         ART_PREFETCH: Plugin(
-            artifact=prefetch.Prefetch, category=CAT_APPLICATION_EXECUTION
+            artifact=prefetch.Prefetch,
+            category=CAT_APPLICATION_EXECUTION,
         ),
         ART_FILE_HISTORY: Plugin(
-            artifact=file_history.FileHistory, category=CAT_FILE_FOLDER_OPENING
+            artifact=file_history.FileHistory,
+            category=CAT_FILE_FOLDER_OPENING,
         ),
-        # "SRU(Network)": Plugin(artifact=SRU, category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION),
-        # "SRU(App)": Plugin(artifact=SRU, category=CAT_APPLICATION_EXECUTION),
+        ART_SRU_NETWORK: Plugin(
+            artifact=sru.SRU,
+            category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
+        ),
+        ART_SRU_APPLICATION: Plugin(
+            artifact=sru.SRU,
+            category=CAT_APPLICATION_EXECUTION,
+        ),
         # "Lnk": Plugin(artifact=LinkFile, category=CAT_FILE_FOLDER_OPENING),
         ART_JUMPLIST: Plugin(
-            artifact=jumplist.JumpList, category=CAT_FILE_FOLDER_OPENING
+            artifact=jumplist.JumpList,
+            category=CAT_FILE_FOLDER_OPENING,
         ),
         ART_WINDOWS_TIMELINE: Plugin(
             artifact=windows_timeline.WindowsTimeline,
             category=CAT_APPLICATION_EXECUTION,
         ),
         ART_LOGON_EVENT: Plugin(
-            artifact=eventlog.ForensicEvent, category=CAT_ACCOUNT_USAGE
+            artifact=eventlog.ForensicEvent,
+            category=CAT_ACCOUNT_USAGE,
         ),  # ! EventLog
         ART_USB_EVENT: Plugin(
             artifact=eventlog.ForensicEvent,
@@ -110,31 +141,44 @@ class CaseConfig:
             category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
         ),
         ART_AMCACHE: Plugin(
-            artifact=amcache.Amcache, category=CAT_APPLICATION_EXECUTION
+            artifact=amcache.Amcache,
+            category=CAT_APPLICATION_EXECUTION,
         ),  # ! Registry
         ART_USER_ACCOUNT: Plugin(
-            artifact=user_account.UserAccount, category=CAT_ACCOUNT_USAGE
+            artifact=user_account.UserAccount,
+            category=CAT_ACCOUNT_USAGE,
         ),
         ART_USER_ASSIST: Plugin(
-            artifact=userassist.UserAssist, category=CAT_APPLICATION_EXECUTION
+            artifact=userassist.UserAssist,
+            category=CAT_APPLICATION_EXECUTION,
         ),
         ART_SHIMCACHE: Plugin(
-            artifact=shimcache.ShimCache, category=CAT_APPLICATION_EXECUTION
+            artifact=shimcache.ShimCache,
+            category=CAT_APPLICATION_EXECUTION,
         ),
-        ART_BAM: Plugin(artifact=bam.BAM, category=CAT_APPLICATION_EXECUTION),
+        ART_BAM: Plugin(
+            artifact=bam.BAM,
+            category=CAT_APPLICATION_EXECUTION,
+        ),
         ART_NETWORK_INFO: Plugin(
             artifact=network_info.NetworkInfo,
             category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
         ),
         ART_SHELLBAGS: Plugin(
-            artifact=shellbags.ShellBags, category=CAT_FILE_FOLDER_OPENING
+            artifact=shellbags.ShellBags,
+            category=CAT_FILE_FOLDER_OPENING,
         ),
         ART_USB_REGISTRY: Plugin(
-            artifact=usb.USB, category=CAT_EXTERNAL_DEVICE_USB_USAGE
+            artifact=usb.USB,
+            category=CAT_EXTERNAL_DEVICE_USB_USAGE,
         ),
-        ART_AUTORUN: Plugin(artifact=autorun.AutoRun, category=CAT_SYSTEM_INFORMATION),
+        ART_AUTORUN: Plugin(
+            artifact=autorun.AutoRun,
+            category=CAT_SYSTEM_INFORMATION,
+        ),
         ART_SYSTEM_INFO: Plugin(
-            artifact=system_info.SystemInfo, category=CAT_SYSTEM_INFORMATION
+            artifact=system_info.SystemInfo,
+            category=CAT_SYSTEM_INFORMATION,
         ),
         # "MRU": Plugin(artifact=MRU, category=CAT_FILE_FOLDER_OPENING),
     }

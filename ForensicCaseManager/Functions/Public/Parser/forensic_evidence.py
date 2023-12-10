@@ -40,7 +40,9 @@ class ForensicEvidence(CaseConfig):
                     if artifact == artifact_entry:
                         self.forensic_artifacts.append(
                             ForensicArtifact(
-                                src=self.src, artifact=artifact, category=category
+                                src=self.src,
+                                artifact=artifact,
+                                category=category,
                             )
                         )
             if self._categories:
@@ -48,7 +50,9 @@ class ForensicEvidence(CaseConfig):
                     if category == category_entry:
                         self.forensic_artifacts.append(
                             ForensicArtifact(
-                                src=self.src, artifact=artifact, category=category
+                                src=self.src,
+                                artifact=artifact,
+                                category=category,
                             )
                         )
             # # set evidence_id to forensic_artifacts
@@ -89,7 +93,8 @@ class ForensicEvidence(CaseConfig):
             return computer_name
         except:
             return convertfrom_extended_ascii(
-                string=computer_name, encoding="UTF-16-LE"
+                string=computer_name,
+                encoding="UTF-16-LE",
             )
 
     @property
@@ -103,7 +108,8 @@ class ForensicEvidence(CaseConfig):
             return registered_owner
         except:
             return convertfrom_extended_ascii(
-                string=registered_owner, encoding="UTF-16-LE"
+                string=registered_owner,
+                encoding="UTF-16-LE",
             )
 
     def parse_evidence(self, descending: bool = False) -> Path:
@@ -115,9 +121,13 @@ class ForensicEvidence(CaseConfig):
         self.db_manager.connect()
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
-            self.db_manager.create_artifact_table_from_yaml(
-                self.ARTIFACT_SCHEMA.get(forensic_artifact.artifact)
-            )
+            schema_files = self.ARTIFACT_SCHEMA.get(
+                forensic_artifact.artifact,
+            )  # ? parameter: ART_ARTIFACT (same as user input data), e.g., 'prefetch', 'sru_network', 'chrome'
+            for schema_file in schema_files:
+                self.db_manager.create_artifact_table_from_yaml(
+                    schema_file=schema_file,
+                )
 
             # insert artifact data / result: {name: [data, ...]}
             for artifact, entry_data in forensic_artifact.result.items():
@@ -126,7 +136,7 @@ class ForensicEvidence(CaseConfig):
                 )
                 for data in entry_data:
                     self.db_manager.insert_artifact_data(
-                        artifact=artifact,
+                        artifact=artifact,  # ? parameter: RSLT_ARTIFACT (parse result name), e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
                         data=data,
                         evidence_id=evidence_id,
                     )

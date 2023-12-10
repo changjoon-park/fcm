@@ -73,7 +73,7 @@ class ForensicCase(CaseConfig):
                 self.db_manager.create_evidences_table()
 
             # insert "evidences" table
-            self.db_manager.insert_evidences(
+            if self.db_manager.insert_evidences(
                 id=evidence.evidence_id,
                 evidence_label=evidence.evidence_label,
                 computer_name=evidence.computer_name,
@@ -81,7 +81,10 @@ class ForensicCase(CaseConfig):
                 source=evidence.src.source_path,
                 case_id=self.case_id,
                 evidence_number=evidence.evidence_number,
-            )
+            ):
+                logger.info(
+                    f"Inserted {evidence.evidence_id} into evidences table in {self.case_name} case"
+                )
             self.db_manager.close()
 
     def _init_table_artifact_category(self):

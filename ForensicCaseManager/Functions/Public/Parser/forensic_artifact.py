@@ -43,8 +43,8 @@ class Source:
 @dataclass(kw_only=True)
 class ForensicArtifact:
     src: Source
-    artifact: str  # eg. Chrome, Edge, RecycleBin, ...
-    category: str  # eg. "Application Execution", "Browser Activity", ...
+    artifact: str  # ? user input data, e.g., 'prefetch', 'sru_network'
+    category: str
     artifact_directory: list[str] = field(init=False)
     artifact_entry: str = field(init=False)
     result: dict = field(default_factory=dict)  # result: {name: [data, ...]}

@@ -63,7 +63,7 @@ class DatabaseManager:
         id: str,
         case_name: str,
         case_directory: str,
-    ):
+    ) -> bool:
         try:
             with self.conn:
                 self.c.execute(
@@ -77,6 +77,7 @@ class DatabaseManager:
                         case_directory,
                     ),
                 )
+            return True
         except Exception as e:
             logger.error(f"Error: {e}")
 
@@ -110,7 +111,7 @@ class DatabaseManager:
         source: str,
         case_id: str,
         evidence_number: int,
-    ):
+    ) -> bool:
         try:
             with self.conn:
                 self.c.execute(
@@ -135,6 +136,7 @@ class DatabaseManager:
                         evidence_number,
                     ),
                 )
+            return True
         except Exception as e:
             logger.exception(f"Error: Unable to insert evidences table: {e}")
 
@@ -169,9 +171,9 @@ class DatabaseManager:
             logger.exception(f"Error: Unable to insert artifact_category table: {e}")
 
     # create/insert artifact table
-    def create_artifact_table_from_yaml(self, yaml_file: Path):
+    def create_artifact_table_from_yaml(self, schema_file: Path) -> str:
         try:
-            with open(yaml_file, "r", encoding="utf-8") as f:
+            with open(schema_file, "r", encoding="utf-8") as f:
                 schema = yaml.load(f, Loader=yaml.FullLoader)
                 for table in schema.get("Table", []):
                     table_name = table.get("TableName")
@@ -186,10 +188,23 @@ class DatabaseManager:
                     )
                     with self.conn:
                         self.c.execute(create_statement)
+                return table_name
         except Exception as e:
-            logger.exception(f"Error: Unable to create artifact table: {e}")
+            if not schema_file:
+                logger.exception(
+                    f"Input Error: None yaml file is given. Please check your input yaml file. / {e}"
+                )
+            else:
+                logger.exception(
+                    f"Error: Unable to create artifact table from [{schema_file}]: {e}"
+                )
 
-    def insert_artifact_data(self, artifact: str, data: dict, evidence_id: str):
+    def insert_artifact_data(
+        self,
+        artifact: str,
+        data: dict,
+        evidence_id: str,
+    ):
         try:
             # convert python data type to sqlite data type
             for attribute, value in data.items():

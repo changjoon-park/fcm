@@ -8,7 +8,7 @@ from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_FILE_HISTORY
+from settings import ART_FILE_HISTORY, RSLT_FILE_HISTORY
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class FileHistory(ForensicArtifact):
         )
 
         self.result = {
-            ART_FILE_HISTORY: file_history,
+            RSLT_FILE_HISTORY: file_history,
         }
 
     def file_history(self) -> Generator[dict, None, None]:
