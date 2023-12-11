@@ -10,6 +10,7 @@ ROOT_DIRECTORY_NAME = "_fcm"
 DATABASE_NAME = "forensic_data.sqlite"
 
 # Artifact Schema
+ARTIFACT_SCHEMA_FILESYSTEM = current_directory / "schema" / "filesystem"
 ARTIFACT_SCHEMA_WINDOWS = current_directory / "schema" / "windows"
 ARTIFACT_SCHEMA_BROWSER = current_directory / "schema" / "application" / "browsers"
 

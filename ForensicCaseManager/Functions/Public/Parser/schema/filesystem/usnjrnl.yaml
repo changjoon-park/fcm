@@ -1,0 +1,17 @@
+Name: UsnJrnl
+Desc: File existance and deletion record from the UsnJrnl
+Table:
+  - TableName: usnjrnl
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - usn: [INTEGER]
+      - segment: [TEXT]
+      - path: [TEXT]
+      - reason: [TEXT]
+      - security_id: [INTEGER]
+      - source: [TEXT]
+      - attr: [TEXT]
+      - major: [INTEGER]
+      - minor: [INTEGER]
+      - evidence_id: [TEXT]

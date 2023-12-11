@@ -2,6 +2,8 @@ from settings import *  # artifacts,
 
 from collections import namedtuple
 
+from artifacts.filesystem import usnjrnl
+
 from artifacts.windows import (
     recyclebin,
     prefetch,
@@ -67,6 +69,9 @@ ARTIFACT_SCHEMA = {
         ARTIFACT_SCHEMA_BROWSER / f"{RSLT_IEXPLORER_HISTORY}.yaml",
         ARTIFACT_SCHEMA_BROWSER / f"{RSLT_IEXPLORER_DOWNLOADS}.yaml",
     ],
+    ART_USNJRNL: [
+        ARTIFACT_SCHEMA_FILESYSTEM / f"{RSLT_USNJRNL}.yaml",
+    ],
     ART_RECYCLEBIN: [
         ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_RECYCLEBIN}.yaml",
     ],
@@ -117,8 +122,12 @@ WINDOWS_PLUGINS = {
         artifact=iexplore.InternetExplorer,
         category=CAT_BROWSER_ACTIVITY,
     ),
+    # ? FileSystem
     # "MFT": Plugin(artifact=mft.MFT, category="todo"),  # FileSystem
-    # "UsnJrnl": Plugin(artifact=UsnJrnl, category=CAT_DELETED_ITEMS_FILE_EXISTENCE),
+    ART_USNJRNL: Plugin(
+        artifact=usnjrnl.UsnJrnl,
+        category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
+    ),
     # ? Windows
     ART_RECYCLEBIN: Plugin(
         artifact=recyclebin.RecycleBin,

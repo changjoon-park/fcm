@@ -151,7 +151,7 @@ ARTIFACT_PATH = {
         directory=ARTIFACT_DIRECTORY_INTERNET_EXPLORER, entry="WebCacheV01.dat"
     ),
     # "MFT": ArtifactPath(directory=ARTIFACT_DIRECTORY_MFT, entry="$MFT"),  # ! FileSystem
-    # "UsnJrnl": ArtifactPath(directory=ARTIFACT_DIRECTORY_USNJRNL, entry="$J"),
+    ART_USNJRNL: ArtifactPath(directory=ARTIFACT_DIRECTORY_USNJRNL, entry="$J"),
     ART_RECYCLEBIN: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_RECYCLEBIN, entry="$I*"
     ),  # ! Windows

@@ -2,7 +2,6 @@ import logging
 from typing import Generator
 
 from dissect.eventlog.evtx import Evtx
-from dissect.target.helpers.record import TargetRecordDescriptor
 
 from forensic_artifact import Source, ForensicArtifact
 from settings import (
