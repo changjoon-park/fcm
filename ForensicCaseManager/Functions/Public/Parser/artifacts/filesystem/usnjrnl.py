@@ -27,21 +27,13 @@ class UsnJrnl(ForensicArtifact):
             - https://en.wikipedia.org/wiki/USN_Journal
             - https://velociraptor.velocidex.com/the-windows-usn-journal-f0c55c9010e
         """
-        usnjrnl = []
-        for fs in self.check_empty_entry(self._iter_filesystem()):
-            if entry := fs.ntfs.usnjrnl:
-                for index, record in enumerate(self.read_records(entry=entry, fs=fs)):
-                    if type(record) == dict:
-                        print(f"{self.artifact}-{index}: parsed successfully")
-                    else:
-                        print(
-                            f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
-                        )
-                        logging.error(
-                            f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
-                        )
-                    usnjrnl.append(record)
 
+        usnjrnl = [
+            self.process_record(record=record, index=index)
+            for fs in self.check_empty_entry(self._iter_filesystem())
+            if (entry := fs.ntfs.usnjrnl)
+            for index, record in enumerate(self.read_records(entry=entry, fs=fs))
+        ]
         self.result = {
             RSLT_USNJRNL: usnjrnl,
         }
@@ -85,3 +77,15 @@ class UsnJrnl(ForensicArtifact):
                     record.record,
                     exc_info=e,
                 )
+
+    def process_record(self, index: int, record: dict):
+        if isinstance(record, dict):
+            print(f"{self.artifact}-{index}: Parsed successfully")
+        else:
+            print(
+                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+            )
+            logging.error(
+                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+            )
+        return record
