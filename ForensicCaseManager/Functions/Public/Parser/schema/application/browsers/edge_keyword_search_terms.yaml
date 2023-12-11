@@ -1,0 +1,17 @@
+Name: EdgeKeywordSearchTerms
+Desc: Keyword search terms data from the Edge browser
+Table:
+  - TableName: edge_keyword_search_terms
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - term: [TEXT]
+      - title: [TEXT]
+      - search_engine: [TEXT]
+      - url: [TEXT]
+      - record_id: [TEXT]
+      - visit_count: [INTEGER]
+      - hidden: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]

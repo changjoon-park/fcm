@@ -1,0 +1,19 @@
+Name: EdgeHistory
+Desc: History data from the Edge browser
+Table:
+  - TableName: edge_history
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - title: [TEXT]
+      - visit_type: [INTEGER]
+      - visit_count: [INTEGER]
+      - url: [TEXT]
+      - record_id: [TEXT]
+      - hidden: [TEXT]
+      - from_visit: [INTEGER]
+      - from_url: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]
+
