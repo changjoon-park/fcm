@@ -104,6 +104,4 @@ class ForensicCase(CaseConfig):
 
     def _export_evidences_all(self):
         for forensic_evidence in self.forensic_evidences:
-            forensic_evidence.export_evidence(
-                evidence_id=forensic_evidence.evidence_id,
-            )
+            forensic_evidence.export_evidence()

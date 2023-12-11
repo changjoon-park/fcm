@@ -90,7 +90,7 @@ class RecycleBin(ForensicArtifact):
         """
         recyclebin = sorted(
             [record for record in self.recyclebin()],
-            key=lambda record: record["ts"],  # Sorting based on the 'ts' field
+            key=lambda record: record["ts"],
             reverse=descending,
         )
         self.result = {RSLT_RECYCLEBIN: recyclebin}
@@ -99,11 +99,12 @@ class RecycleBin(ForensicArtifact):
         for entry in self.check_empty_entry(self._iter_entry(recurse=True)):
             try:
                 recyclebin = RecycleBinParser(path=entry)
+                ts = self.ts.wintimestamp(recyclebin.timestamp)
                 path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
                 filename = os.path.split(path)[1]
 
                 yield {
-                    "ts": self.ts.wintimestamp(recyclebin.timestamp),
+                    "ts": ts,
                     "path": path,
                     "filename": filename,
                     "filesize": recyclebin.file_size,

@@ -117,7 +117,7 @@ class ForensicEvidence(CaseConfig):
         for forensic_artifact in self.forensic_artifacts:
             forensic_artifact.parse(descending=descending)
 
-    def export_evidence(self, evidence_id: str = None) -> None:
+    def export_evidence(self) -> None:
         self.db_manager.connect()
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
@@ -130,26 +130,34 @@ class ForensicEvidence(CaseConfig):
                     )
             else:
                 logger.error(
-                    f"Invalid artifact: Unable to find schema file - {forensic_artifact.artifact} in {evidence_id}"
+                    f"Invalid artifact: Unable to find schema file - {forensic_artifact.artifact} in {self.evidence_id}"
                 )
                 continue
 
-            # insert artifact data / result: {name: [data, ...]}
-            for artifact, entry_data in forensic_artifact.result.items():
+            # insert artifact data
+            for artifact, data in forensic_artifact.result.items():
                 logger.info(
-                    f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
+                    f"{len(data)} {artifact} entries has been parsed from {self.evidence_id}"
                 )
-                for index, data in enumerate(entry_data):
-                    if type(data) == dict:
-                        print(f"{artifact}-{index}: {type(data)} - status OK")
-                    else:
-                        print(f"{artifact}-{index}: {type(data)} - status: ERROR")
-                        logging.error(
-                            f"{artifact}-{index}: {type(data)} - status: ERROR"
-                        )
+                # execute insert query when data is not empty
+                if data:
                     self.db_manager.insert_artifact_data(
-                        artifact=artifact,  # ? parameter: RSLT_ARTIFACT, e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
-                        data=data,
-                        evidence_id=evidence_id,
+                        artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
+                        data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
+                        evidence_id=self.evidence_id,
                     )
+
+                # for index, data in enumerate(entry_data):
+                #     if isinstance(data, tuple):
+                #         print(f"{artifact}-{index}: {type(data)} - status OK")
+                #     else:
+                #         print(f"{artifact}-{index}: {type(data)} - status: ERROR")
+                #         logging.error(
+                #             f"{artifact}-{index}: {type(data)} - status: ERROR"
+                #         )
+                #     self.db_manager.insert_artifact_data(
+                #         artifact=artifact,  # ? parameter: RSLT_ARTIFACT, e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
+                #         data=data,
+                #         evidence_id=self.evidence_id,
+                #     )
         self.db_manager.close()

@@ -207,33 +207,63 @@ class DatabaseManager:
                     f"Error: Unable to create artifact table from [{schema_file}]: {e}"
                 )
 
-    def insert_artifact_data(
-        self,
-        artifact: str,
-        data: dict,
-        evidence_id: str,
-    ):
-        # convert python data type to sqlite data type
-        for attribute, value in data.items():
-            if type(value) == list:
-                for i, v in enumerate(value):
-                    if type(v) == datetime:
-                        value[i] = v.isoformat()
-                data[attribute] = json.dumps(value)
+    # def insert_artifact_data(
+    #     self,
+    #     artifact: str,
+    #     data: list[dict],
+    #     evidence_id: str,
+    # ):
+    #     # convert python data type to sqlite data type
+    #     # for attribute, value in data.items():
+    #     #     if type(value) == list:
+    #     #         for i, v in enumerate(value):
+    #     #             if type(v) == datetime:
+    #     #                 value[i] = v.isoformat()
+    #     #         data[attribute] = json.dumps(value)
 
-        # add evidence_id
-        data["evidence_id"] = evidence_id
+    #     # add evidence_id
+    #     # data["evidence_id"] = evidence_id
 
+    #     try:
+    #         with self.conn:
+    #             statement = f"""
+    #             INSERT INTO {artifact}
+    #             VALUES ({','.join(['?'] * len(data))})
+    #             """
+    #             self.c.executemany(statement, data)
+    #     except Exception as e:
+    #         # logger.exception(
+    #         #     f"Unable to insert artifact data to {artifact} table for attribute: {attribute}, value: {value}, type {type(value)} / {e} "
+    #         # )
+    #         logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")
+
+    def insert_artifact_data(self, artifact: str, data: list[dict], evidence_id: str):
         try:
+            # Prepare the list of tuples for batch insertion
+            prepared_data = []
+            for record in data:
+                # Convert datetime objects to string
+                for key, value in record.items():
+                    if isinstance(value, list):
+                        for i, v in enumerate(value):
+                            if isinstance(v, datetime):
+                                value[i] = v.isoformat()
+                        record[key] = json.dumps(value)
+
+                # TODO: Add evidence_id to each record
+                # TODO: Consider inheritance of ForensicArtifact class from ForensicEvidence class
+                # Add evidence_id to each record
+                record_tuple = tuple(record.values()) + (evidence_id,)
+                prepared_data.append(record_tuple)
+                # print(prepared_data)
+
+            # Prepare SQL statement with placeholders
+            keys = data[0].keys() if data else []
+            placeholders = ", ".join(["?"] * len(keys))
+            statement = f"INSERT INTO {artifact} ({', '.join(keys)}, evidence_id) VALUES ({placeholders}, ?)"
+
+            # Execute batch insertion
             with self.conn:
-                self.c.execute(
-                    f"""
-                INSERT INTO {artifact} ({','.join(data.keys())})
-                VALUES ({','.join(['?'] * len(data.keys()))})
-                """,
-                    tuple(data.values()),
-                )
+                self.c.executemany(statement, prepared_data)
         except Exception as e:
-            logger.exception(
-                f"Unable to insert artifact data to {artifact} table for attribute: {attribute}, value: {value}, type {type(value)} / {e} "
-            )
+            logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")
