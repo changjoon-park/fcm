@@ -16,18 +16,20 @@ class ChromiumBrowser(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(src=src, artifact=artifact, category=category)
 
-        # set default datetime to sort by timestamp
-        self.default_datetime = datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
-
     @property
     def browser_type(self) -> str:
         raise NotImplementedError
+
+    # set default datetime to sort by timestamp
+    @property
+    def default_datetime(self) -> datetime:
+        return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
 
     def parse(self, descending: bool = False) -> None:
         raise NotImplementedError
 
     def history(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="History"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -74,7 +76,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def downloads(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="History"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -138,7 +140,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def keyword_search_terms(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="History"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -205,7 +207,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def autofill(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="Web Data"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="Web Data")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -244,7 +246,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def login_data(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="Login Data"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="Login Data")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -266,7 +268,6 @@ class ChromiumBrowser(ForensicArtifact):
                         if not date_created:
                             date_created = self.default_datetime
 
-                        print(date_created, type(date_created))
                         yield {
                             "ts_created": date_created,
                             "username_element": username_element,
@@ -296,7 +297,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def bookmarks(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name="Bookmarks"):
+        for db_file in self.check_empty_entry(self._iter_entry(name="Bookmarks")):
             json_data = json.load(db_file.open("r", encoding="UTF-8"))
 
             bookmark_result = []

@@ -8,6 +8,8 @@ from dissect.util.ts import from_unix
 from forensic_artifact import Source, ForensicArtifact
 from settings import ART_WINDOWS_TIMELINE
 
+logger = logging.getLogger(__name__)
+
 
 class WindowsTimeline(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
@@ -100,7 +102,7 @@ class WindowsTimeline(ForensicArtifact):
                         # "clipboard_payload": r["[ClipboardPayload]"],
                     }
             except:
-                logging.error(f"Error: Unable to parse {entry}")
+                logger.error(f"Error: Unable to parse {entry}")
                 continue
 
 

@@ -11,6 +11,8 @@ from dissect.target.helpers.fsutil import TargetPath
 from forensic_artifact import Source, ForensicArtifact
 from settings import ART_RECYCLEBIN, RSLT_RECYCLEBIN
 
+logger = logging.getLogger(__name__)
+
 c_recyclebin_i = """
 struct header_v1 {
     int64    version;
@@ -109,5 +111,5 @@ class RecycleBin(ForensicArtifact):
                     "source": uri.from_windows(recyclebin.source_path),
                 }
             except:
-                logging.error(f"Error: Unable to parse {entry}")
+                logger.error(f"Error: Unable to parse {entry}")
                 continue

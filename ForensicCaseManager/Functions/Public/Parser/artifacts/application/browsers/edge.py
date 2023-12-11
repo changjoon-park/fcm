@@ -1,5 +1,3 @@
-import json
-
 from forensic_artifact import Source
 from artifacts.application.browsers.browser import ChromiumBrowser
 from settings import (

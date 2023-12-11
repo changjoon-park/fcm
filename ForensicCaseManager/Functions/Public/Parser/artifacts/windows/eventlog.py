@@ -86,7 +86,7 @@ class ForensicEvent(ForensicArtifact):
             "NT Service",
         ]
 
-        for entry in self._iter_entry(name="Security.evtx"):
+        for entry in self.check_empty_entry(self._iter_entry(name="Security.evtx")):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
@@ -134,8 +134,8 @@ class ForensicEvent(ForensicArtifact):
     def event_usb(self) -> Generator[dict, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
 
-        for entry in self._iter_entry(
-            name="Microsoft-Windows-Partition%4Diagnostic.evtx"
+        for entry in self.check_empty_entry(
+            self._iter_entry(name="Microsoft-Windows-Partition%4Diagnostic.evtx")
         ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
@@ -172,8 +172,8 @@ class ForensicEvent(ForensicArtifact):
                     logger.debug(f"Unable to parse event: {event_id}")
 
     def event_wlan(self) -> Generator[dict, None, None]:
-        for entry in self._iter_entry(
-            name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"
+        for entry in self.check_empty_entry(
+            self._iter_entry(name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx")
         ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))

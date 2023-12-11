@@ -1,4 +1,4 @@
-import json
+import logging
 from typing import Generator
 
 from dissect.esedb.tools.sru import SRU as SRUParser
@@ -13,6 +13,8 @@ from settings import (
     RSLT_SRU_APPLICATION,
     RSLT_SRU_APPLICATION_TIMELINE,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SRU(ForensicArtifact):
@@ -218,7 +220,7 @@ class SRU(ForensicArtifact):
         yield from self.read_records("sdp_network_provider")
 
     def read_records(self, table_name: str) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry():
+        for db_file in self.check_empty_entry(self._iter_entry()):
             try:
                 db = SRUParser(db_file.open("rb"))
 
@@ -247,4 +249,4 @@ class SRU(ForensicArtifact):
 
                     yield record_values
             except:
-                pass
+                logger.exception(f"Error: Unable to parse {table_name} from {db_file}")

@@ -1,0 +1,15 @@
+Name: iExplorerDownloads
+Desc: Download data from the iExplorer browser
+Table:
+  - TableName: iexplorer_downloads
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - entry_id: [TEXT]
+      - path: [TEXT]
+      - url: [TEXT]
+      - size: [INTEGER]
+      - state: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]
