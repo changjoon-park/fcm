@@ -64,7 +64,7 @@ class FileHistory(ForensicArtifact):
 
     def file_history(self) -> Generator[dict, None, None]:
         # Edge History
-        for db_file in self.check_empty_entry(self._iter_entry(name="History*")):
+        for db_file in self.check_empty_entry(self._iter_entry(name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:

@@ -146,18 +146,4 @@ class ForensicEvidence(CaseConfig):
                         data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
                         evidence_id=self.evidence_id,
                     )
-
-                # for index, data in enumerate(entry_data):
-                #     if isinstance(data, tuple):
-                #         print(f"{artifact}-{index}: {type(data)} - status OK")
-                #     else:
-                #         print(f"{artifact}-{index}: {type(data)} - status: ERROR")
-                #         logging.error(
-                #             f"{artifact}-{index}: {type(data)} - status: ERROR"
-                #         )
-                #     self.db_manager.insert_artifact_data(
-                #         artifact=artifact,  # ? parameter: RSLT_ARTIFACT, e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
-                #         data=data,
-                #         evidence_id=self.evidence_id,
-                #     )
         self.db_manager.close()

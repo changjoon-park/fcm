@@ -207,55 +207,30 @@ class DatabaseManager:
                     f"Error: Unable to create artifact table from [{schema_file}]: {e}"
                 )
 
-    # def insert_artifact_data(
-    #     self,
-    #     artifact: str,
-    #     data: list[dict],
-    #     evidence_id: str,
-    # ):
-    #     # convert python data type to sqlite data type
-    #     # for attribute, value in data.items():
-    #     #     if type(value) == list:
-    #     #         for i, v in enumerate(value):
-    #     #             if type(v) == datetime:
-    #     #                 value[i] = v.isoformat()
-    #     #         data[attribute] = json.dumps(value)
-
-    #     # add evidence_id
-    #     # data["evidence_id"] = evidence_id
-
-    #     try:
-    #         with self.conn:
-    #             statement = f"""
-    #             INSERT INTO {artifact}
-    #             VALUES ({','.join(['?'] * len(data))})
-    #             """
-    #             self.c.executemany(statement, data)
-    #     except Exception as e:
-    #         # logger.exception(
-    #         #     f"Unable to insert artifact data to {artifact} table for attribute: {attribute}, value: {value}, type {type(value)} / {e} "
-    #         # )
-    #         logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")
-
-    def insert_artifact_data(self, artifact: str, data: list[dict], evidence_id: str):
+    def insert_artifact_data(
+        self,
+        artifact: str,
+        data: list[dict],
+        evidence_id: str,
+    ):
         try:
             # Prepare the list of tuples for batch insertion
             prepared_data = []
             for record in data:
-                # Convert datetime objects to string
-                for key, value in record.items():
-                    if isinstance(value, list):
-                        for i, v in enumerate(value):
-                            if isinstance(v, datetime):
-                                value[i] = v.isoformat()
-                        record[key] = json.dumps(value)
-
+                # Convert datetime objects in lists to strings and serialize lists to JSON
+                processed_record = {
+                    key: json.dumps(
+                        [v.isoformat() if isinstance(v, datetime) else v for v in value]
+                    )
+                    if isinstance(value, list)
+                    else value
+                    for key, value in record.items()
+                }
                 # TODO: Add evidence_id to each record
                 # TODO: Consider inheritance of ForensicArtifact class from ForensicEvidence class
                 # Add evidence_id to each record
-                record_tuple = tuple(record.values()) + (evidence_id,)
+                record_tuple = tuple(processed_record.values()) + (evidence_id,)
                 prepared_data.append(record_tuple)
-                # print(prepared_data)
 
             # Prepare SQL statement with placeholders
             keys = data[0].keys() if data else []
