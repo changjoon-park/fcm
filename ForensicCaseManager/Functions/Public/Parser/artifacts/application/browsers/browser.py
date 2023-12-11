@@ -1,5 +1,6 @@
 import logging
 import json
+from datetime import datetime, timezone
 from collections import defaultdict
 from typing import Generator
 
@@ -14,6 +15,9 @@ logger = logging.getLogger(__name__)
 class ChromiumBrowser(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(src=src, artifact=artifact, category=category)
+
+        # set default datetime to sort by timestamp
+        self.default_datetime = datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
 
     @property
     def browser_type(self) -> str:
@@ -34,6 +38,9 @@ class ChromiumBrowser(ForensicArtifact):
                         visits[row.id] = row
                         url_record = urls[row.url]
 
+                        if not (ts := self.ts.webkittimestamp(row.visit_time)):
+                            ts = self.default_datetime
+
                         if row.from_visit and row.from_visit in visits:
                             from_visit = visits[row.from_visit]
                             from_url = urls[from_visit.url]
@@ -42,7 +49,7 @@ class ChromiumBrowser(ForensicArtifact):
 
                         if (url := url_record.url).startswith("http"):
                             yield {
-                                "ts": self.ts.webkittimestamp(row.visit_time),
+                                "ts": ts,
                                 "record_id": row.id,
                                 "url": url,
                                 "title": url_record.title,
@@ -79,9 +86,16 @@ class ChromiumBrowser(ForensicArtifact):
                         chain.sort(key=lambda row: row.chain_index)
 
                     for row in db.table("downloads").rows():
+                        ts_start = self.ts.webkittimestamp(row.start_time)
+                        ts_end = (
+                            self.ts.webkittimestamp(row.end_time)
+                            if row.end_time
+                            else None
+                        )
                         download_path = row.target_path
-                        file_name = self.fe.extract_filename(download_path)
-                        file_extension = self.fe.extract_file_extention(download_path)
+
+                        if not ts_start:
+                            ts_start = self.default_datetime
 
                         if download_chain := download_chains.get(row.id):
                             download_chain_url = download_chain[-1].url
@@ -94,12 +108,12 @@ class ChromiumBrowser(ForensicArtifact):
                             state = "Complete"
 
                         yield {
-                            "ts_start": self.ts.webkittimestamp(row.start_time),
-                            "ts_end": self.ts.webkittimestamp(row.end_time)
-                            if row.end_time
-                            else None,
-                            "file_name": file_name,
-                            "file_extension": file_extension,
+                            "ts_start": ts_start,
+                            "ts_end": ts_end,
+                            "file_name": self.fe.extract_filename(download_path),
+                            "file_extension": self.fe.extract_file_extention(
+                                download_path
+                            ),
                             "received_bytes": row.get("total_bytes"),
                             "download_path": download_path,
                             "download_url": row.get("tab_url"),
@@ -136,13 +150,18 @@ class ChromiumBrowser(ForensicArtifact):
                         keyword_search_terms.update(row._values)
                         keyword_search_terms.update(url_row._values)
 
-                        last_visit_time = keyword_search_terms.get("last_visit_time")
+                        last_visit_time = self.ts.webkittimestamp(
+                            keyword_search_terms.get("last_visit_time")
+                        )
                         term = keyword_search_terms.get("term")
                         title = keyword_search_terms.get("title")
                         url = keyword_search_terms.get("url")
                         id = keyword_search_terms.get("id")
                         visit_count = keyword_search_terms.get("visit_count")
                         hidden = keyword_search_terms.get("hidden")
+
+                        if not last_visit_time:
+                            last_visit_time = self.default_datetime
 
                         engines = {
                             "Google": "://www.google.com",
@@ -162,7 +181,7 @@ class ChromiumBrowser(ForensicArtifact):
                                 search_engine = engine_name
 
                         yield {
-                            "ts": self.ts.webkittimestamp(last_visit_time),
+                            "ts": last_visit_time,
                             "term": term,
                             "title": title,
                             "search_engine": search_engine,
@@ -196,12 +215,15 @@ class ChromiumBrowser(ForensicArtifact):
 
                         name = autofill.get("name")
                         value = autofill.get("value")
-                        date_created = autofill.get("date_created")
+                        date_created = self.ts.from_unix(autofill.get("date_created"))
                         date_last_used = autofill.get("date_last_used")
                         count = autofill.get("count")
 
+                        if not date_created:
+                            date_created = self.default_datetime
+
                         yield {
-                            "ts_created": self.ts.from_unix(date_created),
+                            "ts_created": date_created,
                             "value": value,
                             "count": count,
                             "name": name,
@@ -237,12 +259,16 @@ class ChromiumBrowser(ForensicArtifact):
                         password_element = logins.get("password_element")
                         password_value = logins.get("password_value")
                         signon_realm = logins.get("signon_realm")
-                        date_created = logins.get("date_created")
+                        date_created = self.ts.from_unix(logins.get("date_created"))
                         date_last_used = logins.get("date_last_used")
                         date_password_modified = logins.get("date_password_modified")
 
+                        if not date_created:
+                            date_created = self.default_datetime
+
+                        print(date_created, type(date_created))
                         yield {
-                            "ts_created": self.ts.from_unix(date_created),
+                            "ts_created": date_created,
                             "username_element": username_element,
                             "username_value": username_value,
                             "password_element": password_element,
@@ -285,8 +311,11 @@ class ChromiumBrowser(ForensicArtifact):
                             self._bookmark_dir_tree(row, path, bookmark_result)
 
                         for record in bookmark_result:
+                            if not (ts_added := record[0]):
+                                ts_added = self.default_datetime
+
                             yield {
-                                "ts_added": record[0],
+                                "ts_added": ts_added,
                                 "guid": record[1],
                                 "record_id": record[2],
                                 "name": record[4],

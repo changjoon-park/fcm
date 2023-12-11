@@ -30,23 +30,21 @@ class Chrome(ChromiumBrowser):
             key=lambda record: record["ts_start"],
             reverse=descending,
         )
-        # keyword_search_terms = sorted(
-        #     [record for record in self.keyword_search_terms()],
-        #     key=lambda record: record["ts"],
-        #     reverse=descending,
-        # )
-        keyword_search_terms = [record for record in self.keyword_search_terms()]
+        keyword_search_terms = sorted(
+            [record for record in self.keyword_search_terms()],
+            key=lambda record: record["ts"],
+            reverse=descending,
+        )
         autofill = sorted(
             [record for record in self.autofill()],
             key=lambda record: record["ts_created"],
             reverse=descending,
         )
-        # login_data = sorted(
-        #     [record for record in self.login_data()],
-        #     key=lambda record: record["ts_created"],
-        #     reverse=descending,
-        # )
-        login_data = [record for record in self.login_data()]
+        login_data = sorted(
+            [record for record in self.login_data()],
+            key=lambda record: record["ts_created"],
+            reverse=descending,
+        )
         bookmarks = sorted(
             [record for record in self.bookmarks()],
             key=lambda record: record["ts_added"],
