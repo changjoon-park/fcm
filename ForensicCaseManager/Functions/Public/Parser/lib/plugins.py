@@ -47,36 +47,55 @@ ARTIFACT_CATEGORIES = [
 # ! Aritfact Schema:
 
 ARTIFACT_SCHEMA = {
+    ART_CHROME: [
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_HISTORY}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_DOWNLOADS}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_KEYWORD_SEARCH_TERMS}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_AUTOFILL}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_LOGIN_DATA}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_CHROME_BOOKMARKS}.yaml",
+    ],
+    ART_EDGE: [
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_HISTORY}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_DOWNLOADS}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_KEYWORD_SEARCH_TERMS}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_AUTOFILL}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_LOGIN_DATA}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EDGE_BOOKMARKS}.yaml",
+    ],
+    ART_IEXPLORER: [
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_IEXPLORER_HISTORY}.yaml",
+    ],
     ART_RECYCLEBIN: [
-        ARTIFACT_SCHEMA_WINDOWS / "recyclebin.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_RECYCLEBIN}.yaml",
     ],
     ART_PREFETCH: [
-        ARTIFACT_SCHEMA_WINDOWS / "prefetch.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_PREFETCH}.yaml",
     ],
     ART_SRU_NETWORK: [
-        ARTIFACT_SCHEMA_WINDOWS / "sru_network_data.yaml",
-        ARTIFACT_SCHEMA_WINDOWS / "sru_network_connectivity.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_SRU_NETWORK_DATA}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_SRU_NETWORK_CONNECTIVITY}.yaml",
     ],
     ART_SRU_APPLICATION: [
-        ARTIFACT_SCHEMA_WINDOWS / "sru_application.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_SRU_APPLICATION}.yaml",
     ],
     ART_FILE_HISTORY: [
-        ARTIFACT_SCHEMA_WINDOWS / "file_history.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_FILE_HISTORY}.yaml",
     ],
     ART_JUMPLIST: [
-        ARTIFACT_SCHEMA_WINDOWS / "jumplist.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_JUMPLIST}.yaml",
     ],
     ART_WINDOWS_TIMELINE: [
-        ARTIFACT_SCHEMA_WINDOWS / "windows_timeline.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_WINDOWS_TIMELINE}.yaml",
     ],
     ART_EVENT_LOGON: [
-        ARTIFACT_SCHEMA_WINDOWS / "event_logon.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EVENT_LOGON}.yaml",
     ],
     ART_EVENT_USB: [
-        ARTIFACT_SCHEMA_WINDOWS / "event_usb.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EVENT_USB}.yaml",
     ],
     ART_EVENT_WLAN: [
-        ARTIFACT_SCHEMA_WINDOWS / "event_wlan.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EVENT_WLAN}.yaml",
     ],
 }
 
