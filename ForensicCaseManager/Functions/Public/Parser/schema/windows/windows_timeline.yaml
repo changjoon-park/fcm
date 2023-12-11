@@ -3,60 +3,29 @@ Desc: Data extracted from the Windows Timeline
 Table:
   - TableName: windows_timeline
     Columns:
-      - id
-      - start_time
-      - end_time
-      # - last_modified_time
-      # - last_modified_on_client
-      # - original_last_modified_on_client
-      # - expiration_time
-      # - app_id
-      # - enterprise_id
-      # - app_activity_id
-      # - group_app_activity_id
-      # - group
-      # - activity_type
-      # - activity_status
-      # - priority
-      # - match_id
-      # - etag
-      # - tag
-      # - is_local_only
-      # - created_in_cloud
-      # - platform_device_id
-      # - package_id_hash
-      # - payload
-      # - original_payload
-      # - clipboard_payload
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [INTEGER]
-      - [INTEGER]
-      # - [INTEGER]
-      # - [INTEGER]
-      # - [INTEGER]
-      # - [INTEGER]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [INTEGER]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [INTEGER]
-      # - [INTEGER]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      # - [TEXT]
-      - [TEXT]
-
-
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - start_time: [INTEGER]
+      - end_time: [INTEGER]
+      # - last_modified_time: [INTEGER]
+      # - last_modified_on_client: [INTEGER]
+      # - original_last_modified_on_client: [INTEGER]
+      # - expiration_time: [INTEGER]
+      # - app_id: [TEXT]
+      # - enterprise_id: [TEXT]
+      # - app_activity_id: [TEXT]
+      # - group_app_activity_id: [TEXT]
+      # - group: [TEXT]
+      # - activity_type: [TEXT]
+      # - activity_status: [TEXT]
+      # - priority: [INTEGER]
+      # - match_id: [TEXT]
+      # - etag: [TEXT]
+      # - tag: [TEXT]
+      # - is_local_only: [INTEGER]
+      # - created_in_cloud: [INTEGER]
+      # - platform_device_id: [TEXT]
+      # - package_id_hash: [TEXT]
+      # - payload: [TEXT]
+      # - original_payload: [TEXT]
+      # - clipboard_payload: [TEXT]
+      - evidence_id: [TEXT]

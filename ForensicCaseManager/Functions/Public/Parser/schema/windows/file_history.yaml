@@ -3,24 +3,13 @@ Desc: Data extracted from the Edge/IE History
 Table:
   - TableName: file_history
     Columns:
-      - id
-      - ts
-      - file_name
-      - file_ext
-      - path
-      - entry_id
-      - visit_count
-      - browser
-      - source
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - file_name: [TEXT]
+      - file_ext: [TEXT]
+      - path: [TEXT]
+      - entry_id: [TEXT]
+      - visit_count: [INTEGER]
+      - browser: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]

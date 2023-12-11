@@ -3,44 +3,23 @@ Desc: Wireless network connection events from the Windows Event Log
 Table:
   - TableName: event_wlan
     Columns:
-      - id
-      - ts
-      - task
-      - interface_guid
-      - interface_description
-      - connection_mode
-      - profile_name
-      - ssid
-      - failure_reason
-      - reason_code
-      - bsstype
-      - phytype
-      - authentication_algorithm
-      - cipher_algorithm
-      - connection_id
-      - event_id
-      - event_record_id
-      - channel
-      - provider
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [INTEGER]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - task: [TEXT]
+      - interface_guid: [TEXT]
+      - interface_description: [TEXT]
+      - connection_mode: [TEXT]
+      - profile_name: [TEXT]
+      - ssid: [TEXT]
+      - failure_reason: [TEXT]
+      - reason_code: [TEXT]
+      - bsstype: [TEXT]
+      - phytype: [TEXT]
+      - authentication_algorithm: [TEXT]
+      - cipher_algorithm: [TEXT]
+      - connection_id: [TEXT]
+      - event_id: [INTEGER]
+      - event_record_id: [INTEGER]
+      - channel: [TEXT]
+      - provider: [TEXT]
+      - evidence_id: [TEXT]

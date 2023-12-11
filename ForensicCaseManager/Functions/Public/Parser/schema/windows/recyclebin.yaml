@@ -3,20 +3,11 @@ Desc: Data extracted from the Recycle Bin
 Table:
   - TableName: recyclebin
     Columns:
-      - id
-      - ts
-      - path
-      - filename
-      - source
-      - filesize
-      - deleted_path
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - path: [TEXT]
+      - filename: [TEXT]
+      - source: [TEXT]
+      - filesize: [INTEGER]
+      - deleted_path: [TEXT]
+      - evidence_id: [TEXT]

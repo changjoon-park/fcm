@@ -174,21 +174,29 @@ class DatabaseManager:
     def create_artifact_table_from_yaml(self, schema_file: Path) -> str:
         try:
             with open(schema_file, "r", encoding="utf-8") as f:
-                schema = yaml.load(f, Loader=yaml.FullLoader)
-                for table in schema.get("Table", []):
-                    table_name = table.get("TableName")
-                    columns = table.get("Columns", [])
-                    types = table.get("Types", [])
+                # load schema file (yaml)
+                schema = yaml.load(f, Loader=yaml.FullLoader)  # ? dict
 
-                    column_defs = ",".join(
-                        [f"{column} {type[0]}" for column, type in zip(columns, types)]
+                for table in schema.get("Table", []):
+                    # get table name and columns
+                    table_name = table.get("TableName", None)  # ? str
+                    columns = table.get("Columns", [])  # ? list of dict(entity: type)
+
+                    entity_defs = ", ".join(
+                        [
+                            f"{entity} {types[0]}"
+                            for column in columns
+                            for entity, types in column.items()
+                        ]
                     )
+
                     create_statement = (
-                        f"CREATE TABLE IF NOT EXISTS {table_name} ({column_defs})"
+                        f"CREATE TABLE IF NOT EXISTS {table_name} ({entity_defs})"
                     )
                     with self.conn:
                         self.c.execute(create_statement)
-                return table_name
+                    return table_name
+
         except Exception as e:
             if not schema_file:
                 logger.exception(
@@ -227,5 +235,5 @@ class DatabaseManager:
                 )
         except Exception as e:
             logger.exception(
-                f"{e} / attribute: {attribute}, value: {value}, type {type(value)}"
+                f"Unable to insert artifact data to {artifact} table for attribute: {attribute}, value: {value}, type {type(value)} / {e} "
             )

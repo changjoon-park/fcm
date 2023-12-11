@@ -3,49 +3,25 @@ Desc: Logon/Logoff events from the Windows Event Log
 Table:
   - TableName: event_logon
     Columns:
-      - id
-      - ts
-      - task
-      - subject_user_sid
-      - subject_user_name
-      - subject_domain_name
-      - subject_logon_id
-      - target_user_sid
-      - target_user_name
-      - target_domain_name
-      - target_server_name
-      - target_info
-      - target_logon_id
-      - logon_type
-      - workstation_name
-      - ip_address
-      - ip_port
-      - event_id
-      - event_record_id
-      - channel
-      - provider
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
-      - [INTEGER]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
-      - [TEXT]
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - task: [TEXT]
+      - subject_user_sid: [TEXT]
+      - subject_user_name: [TEXT]
+      - subject_domain_name: [TEXT]
+      - subject_logon_id: [TEXT]
+      - target_user_sid: [TEXT]
+      - target_user_name: [TEXT]
+      - target_domain_name: [TEXT]
+      - target_server_name: [TEXT]
+      - target_info: [TEXT]
+      - target_logon_id: [TEXT]
+      - logon_type: [TEXT]
+      - workstation_name: [TEXT]
+      - ip_address: [TEXT]
+      - ip_port: [TEXT]
+      - event_id: [INTEGER]
+      - event_record_id: [INTEGER]
+      - channel: [TEXT]
+      - provider: [TEXT]
+      - evidence_id: [TEXT]

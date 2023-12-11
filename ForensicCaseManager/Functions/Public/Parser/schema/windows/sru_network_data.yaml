@@ -3,24 +3,13 @@ Desc: Network Data extracted from the SRU Database
 Table:
   - TableName: sru_network_data
     Columns:
-      - id
-      - ts
-      - app
-      - user
-      - interface_luid
-      - l2_profile_id
-      - l2_profile_flags
-      - bytes_sent
-      - bytes_recvd
-      - evidence_id
-    Types:
-      - [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - [INTEGER]
-      - [TEXT]
-      - [TEXT]
-      - [INTEGER]
-      - [INTEGER]
-      - [INTEGER]
-      - [INTEGER]
-      - [INTEGER]
-      - [TEXT]
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [TEXT]
+      - app: [TEXT]
+      - user: [TEXT]
+      - interface_luid: [INTEGER]
+      - l2_profile_id: [INTEGER]
+      - l2_profile_flags: [INTEGER]
+      - bytes_sent: [INTEGER]
+      - bytes_recvd: [INTEGER]
+      - evidence_id: [TEXT]
