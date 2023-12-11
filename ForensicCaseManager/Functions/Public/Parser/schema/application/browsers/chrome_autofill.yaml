@@ -1,0 +1,14 @@
+Name: ChromeAutofill
+Desc: Autofill data from the Chrome browser
+Table:
+  - TableName: chrome_autofill
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts_created: [TEXT]
+      - value: [TEXT]
+      - count: [INTEGER]
+      - name: [TEXT]
+      - ts_last_used: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]

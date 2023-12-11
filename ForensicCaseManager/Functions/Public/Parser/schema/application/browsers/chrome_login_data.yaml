@@ -1,0 +1,19 @@
+Name: ChromeLoginData
+Desc: Login data from the Chrome browser
+Table:
+  - TableName: chrome_login_data
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts_created: [TEXT]
+      - username_element: [TEXT]
+      - username_value: [TEXT]
+      - password_element: [TEXT]
+      - password_value: [BYTES]
+      - origin_url: [TEXT]
+      - action_url: [TEXT]
+      - signon_realm: [TEXT]
+      - ts_last_used: [TEXT]
+      - ts_password_modified: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]

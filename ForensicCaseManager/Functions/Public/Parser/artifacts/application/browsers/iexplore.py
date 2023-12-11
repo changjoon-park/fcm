@@ -5,10 +5,6 @@ from typing import BinaryIO, Generator
 
 from dissect.esedb import esedb, record, table
 
-from artifacts.application.browsers.browser import (
-    BrowserHistoryRecord,
-    BrowserDownloadsRecord,
-)
 from forensic_artifact import Source, ForensicArtifact
 
 
@@ -75,7 +71,7 @@ class InternetExplorer(ForensicArtifact):
             # "ie_downloads": downloads,
         }
 
-    def history(self) -> Generator[BrowserHistoryRecord, None, None]:
+    def history(self) -> Generator[dict, None, None]:
         """Return browser history records from Chrome.
 
         Yields ChromeBrowserHistoryRecord with the following fields:
@@ -113,25 +109,24 @@ class InternetExplorer(ForensicArtifact):
                         ts = self.ts.wintimestamp(accessed_time)
 
                     if url.startswith("http"):
-                        yield BrowserHistoryRecord(
-                            ts=ts,
-                            id=container_record.get("EntryId"),
-                            url=url,
-                            title=None,
-                            visit_type=None,
-                            visit_count=container_record.get("AccessCount"),
-                            hidden=None,
-                            from_visit=None,
-                            from_url=None,
-                            browser_type="iexplore",
-                            source=str(db_file),
-                            _target=self._target,
-                        )
+                        yield {
+                            "ts": ts,
+                            "id": container_record.get("EntryId"),
+                            "url": url,
+                            "title": None,
+                            "visit_type": None,
+                            "visit_count": container_record.get("AccessCount"),
+                            "hidden": None,
+                            "from_visit": None,
+                            "from_url": None,
+                            "browser_type": "iexplore",
+                            "source": str(db_file),
+                        }
             except:
                 continue
 
     # TODO: bug fix
-    def downloads(self) -> Generator[BrowserDownloadsRecord, None, None]:
+    def downloads(self) -> Generator[dict, None, None]:
         for db_file in self._iter_entry(name=self.entry):
             try:
                 db = WebCache(fh=db_file.open("rb"))
@@ -147,17 +142,15 @@ class InternetExplorer(ForensicArtifact):
                         down_path,
                     ) = response_headers.split("\x00")[-6:-1]
 
-                    yield self.BrowserDownloadRecord(
-                        ts_start=self.ts.wintimestamp(container_record.AccessedTime),
-                        ts_end=None,
-                        id=container_record.EntryId,
-                        path=down_path,
-                        url=down_url,
-                        size=None,
-                        state=None,
-                        browser_type="iexplore",
-                        source=str(db_file),
-                        _target=self._target,
-                    )
+                    yield {
+                        "ts": self.ts.wintimestamp(container_record.AccessedTime),
+                        "id": container_record.EntryId,
+                        "path": down_path,
+                        "url": down_url,
+                        "size": container_record.FileSize,
+                        "state": container_record.FileExtension,
+                        "browser_type": "iexplore",
+                        "source": str(db_file),
+                    }
             except:
                 pass

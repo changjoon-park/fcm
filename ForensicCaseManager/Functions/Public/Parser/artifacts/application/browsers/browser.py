@@ -1,112 +1,14 @@
+import logging
 import json
 from collections import defaultdict
 from typing import Generator
 
 from dissect.sql.sqlite3 import SQLite3
 from dissect.sql.exceptions import Error as SQLError
-from dissect.target.helpers.record import TargetRecordDescriptor
 
 from forensic_artifact import Source, ForensicArtifact
 
-BrowserHistoryRecord = TargetRecordDescriptor(
-    "browser/history/urls",
-    [
-        ("datetime", "ts"),
-        ("string", "title"),
-        ("varint", "visit_type"),
-        ("varint", "visit_count"),
-        ("string", "url"),
-        ("string", "id"),
-        ("string", "hidden"),
-        ("varint", "from_visit"),
-        ("uri", "from_url"),
-        ("string", "browser_type"),
-        ("path", "source"),
-    ],
-)
-
-BrowserDownloadsRecord = TargetRecordDescriptor(
-    "browser/history/downloads",
-    [
-        ("datetime", "ts_start"),
-        ("datetime", "ts_end"),
-        ("string", "file_name"),
-        ("string", "file_extension"),
-        ("filesize", "received_bytes"),
-        ("string", "download_path"),
-        ("uri", "download_url"),
-        ("uri", "download_chain_url"),
-        ("uri", "reference_url"),
-        ("varint", "id"),
-        ("string", "mime_type"),
-        ("string", "state"),
-        ("string", "browser_type"),
-        ("path", "source"),
-    ],
-)
-
-KeywordSearchTermsRecord = TargetRecordDescriptor(
-    "browser/history/keyword_search_terms",
-    [
-        ("datetime", "ts"),
-        ("string", "term"),
-        ("string", "title"),
-        ("string", "search_engine"),
-        ("uri", "url"),
-        ("string", "id"),
-        ("varint", "visit_count"),
-        ("string", "hidden"),
-        ("string", "browser_type"),
-        ("string", "source"),
-    ],
-)
-
-AutoFillRecord = TargetRecordDescriptor(
-    "browser/webdata/autofill",
-    [
-        ("datetime", "ts_created"),
-        ("string", "value"),
-        ("uint32", "count"),
-        ("string", "name"),
-        ("datetime", "ts_last_used"),
-        ("string", "browser_type"),
-        ("string", "source"),
-    ],
-)
-
-LoginDataRecord = TargetRecordDescriptor(
-    "browser/logindata/logins",
-    [
-        ("datetime", "ts_created"),
-        ("string", "username_element"),
-        ("string", "username_value"),
-        ("string", "password_element"),
-        ("bytes", "password_value"),
-        ("string", "origin_url"),
-        ("string", "action_url"),
-        ("string", "signon_realm"),
-        ("datetime", "ts_last_used"),
-        ("datetime", "ts_password_modified"),
-        ("string", "browser_type"),
-        ("string", "source"),
-    ],
-)
-
-BookmarkRecord = TargetRecordDescriptor(
-    "browser/bookmarks/bookmark",
-    [
-        ("datetime", "ts_added"),
-        ("string", "guid"),
-        ("string", "id"),
-        ("string", "name"),
-        ("string", "bookmark_type"),
-        ("string", "url"),
-        ("string", "path"),
-        ("datetime", "ts_last_visited"),
-        ("string", "browser_type"),
-        ("string", "source"),
-    ],
-)
+logger = logging.getLogger(__name__)
 
 
 class ChromiumBrowser(ForensicArtifact):
@@ -120,8 +22,8 @@ class ChromiumBrowser(ForensicArtifact):
     def parse(self, descending: bool = False) -> None:
         raise NotImplementedError
 
-    def history(self) -> Generator[BrowserHistoryRecord, None, None]:
-        for db_file in self._iter_entry(name="History*"):
+    def history(self) -> Generator[dict, None, None]:
+        for db_file in self._iter_entry(name="History"):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -139,29 +41,33 @@ class ChromiumBrowser(ForensicArtifact):
                             from_visit, from_url = None, None
 
                         if (url := url_record.url).startswith("http"):
-                            yield BrowserHistoryRecord(
-                                ts=self.ts.webkittimestamp(row.visit_time),
-                                id=row.id,
-                                url=url,
-                                title=url_record.title,
-                                visit_type=None,
-                                visit_count=url_record.visit_count,
-                                hidden=url_record.hidden,
-                                from_visit=row.from_visit or None,
-                                from_url=from_url.url if from_url else None,
-                                source=str(db_file),
-                                browser_type=self.browser_type,
-                                _target=self._target,
-                            )
+                            yield {
+                                "ts": self.ts.webkittimestamp(row.visit_time),
+                                "record_id": row.id,
+                                "url": url,
+                                "title": url_record.title,
+                                "visit_type": None,
+                                "visit_count": url_record.visit_count,
+                                "hidden": url_record.hidden,
+                                "from_visit": row.from_visit or None,
+                                "from_url": from_url.url if from_url else None,
+                                "source": str(db_file),
+                                "browser_type": self.browser_type,
+                            }
                 except SQLError as e:
-                    print(f"Error processing history file: {db_file} / exc_info={e}")
+                    logger.error(
+                        f"Error processing history file: {db_file} / exc_info={e}"
+                    )
+                    continue
                 except:
-                    pass
+                    logger.error(f"Error processing history file: {db_file}")
+                    continue
             except:
-                pass
+                logger.exception(f"Unable to open history file: {db_file}")
+                continue
 
-    def downloads(self) -> Generator[BrowserDownloadsRecord, None, None]:
-        for db_file in self._iter_entry(name="History*"):
+    def downloads(self) -> Generator[dict, None, None]:
+        for db_file in self._iter_entry(name="History"):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -187,34 +93,38 @@ class ChromiumBrowser(ForensicArtifact):
                         else:
                             state = "Complete"
 
-                        yield BrowserDownloadsRecord(
-                            ts_start=self.ts.webkittimestamp(row.start_time),
-                            ts_end=self.ts.webkittimestamp(row.end_time)
+                        yield {
+                            "ts_start": self.ts.webkittimestamp(row.start_time),
+                            "ts_end": self.ts.webkittimestamp(row.end_time)
                             if row.end_time
                             else None,
-                            file_name=file_name,
-                            file_extension=file_extension,
-                            received_bytes=row.get("total_bytes"),
-                            download_path=download_path,
-                            download_url=row.get("tab_url"),
-                            download_chain_url=download_chain_url,
-                            reference_url=row.referrer,
-                            id=row.get("id"),
-                            mime_type=row.get("mime_type"),
-                            state=state,
-                            browser_type=self.browser_type,
-                            source=str(db_file),
-                            _target=self._target,
-                        )
+                            "file_name": file_name,
+                            "file_extension": file_extension,
+                            "received_bytes": row.get("total_bytes"),
+                            "download_path": download_path,
+                            "download_url": row.get("tab_url"),
+                            "download_chain_url": download_chain_url,
+                            "reference_url": row.referrer,
+                            "record_id": row.get("id"),
+                            "mime_type": row.get("mime_type"),
+                            "state": state,
+                            "browser_type": self.browser_type,
+                            "source": str(db_file),
+                        }
                 except SQLError as e:
-                    print(f"Error processing history file: {db_file} / exc_info={e}")
+                    logger.error(
+                        f"Error processing history file: {db_file} / exc_info={e}"
+                    )
+                    continue
                 except:
-                    pass
+                    logger.error(f"Error processing history file: {db_file}")
+                    continue
             except:
-                pass
+                logger.exception(f"Unable to open history file: {db_file}")
+                continue
 
-    def keyword_search_terms(self):
-        for db_file in self._iter_entry(name="History*"):
+    def keyword_search_terms(self) -> Generator[dict, None, None]:
+        for db_file in self._iter_entry(name="History"):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -244,13 +154,6 @@ class ChromiumBrowser(ForensicArtifact):
                             "Daum": "://search.daum.net",
                             "Youtube": "://www.youtube.com",
                             "Github": "://github.com",
-                            "AliExpress Korea": "://ko.aliexpress.com",
-                            "IceMinining": "://icemining.ca",
-                            "PyPI": "://pypi.org",
-                            "Jusoen": "://www.jusoen.com",
-                            "Google Scholar(KR)": "://scholar.google.co.kr",
-                            "국가법령정보센터": "://www.law.go.kr/",
-                            "파일보고": "://www.filebogo.com",
                         }
 
                         search_engine = "Unknown"
@@ -258,25 +161,31 @@ class ChromiumBrowser(ForensicArtifact):
                             if site_url in url:
                                 search_engine = engine_name
 
-                        yield KeywordSearchTermsRecord(
-                            ts=self.ts.webkittimestamp(last_visit_time),
-                            term=term,
-                            title=title,
-                            search_engine=search_engine,
-                            url=url,
-                            id=id,
-                            visit_count=visit_count,
-                            hidden=hidden,
-                            browser_type=self.browser_type,
-                            _target=self._target,
-                        )
-
+                        yield {
+                            "ts": self.ts.webkittimestamp(last_visit_time),
+                            "term": term,
+                            "title": title,
+                            "search_engine": search_engine,
+                            "url": url,
+                            "record_id": id,
+                            "visit_count": visit_count,
+                            "hidden": hidden,
+                            "browser_type": self.browser_type,
+                            "source": str(db_file),
+                        }
                 except SQLError as e:
-                    print(f"Error processing history file: {db_file} / exc_info={e}")
+                    logger.error(
+                        f"Error processing history file: {db_file} / exc_info={e}"
+                    )
+                    continue
+                except:
+                    logger.error(f"Error processing history file: {db_file}")
+                    continue
             except:
-                pass
+                logger.exception(f"Unable to open history file: {db_file}")
+                continue
 
-    def autofill(self):
+    def autofill(self) -> Generator[dict, None, None]:
         for db_file in self._iter_entry(name="Web Data"):
             try:
                 db = SQLite3(db_file.open("rb"))
@@ -291,22 +200,28 @@ class ChromiumBrowser(ForensicArtifact):
                         date_last_used = autofill.get("date_last_used")
                         count = autofill.get("count")
 
-                        yield AutoFillRecord(
-                            ts_created=self.ts.from_unix(date_created),
-                            value=value,
-                            count=count,
-                            name=name,
-                            ts_last_used=self.ts.from_unix(date_last_used),
-                            browser_type=self.browser_type,
-                            _target=self._target,
-                        )
-
+                        yield {
+                            "ts_created": self.ts.from_unix(date_created),
+                            "value": value,
+                            "count": count,
+                            "name": name,
+                            "ts_last_used": self.ts.from_unix(date_last_used),
+                            "browser_type": self.browser_type,
+                            "source": str(db_file),
+                        }
                 except SQLError as e:
-                    print(f"Error processing history file: {db_file} / exc_info={e}")
+                    logger.error(
+                        f"Error processing history file: {db_file} / exc_info={e}"
+                    )
+                    continue
+                except:
+                    logger.error(f"Error processing history file: {db_file}")
+                    continue
             except:
-                pass
+                logger.exception(f"Unable to open history file: {db_file}")
+                continue
 
-    def login_data(self):
+    def login_data(self) -> Generator[dict, None, None]:
         for db_file in self._iter_entry(name="Login Data"):
             try:
                 db = SQLite3(db_file.open("rb"))
@@ -326,29 +241,35 @@ class ChromiumBrowser(ForensicArtifact):
                         date_last_used = logins.get("date_last_used")
                         date_password_modified = logins.get("date_password_modified")
 
-                        yield LoginDataRecord(
-                            ts_created=self.ts.webkittimestamp(date_created),
-                            username_element=username_element,
-                            username_value=username_value,
-                            password_element=password_element,
-                            password_value=password_value,
-                            origin_url=origin_url,
-                            action_url=action_url,
-                            signon_realm=signon_realm,
-                            ts_last_used=self.ts.webkittimestamp(date_last_used),
-                            ts_password_modified=self.ts.webkittimestamp(
+                        yield {
+                            "ts_created": self.ts.from_unix(date_created),
+                            "username_element": username_element,
+                            "username_value": username_value,
+                            "password_element": password_element,
+                            "password_value": password_value,
+                            "origin_url": origin_url,
+                            "action_url": action_url,
+                            "signon_realm": signon_realm,
+                            "ts_last_used": self.ts.from_unix(date_last_used),
+                            "ts_password_modified": self.ts.from_unix(
                                 date_password_modified
                             ),
-                            browser_type=self.browser_type,
-                            _target=self._target,
-                        )
-
+                            "browser_type": self.browser_type,
+                            "source": str(db_file),
+                        }
                 except SQLError as e:
-                    print(f"Error processing history file: {db_file} / exc_info={e}")
+                    logger.error(
+                        f"Error processing history file: {db_file} / exc_info={e}"
+                    )
+                    continue
+                except:
+                    logger.error(f"Error processing history file: {db_file}")
+                    continue
             except:
-                pass
+                logger.exception(f"Unable to open history file: {db_file}")
+                continue
 
-    def bookmarks(self):
+    def bookmarks(self) -> Generator[dict, None, None]:
         for db_file in self._iter_entry(name="Bookmarks"):
             json_data = json.load(db_file.open("r", encoding="UTF-8"))
 
@@ -364,18 +285,18 @@ class ChromiumBrowser(ForensicArtifact):
                             self._bookmark_dir_tree(row, path, bookmark_result)
 
                         for record in bookmark_result:
-                            yield BookmarkRecord(
-                                ts_added=record[0],
-                                guid=record[1],
-                                id=record[2],
-                                name=record[4],
-                                bookmark_type=record[5],
-                                url=record[6],
-                                path=record[7],
-                                ts_last_visited=record[3],
-                                browser_type=self.browser_type,
-                                _target=self._target,
-                            )
+                            yield {
+                                "ts_added": record[0],
+                                "guid": record[1],
+                                "record_id": record[2],
+                                "name": record[4],
+                                "bookmark_type": record[5],
+                                "url": record[6],
+                                "path": record[7],
+                                "ts_last_visited": record[3],
+                                "browser_type": self.browser_type,
+                                "source": str(db_file),
+                            }
 
     def _bookmark_dir_tree(self, row, path, bookmark_result):
         if row["type"] == "folder":

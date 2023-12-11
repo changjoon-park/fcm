@@ -1,0 +1,21 @@
+Name: ChromeDownloads
+Desc: Download data from the Chrome browser
+Table:
+  - TableName: chrome_downloads
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts_start: [TEXT]
+      - ts_end: [TEXT]
+      - file_name: [TEXT]
+      - file_extension: [TEXT]
+      - received_bytes: [INTEGER]
+      - download_path: [TEXT]
+      - download_url: [TEXT]
+      - download_chain_url: [TEXT]
+      - reference_url: [TEXT]
+      - record_id: [INTEGER]
+      - mime_type: [TEXT]
+      - state: [TEXT]
+      - browser_type: [TEXT]
+      - source: [TEXT]
+      - evidence_id: [TEXT]

@@ -139,7 +139,14 @@ class ForensicEvidence(CaseConfig):
                 logger.info(
                     f"{len(entry_data)} {artifact} entries has been parsed from {evidence_id}"
                 )
-                for data in entry_data:
+                for index, data in enumerate(entry_data):
+                    if type(data) == dict:
+                        print(f"{artifact}-{index}: {type(data)} - status OK")
+                    else:
+                        print(f"{artifact}-{index}: {type(data)} - status: ERROR")
+                        logging.error(
+                            f"{artifact}-{index}: {type(data)} - status: ERROR"
+                        )
                     self.db_manager.insert_artifact_data(
                         artifact=artifact,  # ? parameter: RSLT_ARTIFACT, e.g., 'prefetch', 'sru_network_DATA', 'chrome_history'
                         data=data,
