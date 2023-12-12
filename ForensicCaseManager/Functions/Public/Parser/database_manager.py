@@ -225,8 +225,10 @@ class DatabaseManager:
                     else value
                     for key, value in record.items()
                 }
+
                 # Convert the dictionary to a tuple
                 record_tuple = tuple(processed_record.values())
+
                 # Append the tuple to the list of tuples
                 prepared_data.append(record_tuple)
 

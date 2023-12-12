@@ -157,7 +157,9 @@ ARTIFACT_PATH = {
     ),  # ! Windows
     ART_PREFETCH: ArtifactPath(directory=ARTIFACT_DIRECTORY_PREFETCH, entry="*.pf"),
     ART_SRU_NETWORK: ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
-    # "SRU(App)": ArtifactPath(directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"),
+    ART_SRU_APPLICATION: ArtifactPath(
+        directory=ARTIFACT_DIRECTORY_SRU, entry="SRUDB.dat"
+    ),
     ART_FILE_HISTORY: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_FILEHISTORY, entry=None
     ),
