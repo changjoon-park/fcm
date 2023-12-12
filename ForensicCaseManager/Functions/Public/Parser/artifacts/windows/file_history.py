@@ -8,7 +8,7 @@ from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_FILE_HISTORY, RSLT_FILE_HISTORY
+from settings import RSLT_FILE_HISTORY
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +53,20 @@ class FileHistory(ForensicArtifact):
 
     def parse(self, descending: bool = False):
         file_history = sorted(
-            [record for record in self.file_history()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.file_history())
+            ],
             key=lambda record: record["ts"],  # Sorting based on the 'ts' field
             reverse=descending,
         )
-
         self.result = {
             RSLT_FILE_HISTORY: file_history,
         }
 
     def file_history(self) -> Generator[dict, None, None]:
         # Edge History
-        for db_file in self.check_empty_entry(self._iter_entry(name="History")):
+        for db_file in self.check_empty_entry(self.iter_entry(name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -87,6 +89,7 @@ class FileHistory(ForensicArtifact):
                                 "visit_count": visit_count,
                                 "browser": "edge",
                                 "source": str(db_file),
+                                "evidence_id": self.evidence_id,
                             }
                 except SQLError as e:
                     logger.exception(
@@ -98,7 +101,7 @@ class FileHistory(ForensicArtifact):
                 )
 
         # IE History
-        for db_file in self.check_empty_entry(self._iter_entry(name="WebCacheV01.dat")):
+        for db_file in self.check_empty_entry(self.iter_entry(name="WebCacheV01.dat")):
             try:
                 db = WebCache(fh=db_file.open("rb"))
                 try:
@@ -129,6 +132,7 @@ class FileHistory(ForensicArtifact):
                                 "visit_count": container_record.get("AccessCount"),
                                 "browser": "iexplore",
                                 "source": str(db_file),
+                                "evidence_id": self.evidence_id,
                             }
                 except Exception as e:
                     logger.exception(

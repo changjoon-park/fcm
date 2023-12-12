@@ -211,7 +211,6 @@ class DatabaseManager:
         self,
         artifact: str,
         data: list[dict],
-        evidence_id: str,
     ):
         try:
             # Prepare the list of tuples for batch insertion
@@ -226,16 +225,17 @@ class DatabaseManager:
                     else value
                     for key, value in record.items()
                 }
-                # TODO: Add evidence_id to each record
-                # TODO: Consider inheritance of ForensicArtifact class from ForensicEvidence class
-                # Add evidence_id to each record
-                record_tuple = tuple(processed_record.values()) + (evidence_id,)
+                # Convert the dictionary to a tuple
+                record_tuple = tuple(processed_record.values())
+                # Append the tuple to the list of tuples
                 prepared_data.append(record_tuple)
 
             # Prepare SQL statement with placeholders
             keys = data[0].keys() if data else []
             placeholders = ", ".join(["?"] * len(keys))
-            statement = f"INSERT INTO {artifact} ({', '.join(keys)}, evidence_id) VALUES ({placeholders}, ?)"
+            statement = (
+                f"INSERT INTO {artifact} ({', '.join(keys)}) VALUES ({placeholders})"
+            )
 
             # Execute batch insertion
             with self.conn:

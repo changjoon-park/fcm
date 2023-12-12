@@ -10,18 +10,20 @@ from forensic_artifact import (
     ForensicArtifact,
 )
 from case_config import CaseConfig
+from lib.plugins import WINDOWS_PLUGINS, ARTIFACT_SCHEMA
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
 class ForensicEvidence(CaseConfig):
-    evidence_number: int
+    _evidence_number: int
     _local: Optional[bool] = False
     _container: Optional[str] = None
     _artifacts: Optional[list] = None
     _categories: Optional[list] = None
     src: Source = field(init=False)
+    evidence_id: str = field(init=False)
     forensic_artifacts: list[ForensicArtifact] = field(default_factory=list)
 
     def __post_init__(self):
@@ -32,8 +34,17 @@ class ForensicEvidence(CaseConfig):
             _local=self._local,
             _container=self._container,
         )
+
+        # set evidence_id
+        self.evidence_id = "-".join(
+            [
+                str(self.case_id),
+                str(self._evidence_number),
+            ]
+        )
+
         # set forensic_artifacts
-        for artifact, plugin in self.PLUGINS.items():
+        for artifact, plugin in WINDOWS_PLUGINS.items():
             ForensicArtifact, category = plugin
             if self._artifacts:
                 for artifact_entry in self._artifacts:
@@ -55,25 +66,10 @@ class ForensicEvidence(CaseConfig):
                                 category=category,
                             )
                         )
-            # # set evidence_id to forensic_artifacts
-            # for artifact in self.forensic_artifacts:
-            #     artifact.evidence_id = self.evidence_id
 
-    @property
-    def case_id(self):
-        return self._case_id
-
-    @case_id.setter
-    def case_id(self, value):
-        self._case_id = value
-
-    @property
-    def evidence_id(self):
-        evidence_id = [
-            str(self.case_id),
-            str(self.evidence_number),
-        ]
-        return "-".join(evidence_id)
+        # set forensic_artifacts properties
+        for forensic_artifact in self.forensic_artifacts:
+            forensic_artifact.evidence_id = self.evidence_id
 
     @property
     def evidence_label(self):
@@ -121,7 +117,7 @@ class ForensicEvidence(CaseConfig):
         self.db_manager.connect()
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
-            if schema_files := self.ARTIFACT_SCHEMA.get(
+            if schema_files := ARTIFACT_SCHEMA.get(
                 forensic_artifact.artifact,  # ? parameter: ART_ARTIFACT, e.g., 'prefetch', 'sru_network', 'chrome'
             ):
                 for schema_file in schema_files:
@@ -136,14 +132,13 @@ class ForensicEvidence(CaseConfig):
 
             # insert artifact data
             for artifact, data in forensic_artifact.result.items():
-                logger.info(
-                    f"{len(data)} {artifact} entries has been parsed from {self.evidence_id}"
-                )
                 # execute insert query when data is not empty
                 if data:
+                    logger.info(
+                        f"{len(data)} {artifact} entries has been parsed from {self.evidence_id}"
+                    )
                     self.db_manager.insert_artifact_data(
                         artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
                         data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
-                        evidence_id=self.evidence_id,
                     )
         self.db_manager.close()

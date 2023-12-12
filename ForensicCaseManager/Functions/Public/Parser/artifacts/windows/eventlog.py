@@ -18,40 +18,42 @@ logger = logging.getLogger(__name__)
 
 class ForensicEvent(ForensicArtifact):
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category,
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
         if self.artifact == ART_EVENT_LOGON:
             event_logon = sorted(
-                [record for record in self.event_logon()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.event_logon())
+                ],
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-
             self.result = {
                 RSLT_EVENT_LOGON: event_logon,
             }
         elif self.artifact == ART_EVENT_USB:
             event_usb = sorted(
-                [record for record in self.event_usb()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.event_usb())
+                ],
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-
             self.result = {
                 RSLT_EVENT_USB: event_usb,
             }
         elif self.artifact == ART_EVENT_WLAN:
             event_wlan = sorted(
-                [record for record in self.event_wlan()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.event_wlan())
+                ],
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-
             self.result = {
                 RSLT_EVENT_WLAN: event_wlan,
             }
@@ -85,7 +87,7 @@ class ForensicEvent(ForensicArtifact):
             "NT Service",
         ]
 
-        for entry in self.check_empty_entry(self._iter_entry(name="Security.evtx")):
+        for entry in self.check_empty_entry(self.iter_entry(name="Security.evtx")):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
@@ -126,6 +128,7 @@ class ForensicEvent(ForensicArtifact):
                         "ip_port": event.get("IpPort"),
                         "channel": event.get("Channel"),
                         "provider": str(event.get("Provider_Name")),
+                        "evidence_id": self.evidence_id,
                     }
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
@@ -134,7 +137,7 @@ class ForensicEvent(ForensicArtifact):
         SIZE_GB = 1024 * 1024 * 1024
 
         for entry in self.check_empty_entry(
-            self._iter_entry(name="Microsoft-Windows-Partition%4Diagnostic.evtx")
+            self.iter_entry(name="Microsoft-Windows-Partition%4Diagnostic.evtx")
         ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
@@ -172,7 +175,7 @@ class ForensicEvent(ForensicArtifact):
 
     def event_wlan(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(
-            self._iter_entry(name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx")
+            self.iter_entry(name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx")
         ):
             try:
                 evtx = Evtx(fh=entry.open("rb"))

@@ -9,7 +9,7 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers.fsutil import TargetPath
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_RECYCLEBIN, RSLT_RECYCLEBIN
+from settings import RSLT_RECYCLEBIN
 
 logger = logging.getLogger(__name__)
 
@@ -89,14 +89,17 @@ class RecycleBin(ForensicArtifact):
           source (uri): Location of $I meta file on disk
         """
         recyclebin = sorted(
-            [record for record in self.recyclebin()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.recyclebin())
+            ],
             key=lambda record: record["ts"],
             reverse=descending,
         )
         self.result = {RSLT_RECYCLEBIN: recyclebin}
 
     def recyclebin(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(self._iter_entry(recurse=True)):
+        for entry in self.check_empty_entry(self.iter_entry(recurse=True)):
             try:
                 recyclebin = RecycleBinParser(path=entry)
                 ts = self.ts.wintimestamp(recyclebin.timestamp)
@@ -110,6 +113,7 @@ class RecycleBin(ForensicArtifact):
                     "filesize": recyclebin.file_size,
                     "deleted_path": uri.from_windows(recyclebin.deleted_path),
                     "source": uri.from_windows(recyclebin.source_path),
+                    "evidence_id": self.evidence_id,
                 }
             except:
                 logger.error(f"Error: Unable to parse {entry}")

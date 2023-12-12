@@ -85,7 +85,7 @@ if __name__ == "__main__":
         ForensicEvidence(
             root_directory=root_directory,
             case_name=case_name,
-            evidence_number=index,
+            _evidence_number=index,
             _local=local,
             _container=container,
             _artifacts=artifacts,

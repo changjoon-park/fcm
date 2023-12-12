@@ -201,18 +201,32 @@ class AmcachePluginOldMixin:
 
         for entry in self.read_key_subkeys(key):
             for subkey in entry.subkeys():
-                subkey_data = self._replace_indices_with_fields(AMCACHE_FILE_KEYS, subkey)
+                subkey_data = self._replace_indices_with_fields(
+                    AMCACHE_FILE_KEYS, subkey
+                )
 
                 yield FileAppcompatRecord(
-                    last_modified_store_timestamp=self.ts.wintimestamp(subkey_data.get("last_modified_store_timestamp")),
-                    last_modified_timestamp=self.ts.wintimestamp(subkey_data.get("last_modified_timestamp")),
+                    last_modified_store_timestamp=self.ts.wintimestamp(
+                        subkey_data.get("last_modified_store_timestamp")
+                    ),
+                    last_modified_timestamp=self.ts.wintimestamp(
+                        subkey_data.get("last_modified_timestamp")
+                    ),
                     link_timestamp=subkey_data.get("link_timestamp"),
-                    created_timestamp=self.ts.wintimestamp(subkey_data.get("created_timestamp")),
+                    created_timestamp=self.ts.wintimestamp(
+                        subkey_data.get("created_timestamp")
+                    ),
                     mtime_regf=subkey.timestamp,
                     reference=int(subkey.name, 16),
-                    path=uri.from_windows(subkey_data["full_path"]) if subkey_data.get("full_path") else None,
+                    path=uri.from_windows(subkey_data["full_path"])
+                    if subkey_data.get("full_path")
+                    else None,
                     language_code=subkey_data.get("language_code"),
-                    digests=[None, subkey_data["sha1"][-40:] if subkey_data.get("sha1") else None, None],
+                    digests=[
+                        None,
+                        subkey_data["sha1"][-40:] if subkey_data.get("sha1") else None,
+                        None,
+                    ],
                     program_id=subkey_data.get("program_id"),
                     pe_header_checksum=subkey_data.get("pe_header_checksum"),
                     pe_size_of_image=subkey_data.get("pe_size_of_image"),
@@ -248,7 +262,9 @@ class AmcachePluginOldMixin:
                 for file_path_entry in entry_data["FilePaths"]:
                     yield ProgramsAppcompatRecord(
                         mtime_regf=entry.timestamp,
-                        install_date=self.ts.wintimestamp(entry_data.get("InstallDate")),
+                        install_date=self.ts.wintimestamp(
+                            entry_data.get("InstallDate")
+                        ),
                         name=entry_data.get("Name"),
                         version=entry_data.get("Version"),
                         publisher=entry_data.get("Publisher"),
@@ -267,7 +283,9 @@ class AmcachePluginOldMixin:
                 for file_entry in entry_data["Files"]:
                     yield ProgramsAppcompatRecord(
                         mtime_regf=entry.timestamp,
-                        install_date=self.ts.wintimestamp(entry_data.get("InstallDate")),
+                        install_date=self.ts.wintimestamp(
+                            entry_data.get("InstallDate")
+                        ),
                         name=entry_data.get("Name"),
                         version=entry_data.get("Version"),
                         publisher=entry_data.get("Publisher"),
@@ -316,19 +334,15 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
     """
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     @property
     def amcache(self):
         amcache = regutil.HiveCollection()
-        for path in self._iter_entry():
+        for path in self.iter_entry():
             amcache.add(regutil.RegfHive(path))
         return amcache
-        
+
     def read_key_subkeys(self, key):
         try:
             for entry in self.amcache.key(key).subkeys():
@@ -348,25 +362,37 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     for record in self.programs()
         # ]
 
-        applications = sorted([
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-                for record in self.applications()], reverse=descending)
+        applications = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.applications()
+            ],
+            reverse=descending,
+        )
 
-        application_files = sorted([
-                json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-                for record in self.application_files()], reverse=descending)
+        application_files = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.application_files()
+            ],
+            reverse=descending,
+        )
 
         # sorted_applications = sorted(
-        #     [record._packdict() for record in self.applications()], 
+        #     [record._packdict() for record in self.applications()],
         #     key=lambda x: x["install_date"], reverse=descending
         # )
         # applications = [
         #     json.dumps(entry, indent=2, default=str, ensure_ascii=False)
         #     for entry in sorted_applications
         # ]
-        
+
         # sorted_application_files = sorted(
-        #     [record._packdict() for record in self.application_files()], 
+        #     [record._packdict() for record in self.application_files()],
         #     key=lambda x: x["link_date"], reverse=descending
         # )
         # application_files = [
@@ -385,7 +411,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.device_containers()
         # ]
-                    
+
         self.result = {
             # "files": files,
             # "programs": programs,
@@ -443,7 +469,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # }
 
             install_date_arp_last_modified = (
-                entry_data["InstallDateArpLastModified"][0] if entry_data.get("InstallDateArpLastModified") else None
+                entry_data["InstallDateArpLastModified"][0]
+                if entry_data.get("InstallDateArpLastModified")
+                else None
             )
 
             yield ApplicationAppcompatRecord(
@@ -458,9 +486,12 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 msi_package_code=entry_data.get("MsiPackageCode"),
                 msi_product_code=entry_data.get("MsiProductCode"),
                 mtime_regf=entry.timestamp,
-                install_date_arp_last_modified=parse_win_datetime(install_date_arp_last_modified),
+                install_date_arp_last_modified=parse_win_datetime(
+                    install_date_arp_last_modified
+                ),
                 install_date_from_link_file=[
-                    parse_win_datetime(dt) for dt in entry_data.get("InstallDateFromLinkFile", [])
+                    parse_win_datetime(dt)
+                    for dt in entry_data.get("InstallDateFromLinkFile", [])
                 ],
                 os_version_at_install_time=entry_data.get("OSVersionAtInstallTime"),
                 language_code=entry_data.get("Language"),
@@ -468,7 +499,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 manifest_path=entry_data.get("ManifestPath"),
                 registry_key_path=entry_data.get("RegistryKeyPath"),
                 source=entry_data.get("Source"),
-                _target=self._target
+                _target=self._target,
             )
 
     def parse_inventory_application_file(self):
@@ -534,7 +565,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 language=entry_data.get("Language"),
                 is_pefile=entry_data.get("IsPeFile"),
                 is_oscomponent=entry_data.get("IsOsComponent"),
-                _target=self._target
+                _target=self._target,
             )
 
     def parse_inventory_driver_binary(self):
@@ -566,10 +597,14 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 service=entry_data.get("Service"),
                 driver_signed=entry_data.get("DriverSigned"),
                 driver_is_kernel_mode=entry_data.get("DriverIsKernelMode"),
-                last_write_time=parse_win_datetime(entry_data.get("DriverLastWriteTime")),
-                driver_timestamp=self.ts.wintimestamp(entry_data.get("DriverTimestamp")),
+                last_write_time=parse_win_datetime(
+                    entry_data.get("DriverLastWriteTime")
+                ),
+                driver_timestamp=self.ts.wintimestamp(
+                    entry_data.get("DriverTimestamp")
+                ),
                 image_size=entry_data.get("ImageSize"),
-                _target=self._target
+                _target=self._target,
             )
 
     def parse_inventory_application_shortcut(self):
@@ -590,7 +625,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             yield ShortcutAppcompatRecord(
                 mtime_regf=entry.timestamp,
                 path=uri.from_windows(entry.value("ShortCutPath").value),
-                _target=self._target
+                _target=self._target,
             )
 
     def parse_inventory_device_container(self):
@@ -604,7 +639,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             - https://docs.microsoft.com/en-us/windows/privacy/basic-level-windows-diagnostic-events-and-fields-1803
             - https://www.andreafortuna.org/2017/10/16/amcache-and-shimcache-in-forensic-analysis/
         """
-        
+
         key = "Root\\InventoryDeviceContainer"
 
         for entry in self.read_key_subkeys(key):
@@ -626,7 +661,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 model_number=entry_data.get("ModelNumber"),
                 primary_category=entry_data.get("PrimaryCategory"),
                 state=entry_data.get("State"),
-                _target=self._target
+                _target=self._target,
             )
 
     def applications(self):
@@ -697,6 +732,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         """
         if self.amcache:
             yield from self.parse_inventory_device_container()
+
 
 def parse_win_datetime(value: str):
     if value:

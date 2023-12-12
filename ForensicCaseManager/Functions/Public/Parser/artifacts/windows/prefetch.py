@@ -7,7 +7,7 @@ from flow.record.fieldtypes import uri
 
 from util.lzxpress_huffman import LZXpressHuffman
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_PREFETCH, RSLT_PREFETCH
+from settings import RSLT_PREFETCH
 
 logger = logging.getLogger(__name__)
 
@@ -240,15 +240,17 @@ class Prefetch(ForensicArtifact):
             previousruns: Previous run non zero timestamps
         """
         prefetch = sorted(
-            [record for record in self.prefetch()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.prefetch())
+            ],
             key=lambda record: record["ts"],
             reverse=descending,
         )
-
         self.result = {RSLT_PREFETCH: prefetch}
 
     def prefetch(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(self._iter_entry()):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 prefetch = PrefetchParser(fh=entry.open("rb"))
                 filename = prefetch.header.name.decode(
@@ -266,6 +268,7 @@ class Prefetch(ForensicArtifact):
                     "linkedfiles": prefetch.metrics,
                     "runcount": prefetch.fn.run_count,
                     "previousruns": previousruns,
+                    "evidence_id": self.evidence_id,
                 }
             except:
                 logger.exception(f"Error: Unable to parse {entry}")

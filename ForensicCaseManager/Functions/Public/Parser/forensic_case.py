@@ -1,6 +1,7 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
+from lib.plugins import ARTIFACT_CATEGORIES
 from case_config import CaseConfig
 
 logger = logging.getLogger(__name__)
@@ -16,10 +17,6 @@ class ForensicCase(CaseConfig):
 
         # set case_directory
         self.case_directory = self.root_directory / self.case_name
-
-        # set case_id to forensic_evidences
-        for evidence in self.forensic_evidences:
-            evidence.case_id = self.case_id
 
     def investigate_case(self):
         # create case directory
@@ -80,7 +77,7 @@ class ForensicCase(CaseConfig):
                 registered_owner=evidence.registered_owner,
                 source=evidence.src.source_path,
                 case_id=self.case_id,
-                evidence_number=evidence.evidence_number,
+                evidence_number=evidence._evidence_number,
             ):
                 logger.info(
                     f"Inserted {evidence.evidence_id} into evidences table in {self.case_name} case"
@@ -91,7 +88,7 @@ class ForensicCase(CaseConfig):
         self.db_manager.connect()
         if not self.db_manager.is_table_exist("artifact_category"):
             self.db_manager.create_artifact_category_table()
-            for id, category in self.ARTIFACT_CATEGORIES:
+            for id, category in ARTIFACT_CATEGORIES:
                 self.db_manager.insert_artifact_category(
                     id=id,
                     category=category,

@@ -24,12 +24,18 @@ class SRU(ForensicArtifact):
     def parse(self, descending: bool = False):
         if self.artifact == ART_SRU_NETWORK:
             network_data = sorted(
-                [record for record in self.network_data()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.network_data())
+                ],
                 key=lambda record: record["ts"],  # Sorting based on the 'ts' field
                 reverse=descending,
             )
             network_connectivity = sorted(
-                [record for record in self.network_connectivity()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.network_connectivity())
+                ],
                 key=lambda record: record["ts"],  # Sorting based on the 'ts' field
                 reverse=descending,
             )
@@ -39,7 +45,10 @@ class SRU(ForensicArtifact):
             }
         elif self.artifact == ART_SRU_APPLICATION:
             application = sorted(
-                [record for record in self.application()],
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.application())
+                ],
                 key=lambda record: record["ts"],  # Sorting based on the 'ts' field
                 reverse=descending,
             )
@@ -220,7 +229,7 @@ class SRU(ForensicArtifact):
         yield from self.read_records("sdp_network_provider")
 
     def read_records(self, table_name: str) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self._iter_entry()):
+        for db_file in self.check_empty_entry(self.iter_entry()):
             try:
                 db = SRUParser(db_file.open("rb"))
 
@@ -246,6 +255,7 @@ class SRU(ForensicArtifact):
                         )
                         new_column = FIELD_MAPPINGS.get(column, column)
                         record_values[new_column] = new_value
+                        record_values["evidence_id"] = self.evidence_id
 
                     yield record_values
             except:

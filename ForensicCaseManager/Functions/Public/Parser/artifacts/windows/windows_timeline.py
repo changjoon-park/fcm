@@ -67,7 +67,7 @@ class WindowsTimeline(ForensicArtifact):
         self.result = {ART_WINDOWS_TIMELINE: windows_timeline}
 
     def windows_timeline(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(self._iter_entry()):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 fh = entry.open("rb")
                 db = sqlite3.SQLite3(fh)
@@ -100,6 +100,7 @@ class WindowsTimeline(ForensicArtifact):
                         # "payload": r["[Payload]"],
                         # "original_payload": r["[OriginalPayload]"],
                         # "clipboard_payload": r["[ClipboardPayload]"],
+                        "evidence_id": self.evidence_id,
                     }
             except:
                 logger.error(f"Error: Unable to parse {entry}")

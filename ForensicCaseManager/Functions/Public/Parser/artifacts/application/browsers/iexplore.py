@@ -60,7 +60,10 @@ class InternetExplorer(ForensicArtifact):
 
     def parse(self, descending: bool = False) -> None:
         history = sorted(
-            [record for record in self.history()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.history())
+            ],
             key=lambda record: record["ts"],
             reverse=descending,
         )
@@ -101,7 +104,7 @@ class InternetExplorer(ForensicArtifact):
             from_url: URL of the "from" visit.
             source: The source file of the history record.
         """
-        for db_file in self.check_empty_entry(self._iter_entry(name="WebCacheV01.dat")):
+        for db_file in self.check_empty_entry(self.iter_entry(name="WebCacheV01.dat")):
             try:
                 db = WebCache(fh=db_file.open("rb"))
                 for container_record in db.history():
@@ -132,13 +135,14 @@ class InternetExplorer(ForensicArtifact):
                             "from_url": None,
                             "browser_type": ART_IEXPLORER,
                             "source": str(db_file),
+                            "evidence_id": self.evidence_id,
                         }
             except:
                 logger.exception(f"Error: Unable to parse history from {db_file}")
 
     # TODO: bug fix
     def downloads(self) -> Generator[dict, None, None]:
-        for db_file in self._iter_entry(name=self.entry):
+        for db_file in self.iter_entry(name=self.entry):
             try:
                 db = WebCache(fh=db_file.open("rb"))
                 for container_record in db.downloads():
@@ -162,6 +166,7 @@ class InternetExplorer(ForensicArtifact):
                         "state": container_record.FileExtension,
                         "browser_type": ART_IEXPLORER,
                         "source": str(db_file),
+                        "evidence_id": self.evidence_id,
                     }
             except:
                 pass

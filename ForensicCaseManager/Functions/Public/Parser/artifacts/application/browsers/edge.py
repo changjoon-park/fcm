@@ -21,32 +21,50 @@ class Edge(ChromiumBrowser):
 
     def parse(self, descending: bool = False) -> None:
         history = sorted(
-            [record for record in self.history()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.history())
+            ],
             key=lambda record: record["ts"],
             reverse=descending,
         )
         downloads = sorted(
-            [record for record in self.downloads()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.downloads())
+            ],
             key=lambda record: record["ts_start"],
             reverse=descending,
         )
         keyword_search_terms = sorted(
-            [record for record in self.keyword_search_terms()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.keyword_search_terms())
+            ],
             key=lambda record: record["ts"],
             reverse=descending,
         )
         autofill = sorted(
-            [record for record in self.autofill()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.autofill())
+            ],
             key=lambda record: record["ts_created"],
             reverse=descending,
         )
         login_data = sorted(
-            [record for record in self.login_data()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.login_data())
+            ],
             key=lambda record: record["ts_created"],
             reverse=descending,
         )
         bookmarks = sorted(
-            [record for record in self.bookmarks()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.bookmarks())
+            ],
             key=lambda record: record["ts_added"],
             reverse=descending,
         )

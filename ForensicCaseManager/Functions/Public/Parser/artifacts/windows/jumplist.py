@@ -17,17 +17,19 @@ class JumpList(ForensicArtifact):
 
     def parse(self, descending: bool = False) -> None:
         jumplist = sorted(
-            [record for record in self.jumplist()],
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.jumplist())
+            ],
             key=lambda record: record[
                 "last_opened"
             ],  # Sorting based on the 'last_opened' field
             reverse=descending,
         )
-
         self.result = {ART_JUMPLIST: jumplist}
 
     def jumplist(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(self._iter_entry()):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 entry_filename = os.path.split(entry)[1]
                 app_id = entry_filename[: entry_filename.rfind(".")]
@@ -69,6 +71,7 @@ class JumpList(ForensicArtifact):
                         "entry_id": str(result[3]),
                         "machine_id": str(result[16]),
                         "mac_address": str(result[17]),
+                        "evidence_id": self.evidence_id,
                     }
             except:
                 logger.exception("Error parsing JumpList entry: %s", entry)

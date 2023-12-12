@@ -45,13 +45,21 @@ class ForensicArtifact:
     src: Source
     artifact: str  # ? user input data, e.g., 'prefetch', 'sru_network'
     category: str
+    _evidence_id: str = field(init=False)
     artifact_directory: list[str] = field(init=False)
     artifact_entry: str = field(init=False)
     result: dict = field(default_factory=dict)  # result: {name: [data, ...]}
 
     def __post_init__(self):
         self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)
-        self._target = self.src._target  #
+
+    @property
+    def evidence_id(self) -> str:
+        return self._evidence_id
+
+    @evidence_id.setter
+    def evidence_id(self, value: str) -> None:
+        self._evidence_id = value
 
     @property
     def ts(self) -> Timestamp:
@@ -65,7 +73,7 @@ class ForensicArtifact:
     def fe(self) -> FileExtractor:
         return FileExtractor()
 
-    def _iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
+    def iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
     def _iter_directory(self) -> Generator[Path, None, None]:
@@ -86,7 +94,7 @@ class ForensicArtifact:
                     if user_details.home_path.joinpath(dir).exists()
                 )
 
-    def _iter_entry(
+    def iter_entry(
         self, name: str = None, recurse: bool = False
     ) -> Generator[Path, None, None]:
         if name == None:
@@ -124,8 +132,20 @@ class ForensicArtifact:
             first = next(entry)
         except StopIteration:
             logger.info(
-                f"No entries found in the {self.artifact} from {self.src.source}"
+                f"No entries found in the {self.artifact} from {self.evidence_id}"
             )
         else:
             yield first
             yield from entry
+
+    def validate_record(self, index: int, record: dict) -> dict:
+        if isinstance(record, dict):
+            print(f"{self.artifact}-{index}: Parsed successfully")
+        else:
+            print(
+                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+            )
+            logging.error(
+                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+            )
+        return record
