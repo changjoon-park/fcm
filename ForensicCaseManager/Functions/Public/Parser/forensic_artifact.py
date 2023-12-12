@@ -111,7 +111,7 @@ class ForensicArtifact:
             else:
                 yield Path(self.src.source)
 
-    def _iter_key(self, name: str = None) -> Generator:
+    def iter_key(self, name: str = None) -> Generator:
         if self.artifact_directory == None:
             if name == None:
                 yield from self.artifact_entry

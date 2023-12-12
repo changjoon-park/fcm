@@ -107,6 +107,9 @@ ARTIFACT_SCHEMA = {
     ART_EVENT_WLAN: [
         ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_EVENT_WLAN}.yaml",
     ],
+    ART_REGISTRY_USB: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USB}.yaml",
+    ],
 }
 
 
@@ -208,7 +211,7 @@ WINDOWS_PLUGINS = {
         artifact=shellbags.ShellBags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    ART_USB_REGISTRY: Plugin(
+    ART_REGISTRY_USB: Plugin(
         artifact=usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),

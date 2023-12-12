@@ -20,11 +20,6 @@ class ChromiumBrowser(ForensicArtifact):
     def browser_type(self) -> str:
         raise NotImplementedError
 
-    # set default datetime to sort by timestamp
-    @property
-    def default_datetime(self) -> datetime:
-        return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
-
     def parse(self, descending: bool = False) -> None:
         raise NotImplementedError
 
@@ -41,7 +36,7 @@ class ChromiumBrowser(ForensicArtifact):
                         url_record = urls[row.url]
 
                         if not (ts := self.ts.webkittimestamp(row.visit_time)):
-                            ts = self.default_datetime
+                            ts = self.ts.base_datetime_browser
 
                         if row.from_visit and row.from_visit in visits:
                             from_visit = visits[row.from_visit]
@@ -98,7 +93,7 @@ class ChromiumBrowser(ForensicArtifact):
                         download_path = row.target_path
 
                         if not ts_start:
-                            ts_start = self.default_datetime
+                            ts_start = self.ts.base_datetime_browser
 
                         if download_chain := download_chains.get(row.id):
                             download_chain_url = download_chain[-1].url
@@ -165,7 +160,7 @@ class ChromiumBrowser(ForensicArtifact):
                         hidden = keyword_search_terms.get("hidden")
 
                         if not last_visit_time:
-                            last_visit_time = self.default_datetime
+                            last_visit_time = self.ts.base_datetime_browser
 
                         engines = {
                             "Google": "://www.google.com",
@@ -225,7 +220,7 @@ class ChromiumBrowser(ForensicArtifact):
                         count = autofill.get("count")
 
                         if not date_created:
-                            date_created = self.default_datetime
+                            date_created = self.ts.base_datetime_browser
 
                         yield {
                             "ts_created": date_created,
@@ -270,7 +265,7 @@ class ChromiumBrowser(ForensicArtifact):
                         date_password_modified = logins.get("date_password_modified")
 
                         if not date_created:
-                            date_created = self.default_datetime
+                            date_created = self.ts.base_datetime_browser
 
                         yield {
                             "ts_created": date_created,
@@ -318,7 +313,7 @@ class ChromiumBrowser(ForensicArtifact):
 
                         for record in bookmark_result:
                             if not (ts_added := record[0]):
-                                ts_added = self.default_datetime
+                                ts_added = self.ts.base_datetime_browser
 
                             yield {
                                 "ts_added": ts_added,

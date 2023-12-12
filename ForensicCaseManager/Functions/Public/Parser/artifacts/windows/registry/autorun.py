@@ -8,21 +8,23 @@ class AutoRun(ForensicArtifact):
     """Plugin that iterates various Runkey locations."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        runkeys = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.runkeys()], reverse=descending)
+        runkeys = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.runkeys()
+            ],
+            reverse=descending,
+        )
 
         self.result = {
             "runkeys": runkeys,
         }
-        
+
     def runkeys(self):
         """Iterate various run key locations. See source for all locations.
 
@@ -41,7 +43,7 @@ class AutoRun(ForensicArtifact):
             path (string): The run key path.
             key (string): The source key for this run key.
         """
-        for reg_path in self._iter_key():
+        for reg_path in self.iter_key():
             for r in self.src.source.registry.keys(reg_path):
                 user = self.src.source.registry.get_user(r)
                 for entry in r.values():

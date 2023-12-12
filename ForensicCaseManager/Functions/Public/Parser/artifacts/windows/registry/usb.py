@@ -1,39 +1,30 @@
+import logging
 import json
 import struct
 
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
-from dissect.target.helpers.record import TargetRecordDescriptor
 
 from forensic_artifact import Source, ForensicArtifact
-
-UsbRegistryRecord = TargetRecordDescriptor(
-    "windows/registry/usb",
-    [
-        ("datetime", "first_insert"),
-        ("string", "product"),
-        ("string", "version"),
-        ("string", "vendor"),
-        ("string", "friendlyname"),
-        ("string", "serial"),
-        ("string", "vid"),
-        ("string", "pid"),
-        ("string", "rev"),
-        ("string", "device_type"),
-        ("string", "containerid"),
-        ("datetime", "first_install"),
-        ("datetime", "last_insert"),
-        ("datetime", "last_removal"),
-        ("string", "info_origin"),
-    ],
-)
-
+from settings import RSLT_REGISTRY_USB
 
 USB_DEVICE_PROPERTY_KEYS = {
-    "first_install": ("0064", "00000064"),  # Windows 7 and higher. USB device first install date
-    "first_insert": ("0065", "00000065"),  # Windows 7 and higher. USB device first insert date.
-    "last_insert": ("0066", "00000066"),  # Windows 8 and higher. USB device last insert date.
-    "last_removal": ("0067", "00000067"),  # Windows 8 and higer. USB device last removal date.
+    "first_install": (
+        "0064",
+        "00000064",
+    ),  # Windows 7 and higher. USB device first install date
+    "first_insert": (
+        "0065",
+        "00000065",
+    ),  # Windows 7 and higher. USB device first insert date.
+    "last_insert": (
+        "0066",
+        "00000066",
+    ),  # Windows 8 and higher. USB device last insert date.
+    "last_removal": (
+        "0067",
+        "00000067",
+    ),  # Windows 8 and higer. USB device last removal date.
 }
 
 
@@ -41,30 +32,33 @@ class USB(ForensicArtifact):
     """USB plugin."""
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        usbstor = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.usbstor()], reverse=descending)
-                            
+        usbstor = sorted(
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.usbstor())
+            ],
+            key=lambda record: record["first_insert"],
+            reverse=descending,
+        )
+
         self.result = {
-            "usbstor": usbstor,
+            RSLT_REGISTRY_USB: usbstor,
         }
-        
+
     @internal
-    def unpack_timestamps(self, usb_reg_properties):
+    def unpack_timestamps(self, usb_reg_properties) -> dict:
         """
         Params:
             usb_reg_properties (Regf): A registry object with USB properties
         Returns:
             timestamps (Dict): A dict containing parsed timestamps within passed registry object
         """
-        usb_reg_properties = usb_reg_properties.subkey("{83da6326-97a6-4088-9453-a1923f573b29}")
+        usb_reg_properties = usb_reg_properties.subkey(
+            "{83da6326-97a6-4088-9453-a1923f573b29}"
+        )
         timestamps = {}
 
         for device_property, usbstor_values in USB_DEVICE_PROPERTY_KEYS.items():
@@ -75,21 +69,25 @@ class USB(ForensicArtifact):
                         data_value = version_key.subkey("00000000").value("Data").value
                     else:
                         data_value = version_key.value("(Default)").value
-                    timestamps[device_property] = self.ts.wintimestamp(struct.unpack("<Q", data_value)[0])
+                    timestamps[device_property] = self.ts.wintimestamp(
+                        struct.unpack("<Q", data_value)[0]
+                    )
                     break
                 else:
                     timestamps[device_property] = None
         return timestamps
 
     @internal
-    def parse_device_name(self, device_name):
+    def parse_device_name(self, device_name) -> dict:
         device_info = device_name.split("&")
         device_type = device_info[0]
         vendor = device_info[1].split("Ven_")[1]
         product = device_info[2].split("Prod_")[1]
         version = None if len(device_info) < 4 else device_info[3].split("Rev_")[1]
 
-        return dict(device_type=device_type, vendor=vendor, product=product, version=version)
+        return dict(
+            device_type=device_type, vendor=vendor, product=product, version=version
+        )
 
     def usbstor(self):
         """Return information about attached USB devices.
@@ -114,13 +112,13 @@ class USB(ForensicArtifact):
             info_origin (string): Location of info present in output
         """
 
-        for reg_path in self._iter_key(name="USBSTOR"):
-            for k in self.src.source.registry.keys(reg_path):
-                info_origin = "\\".join((k.path, k.name))
-                usb_stor = k.subkeys()
+        for reg_path in self.check_empty_entry(self.iter_key(name="USBSTOR")):
+            for key in self.src.source.registry.keys(reg_path):
+                info_origin = "\\".join((key.path, key.name))
+                usb_stor = key.subkeys()
 
                 for usb_type in usb_stor:
-                    device_info = self.parse_device_name(usb_type.name)
+                    device_info = self.parse_device_name(device_name=usb_type.name)
                     usb_devices = usb_type.subkeys()
                     for usb_device in usb_devices:
                         properties = list(usb_device.subkeys())
@@ -138,27 +136,39 @@ class USB(ForensicArtifact):
                         except RegistryValueNotFoundError:
                             friendlyname = None
                             timestamps = {
-                                "first_install": None,
-                                "first_insert": None,
-                                "last_insert": None,
-                                "last_removal": None,
+                                "first_install": self.ts.base_datetime_windows,
+                                "first_insert": self.ts.base_datetime_windows,
+                                "last_insert": self.ts.base_datetime_windows,
+                                "last_removal": self.ts.base_datetime_windows,
                             }
                             containerid = None
 
-                        yield UsbRegistryRecord(
-                            first_install=timestamps["first_install"],
-                            product=device_info["product"],
-                            version=device_info["version"],
-                            vendor=device_info["vendor"],
-                            friendlyname=friendlyname,
-                            serial=serial,
-                            vid=None,
-                            pid=None,
-                            device_type=device_info["device_type"],
-                            containerid=containerid,
-                            first_insert=timestamps["first_insert"],
-                            last_insert=timestamps["last_insert"],  # AKA first arrival
-                            last_removal=timestamps["last_removal"],
-                            info_origin=info_origin,
-                            _target=self._target,
+                        first_install = timestamps.get(
+                            "first_install", self.ts.base_datetime_windows
                         )
+                        first_insert = timestamps.get(
+                            "first_insert", self.ts.base_datetime_windows
+                        )
+                        last_insert = timestamps.get(
+                            "last_insert", self.ts.base_datetime_windows
+                        )
+                        last_removal = timestamps.get(
+                            "last_removal", self.ts.base_datetime_windows
+                        )
+
+                        yield {
+                            "first_install": first_install,
+                            "product": device_info.get("product", None),
+                            "version": device_info.get("version", None),
+                            "vendor": device_info.get("vendor", None),
+                            "friendlyname": friendlyname,
+                            "serial": serial,
+                            "vid": None,
+                            "pid": None,
+                            "device_type": device_info.get("device_type", None),
+                            "containerid": containerid,
+                            "first_insert": first_insert,
+                            "last_insert": last_insert,  # AKA first arrival
+                            "last_removal": last_removal,
+                            "info_origin": info_origin,
+                        }

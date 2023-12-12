@@ -72,11 +72,21 @@ REGISTRY_KEY_NETWORK_INFO = {
     ],
 }
 REGISTRY_KEY_USB = {
-    "USB": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB"],
-    "USBSTOR": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR"],
-    "DeviceContainers": ["HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceContainers"],
-    "HID": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\HID"],
-    "SCSI": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\SCSI"],
+    "USB": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB",
+    ],
+    "USBSTOR": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR",
+    ],
+    "DeviceContainers": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceContainers",
+    ],
+    "HID": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\HID",
+    ],
+    "SCSI": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\SCSI",
+    ],
 }
 REGISTRY_KEY_AUTORUN = [
     "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run",
@@ -104,13 +114,21 @@ REGISTRY_KEY_SYSTEM_INFO = {
     "ComputerName": [
         "HKLM\\SYSTEM\\ControlSet001\\Control\\ComputerName\\ComputerName"
     ],
-    "CurrentVersion": ["HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"],
+    "CurrentVersion": [
+        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+    ],
     "Environment": [
         "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
     ],
-    "CodePage": ["HKLM\\SYSTEM\\CurrentControlSet\\Control\\Nls\\CodePage"],
-    "FileSystem": ["HKLM\\SYSTEM\\ControlSet001\\Control\\FileSystem"],
-    "Windows": ["HKLM\\SYSTEM\\ControlSet001\\Control\\Windows"],
+    "CodePage": [
+        "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Nls\\CodePage",
+    ],
+    "FileSystem": [
+        "HKLM\\SYSTEM\\ControlSet001\\Control\\FileSystem",
+    ],
+    "Windows": [
+        "HKLM\\SYSTEM\\ControlSet001\\Control\\Windows",
+    ],
 }
 
 ## WINDOWS
@@ -120,7 +138,9 @@ ARTIFACT_DIRECTORY_RECYCLEBIN = [
 ARTIFACT_DIRECTORY_PREFETCH = [
     "%ROOT%/windows/prefetch",
 ]
-ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = ["%USER%/AppData/Local/ConnectedDevicesPlatform"]
+ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
+    "%USER%/AppData/Local/ConnectedDevicesPlatform",
+]
 ARTIFACT_DIRECTORY_LNK = [
     "%USER%/Desktop",
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent",
@@ -131,15 +151,23 @@ ARTIFACT_DIRECTORY_JUMPLIST = [
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations",
     "%USER%/AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations",
 ]
-ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = ["%USER%/AppData/Local/ConnectedDevicesPlatform"]
-ARTIFACT_DIRECTORY_SRU = ["%ROOT%/Windows/System32/sru"]
-ARTIFACT_DIRECTORY_THUMBCACHE = ["%USER%/AppData/Local/Microsoft/Windows/Explorer"]
+ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
+    "%USER%/AppData/Local/ConnectedDevicesPlatform",
+]
+ARTIFACT_DIRECTORY_SRU = [
+    "%ROOT%/Windows/System32/sru",
+]
+ARTIFACT_DIRECTORY_THUMBCACHE = [
+    "%USER%/AppData/Local/Microsoft/Windows/Explorer",
+]
 ARTIFACT_DIRECTORY_FILEHISTORY = [
     "%USER%/AppData/Local/Microsoft/Edge/User Data/Default",
     "%USER%/Library/Application Support/Microsoft Edge/Default",
     "%USER%/AppData/Local/Microsoft/Windows/WebCache",
 ]
-ARTIFACT_DIRECTORY_EVENTLOG = ["%ROOT%/Windows/System32/winevt/Logs"]
+ARTIFACT_DIRECTORY_EVENTLOG = [
+    "%ROOT%/Windows/System32/winevt/Logs",
+]
 
 
 ARTIFACT_PATH = {
@@ -200,13 +228,40 @@ ARTIFACT_PATH = {
     ART_AMCACHE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry
-    ART_USER_ASSIST: ArtifactPath(directory=None, entry=REGISTRY_KEY_USERASSIST),
-    ART_SHIMCACHE: ArtifactPath(directory=None, entry=REGISTRY_KEY_SHIMCACHE),
-    ART_BAM: ArtifactPath(directory=None, entry=REGISTRY_KEY_BAM),
-    ART_USER_ACCOUNT: ArtifactPath(directory=None, entry=REGISTRY_KEY_USER_ACCOUNT),
-    ART_NETWORK_INFO: ArtifactPath(directory=None, entry=REGISTRY_KEY_NETWORK_INFO),
-    ART_SHELLBAGS: ArtifactPath(directory=None, entry=REGISTRY_KEY_SHELLBAGS),
-    ART_USB_REGISTRY: ArtifactPath(directory=None, entry=REGISTRY_KEY_USB),
-    ART_AUTORUN: ArtifactPath(directory=None, entry=REGISTRY_KEY_AUTORUN),
-    ART_SYSTEM_INFO: ArtifactPath(directory=None, entry=REGISTRY_KEY_SYSTEM_INFO),
+    ART_USER_ASSIST: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_USERASSIST,
+    ),
+    ART_SHIMCACHE: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_SHIMCACHE,
+    ),
+    ART_BAM: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_BAM,
+    ),
+    ART_USER_ACCOUNT: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_USER_ACCOUNT,
+    ),
+    ART_NETWORK_INFO: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_NETWORK_INFO,
+    ),
+    ART_SHELLBAGS: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_SHELLBAGS,
+    ),
+    ART_REGISTRY_USB: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_USB,
+    ),
+    ART_AUTORUN: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_AUTORUN,
+    ),
+    ART_SYSTEM_INFO: ArtifactPath(
+        directory=None,
+        entry=REGISTRY_KEY_SYSTEM_INFO,
+    ),
 }

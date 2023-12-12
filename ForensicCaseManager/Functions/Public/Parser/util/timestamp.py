@@ -1,12 +1,13 @@
 import struct
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, tzinfo, timezone
 from platform import system
 from typing import Dict
 
 
+@dataclass(kw_only=True)
 class Timestamp:
-    def __init__(self, tzinfo: timezone) -> None:
-        self.tzinfo: timezone = tzinfo
+    tzinfo: timezone
 
     def _calculate_timestamp(self, ts: float) -> datetime:
         try:
@@ -30,6 +31,18 @@ class Timestamp:
             Thus, empty string("") occurs error so this function returns None.
             """
             return None
+
+    @property
+    def base_datetime_unix(self):
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)  # Unix epoch
+
+    @property
+    def base_datetime_windows(self):
+        return datetime(1601, 1, 1, tzinfo=timezone.utc)
+
+    @property
+    def base_datetime_browser(self):
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)
 
     def to_localtime(self, dt: datetime) -> datetime:
         return datetime.fromtimestamp(dt.timestamp(), tz=self.tzinfo)

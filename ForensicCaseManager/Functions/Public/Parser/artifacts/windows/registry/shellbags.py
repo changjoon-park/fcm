@@ -26,7 +26,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
     DELEGATE,
     EXTENSION_BLOCK,
     EXTENSION_BLOCK_BEEF0004,
-    EXTENSION_BLOCK_BEEF0005
+    EXTENSION_BLOCK_BEEF0005,
 )
 
 from forensic_artifact import Source, ForensicArtifact
@@ -40,17 +40,19 @@ class ShellBags(ForensicArtifact):
     """
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
+        super().__init__(src=src, artifact=artifact, category=category)
+
+    def parse(self, descending: bool = False):
+        shellbags = sorted(
+            [
+                json.dumps(
+                    record._packdict(), indent=2, default=str, ensure_ascii=False
+                )
+                for record in self.shellbags()
+            ],
+            reverse=descending,
         )
 
-    def parse(self,descending: bool = False):
-        shellbags = sorted([
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.shellbags()], reverse=descending)
-                    
         self.result = {
             "shellbags": shellbags,
         }
@@ -64,7 +66,7 @@ class ShellBags(ForensicArtifact):
         Sources:
             - https://www.hackingarticles.in/forensic-investigation-shellbags/
         """
-        for reg_path in self._iter_key():
+        for reg_path in self.iter_key():
             for regkey in self.src.source.registry.keys(reg_path):
                 try:
                     bagsmru = regkey.subkey("BagMRU")
@@ -137,7 +139,13 @@ def parse_shell_item_list(buf):
                 entry = MTP_FILE_ENTRY
             elif signature == 0x10312005:
                 entry = MTP_VOLUME
-            elif signature in (0x10141981, 0x23A3DFD5, 0x23FEBBEE, 0x3B93AFBB, 0xBEEBEE00):
+            elif signature in (
+                0x10141981,
+                0x23A3DFD5,
+                0x23FEBBEE,
+                0x3B93AFBB,
+                0xBEEBEE00,
+            ):
                 entry = USERS_PROPERTY_VIEW
             elif signature == 0x46534643:
                 entry = UNKNOWN_0x74
@@ -199,7 +207,9 @@ def parse_shell_item_list(buf):
         if 4 <= first_extension_block_offset < size - 2:
             extension_offset = first_extension_block_offset
             while extension_offset < size - 2:
-                extension_size = c_bag.uint16(item_buf[extension_offset : extension_offset + 2])
+                extension_size = c_bag.uint16(
+                    item_buf[extension_offset : extension_offset + 2]
+                )
 
                 if extension_size == 0:
                     break
@@ -213,7 +223,9 @@ def parse_shell_item_list(buf):
                     # )
                     break  # Extension size too large
 
-                extension_buf = item_buf[extension_offset : extension_offset + extension_size]
+                extension_buf = item_buf[
+                    extension_offset : extension_offset + extension_size
+                ]
                 extension_signature = c_bag.uint32(extension_buf[4:8])
 
                 ext = None
