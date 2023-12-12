@@ -30,7 +30,7 @@ if __name__ == "__main__":
         encoding="utf-8",
     )
     logger = logging.getLogger(__name__)
-    logger.info("Starting Forensic Case Manager")
+    logger.info("Starting Forensic Case Manager...")
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
