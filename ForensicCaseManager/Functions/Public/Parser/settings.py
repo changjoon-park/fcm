@@ -54,7 +54,7 @@ ART_AUTORUN = "autorun"
 ART_SYSTEM_INFO = "system_info"
 ART_MRU = "mru"
 
-# ! Parsed Result Name: the name for "result" from 'parse()' method (ForensicArtifact)
+# ! Parsed Artifact Result Name: the name for "result" from 'parse()' method (ForensicArtifact)
 RSLT_CHROME_HISTORY = "chrome_history"
 RSLT_CHROME_DOWNLOADS = "chrome_downloads"
 RSLT_CHROME_KEYWORD_SEARCH_TERMS = "chrome_keyword_search_terms"
@@ -79,6 +79,7 @@ RSLT_SRU_APPLICATION = "sru_application"
 RSLT_SRU_APPLICATION_TIMELINE = "sru_application_timeline"
 RSLT_FILE_HISTORY = "file_history"
 RSLT_THUMBCACHE = "thumbcache"
+RSLT_ICONCACHE = "iconcache"
 RSLT_JUMPLIST = "jumplist"
 RSLT_WINDOWS_TIMELINE = "windows_timeline"
 RSLT_EVENT_LOGON = "event_logon"

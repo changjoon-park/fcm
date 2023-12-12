@@ -200,8 +200,8 @@ class JumpListParser:
 
     def integrate_link_file_data(self):
         if len(self.dest_list) > 1:
-            for i, record in enumerate(self.dest_list):
-                if i == 0:
+            for index, record in enumerate(self.dest_list):
+                if index == 0:
                     # Extend the fields with the names from LinkFileEntry namedtuple
                     record.extend(LinkFileEntry._fields)
                     continue

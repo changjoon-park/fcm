@@ -88,6 +88,10 @@ ARTIFACT_SCHEMA = {
     ART_FILE_HISTORY: [
         ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_FILE_HISTORY}.yaml",
     ],
+    ART_THUMBCACHE: [
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_THUMBCACHE}.yaml",
+        ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_ICONCACHE}.yaml",
+    ],
     ART_JUMPLIST: [
         ARTIFACT_SCHEMA_WINDOWS / f"{RSLT_JUMPLIST}.yaml",
     ],
@@ -152,6 +156,10 @@ WINDOWS_PLUGINS = {
     # "Lnk": Plugin(artifact=LinkFile, category=CAT_FILE_FOLDER_OPENING),
     ART_JUMPLIST: Plugin(
         artifact=jumplist.JumpList,
+        category=CAT_FILE_FOLDER_OPENING,
+    ),
+    ART_THUMBCACHE: Plugin(
+        artifact=thumbcache.Thumbcache,
         category=CAT_FILE_FOLDER_OPENING,
     ),
     ART_WINDOWS_TIMELINE: Plugin(

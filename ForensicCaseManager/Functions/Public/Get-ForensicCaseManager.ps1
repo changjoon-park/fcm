@@ -37,6 +37,11 @@ function Get-ForensicCaseManager {
         [string[]]
         $Category,
 
+        # TODO: Add quick investigation mode
+        [Parameter()]
+        [switch]
+        $Triage,
+
         [Parameter()]
         [string]
         $Out = $env:TEMP

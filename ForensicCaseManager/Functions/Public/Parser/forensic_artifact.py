@@ -76,7 +76,7 @@ class ForensicArtifact:
     def iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
-    def _iter_directory(self) -> Generator[Path, None, None]:
+    def iter_directory(self) -> Generator[Path, None, None]:
         for dir in self.artifact_directory:
             if dir.startswith("%ROOT%"):
                 dir = Path(dir.replace("%ROOT%", ""))
@@ -102,7 +102,7 @@ class ForensicArtifact:
         else:
             artifact_entry = name
 
-        for dir in self._iter_directory():
+        for dir in self.iter_directory():
             if dir.is_dir():
                 if recurse == True:
                     yield from dir.rglob(artifact_entry)
