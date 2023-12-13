@@ -171,4 +171,5 @@ class USB(ForensicArtifact):
                             "last_insert": last_insert,  # AKA first arrival
                             "last_removal": last_removal,
                             "info_origin": info_origin,
+                            "evidence_id": self.evidence_id,
                         }

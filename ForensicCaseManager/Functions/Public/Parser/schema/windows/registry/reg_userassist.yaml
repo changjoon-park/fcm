@@ -1,0 +1,12 @@
+Name: User Assist Registry
+Desc: UserAssist data from the Windows Registry
+Table:
+  - TableName: reg_userassist
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [INTEGER]
+      - path: [TEXT]
+      - number_of_executions: [INTEGER]
+      - application_focus_count: [INTEGER]
+      - application_focus_duration: [INTEGER]
+      - evidence_id: [TEXT]

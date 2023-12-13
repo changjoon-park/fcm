@@ -17,12 +17,12 @@ from artifacts.windows import (
 from artifacts.windows.registry import (
     amcache,
     user_account,
-    userassist,
+    reg_userassist,
     shimcache,
     bam,
     network_info,
     shellbags,
-    usb,
+    reg_usb,
     autorun,
     system_info,
     mru,
@@ -110,6 +110,9 @@ ARTIFACT_SCHEMA = {
     ART_REGISTRY_USB: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USB}.yaml",
     ],
+    ART_REGISTRY_USERASSIST: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USERASSIST}.yaml",
+    ],
 }
 
 
@@ -191,8 +194,8 @@ WINDOWS_PLUGINS = {
         artifact=user_account.UserAccount,
         category=CAT_ACCOUNT_USAGE,
     ),
-    ART_USER_ASSIST: Plugin(
-        artifact=userassist.UserAssist,
+    ART_REGISTRY_USERASSIST: Plugin(
+        artifact=reg_userassist.UserAssist,
         category=CAT_APPLICATION_EXECUTION,
     ),
     ART_SHIMCACHE: Plugin(
@@ -212,7 +215,7 @@ WINDOWS_PLUGINS = {
         category=CAT_FILE_FOLDER_OPENING,
     ),
     ART_REGISTRY_USB: Plugin(
-        artifact=usb.USB,
+        artifact=reg_usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
     ART_AUTORUN: Plugin(

@@ -1,37 +1,54 @@
+import logging
 import codecs
 import json
 
 from flow.record.fieldtypes import uri
-
+from dissect import cstruct
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
-from dissect.target.plugins.os.windows.regf.userassist import (
-    c_userassist,
-    UserAssistRecord,
-)
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import RSLT_REGISTRY_USERASSIST
+
+logger = logging.getLogger(__name__)
+
+userassist_def = """
+struct VERSION5_ENTRY {
+    char padding[4];
+    uint32 number_of_executions;
+    uint32 application_focus_count;
+    uint32 application_focus_duration;
+    char padding[44];
+    uint64 timestamp;
+    char padding[4];
+};
+
+struct VERSION3_ENTRY {
+    uint32  session_id;
+    uint32  number_of_executions;
+    uint64  timestamp;
+};
+"""
+c_userassist = cstruct.cstruct()
+c_userassist.load(userassist_def)
 
 
 class UserAssist(ForensicArtifact):
-    """UserAssist plugin."""
-
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
         userassist = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.userassist()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.userassist())
             ],
+            key=lambda record: record["ts"],
             reverse=descending,
         )
 
         self.result = {
-            "userassist": userassist,
+            RSLT_REGISTRY_USERASSIST: userassist,
         }
 
     def userassist(self):
@@ -88,6 +105,11 @@ class UserAssist(ForensicArtifact):
                                 # Unknown format?
                                 pass
                             else:
+                                logger.debug(
+                                    "Invalid userassist value of length %d: %r",
+                                    len(entry.value),
+                                    entry.value,
+                                )
                                 continue
 
                             value = uri.from_windows(
@@ -102,13 +124,16 @@ class UserAssist(ForensicArtifact):
                             except KeyError:
                                 pass
 
-                            yield UserAssistRecord(
-                                ts=self.ts.wintimestamp(timestamp),
-                                path=value,
-                                number_of_executions=number_of_executions,
-                                application_focus_count=application_focus_count,
-                                application_focus_duration=application_focus_duration,
-                                _target=self._target,
-                                _user=user,
-                                _key=count,
-                            )
+                            if not (ts := self.ts.wintimestamp(timestamp)):
+                                ts = self.ts.base_datetime_windows
+
+                            yield {
+                                "ts": ts,
+                                "path": value,
+                                "number_of_executions": number_of_executions,
+                                "application_focus_count": application_focus_count,
+                                "application_focus_duration": application_focus_duration,
+                                "evidence_id": self.evidence_id,
+                                # "user": user,
+                                # "key": count,
+                            }

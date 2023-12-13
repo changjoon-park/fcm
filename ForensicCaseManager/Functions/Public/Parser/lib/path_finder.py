@@ -228,7 +228,7 @@ ARTIFACT_PATH = {
     ART_AMCACHE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry
-    ART_USER_ASSIST: ArtifactPath(
+    ART_REGISTRY_USERASSIST: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_USERASSIST,
     ),

@@ -1,4 +1,4 @@
-Name: USB
+Name: USB Registry
 Desc: USB data from the Windows Registry
 Table:
   - TableName: reg_usb
