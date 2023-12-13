@@ -240,7 +240,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_BAM,
     ),
-    ART_USER_ACCOUNT: ArtifactPath(
+    ART_REGISTRY_USER_ACCOUNT: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_USER_ACCOUNT,
     ),

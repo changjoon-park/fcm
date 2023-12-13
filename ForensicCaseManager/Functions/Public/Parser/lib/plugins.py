@@ -16,7 +16,7 @@ from artifacts.windows import (
 )
 from artifacts.windows.registry import (
     amcache,
-    user_account,
+    reg_user_account,
     reg_userassist,
     shimcache,
     bam,
@@ -113,6 +113,10 @@ ARTIFACT_SCHEMA = {
     ART_REGISTRY_USERASSIST: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USERASSIST}.yaml",
     ],
+    ART_REGISTRY_USER_ACCOUNT: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_SAM}.yaml",
+        # ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST}.yaml",
+    ],
 }
 
 
@@ -190,8 +194,8 @@ WINDOWS_PLUGINS = {
         artifact=amcache.Amcache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_USER_ACCOUNT: Plugin(
-        artifact=user_account.UserAccount,
+    ART_REGISTRY_USER_ACCOUNT: Plugin(
+        artifact=reg_user_account.UserAccount,
         category=CAT_ACCOUNT_USAGE,
     ),
     ART_REGISTRY_USERASSIST: Plugin(
