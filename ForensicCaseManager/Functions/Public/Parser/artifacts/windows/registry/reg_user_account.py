@@ -269,7 +269,7 @@ class UserAccount(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        user_account_sam = sorted(
+        reg_user_account_sam = sorted(
             [
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.sam())
@@ -277,9 +277,18 @@ class UserAccount(ForensicArtifact):
             key=lambda record: record["rid"],
             reverse=descending,
         )
+        reg_user_account_profilelist = sorted(
+            [
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.profilelist())
+            ],
+            key=lambda record: record["rid"],
+            reverse=descending,
+        )
 
         self.result = {
-            RSLT_REGISTRY_USER_ACCOUNT_SAM: user_account_sam,
+            RSLT_REGISTRY_USER_ACCOUNT_SAM: reg_user_account_sam,
+            RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST: reg_user_account_profilelist,
         }
 
         """
@@ -425,5 +434,37 @@ class UserAccount(ForensicArtifact):
                         "failedlogins": f.failedcnt,
                         "lm": lm_hash,
                         "nt": nt_hash,
+                        "evidence_id": self.evidence_id,
+                    }
+
+    def profilelist(self) -> Generator[dict, None, None]:
+        for reg_path in self.iter_key(name="ProfileList"):
+            sids = set()
+            for k in self.src.source.registry.keys(reg_path):
+                for subkey in k.subkeys():
+                    sid = subkey.name
+                    if sid in sids:
+                        continue
+
+                    sids.add(sid)
+                    sid = str(subkey.name)
+                    rid = int(sid.split("-")[-1])
+                    name = None
+                    home = None
+                    try:
+                        profile_image_path = subkey.value("ProfileImagePath")
+                    except:
+                        logger.error(
+                            f"Unable to find ProfileImagePath value in {self.evidence_id}"
+                        )
+                    else:
+                        home = profile_image_path.value
+                        name = home.split("\\")[-1]
+
+                    yield {
+                        "rid": rid,
+                        "username": name,
+                        "sid": sid,
+                        "home": home,
                         "evidence_id": self.evidence_id,
                     }
