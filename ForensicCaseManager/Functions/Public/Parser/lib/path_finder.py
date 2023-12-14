@@ -232,7 +232,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_USERASSIST,
     ),
-    ART_SHIMCACHE: ArtifactPath(
+    ART_REGISTRY_SHIMCACHE: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_SHIMCACHE,
     ),

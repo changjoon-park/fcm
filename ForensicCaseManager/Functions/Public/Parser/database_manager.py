@@ -190,13 +190,15 @@ class DatabaseManager:
                         ]
                     )
 
-                    create_statement = (
-                        f"CREATE TABLE IF NOT EXISTS {table_name} ({entity_defs})"
-                    )
-                    with self.conn:
-                        self.c.execute(create_statement)
+                    try:
+                        create_statement = (
+                            f"CREATE TABLE IF NOT EXISTS {table_name} ({entity_defs})"
+                        )
+                        with self.conn:
+                            self.c.execute(create_statement)
+                    except:
+                        logger.error(f"Failed executing statement: {create_statement}")
                     return table_name
-
         except Exception as e:
             if not schema_file:
                 logger.exception(
@@ -239,8 +241,11 @@ class DatabaseManager:
                 f"INSERT INTO {artifact} ({', '.join(keys)}) VALUES ({placeholders})"
             )
 
-            # Execute batch insertion
-            with self.conn:
-                self.c.executemany(statement, prepared_data)
+            try:
+                # Execute batch insertion
+                with self.conn:
+                    self.c.executemany(statement, prepared_data)
+            except:
+                logger.error(f"Falied executing statement: {statement}")
         except Exception as e:
             logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")
