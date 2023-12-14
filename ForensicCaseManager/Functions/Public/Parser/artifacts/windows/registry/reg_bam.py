@@ -1,12 +1,18 @@
 import json
-from flow.record.fieldtypes import uri
 
-from dissect.target.plugins.os.windows.regf.bam import (
-    c_bam,
-    BamDamRecord,
-)
+from flow.record.fieldtypes import uri
+from dissect.cstruct import cstruct
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import RSLT_REGISTRY_BAM
+
+c_bamdef = """
+    struct entry {
+        uint64 ts;
+    };
+    """
+c_bam = cstruct()
+c_bam.load(c_bamdef)
 
 
 class BAM(ForensicArtifact):
@@ -18,16 +24,14 @@ class BAM(ForensicArtifact):
     def parse(self, descending: bool = False):
         bam = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.bam()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.bam())
             ],
+            key=lambda record: record["ts"],
             reverse=descending,
         )
-
         self.result = {
-            "bam": bam,
+            RSLT_REGISTRY_BAM: bam,
         }
 
     def bam(self):
@@ -47,8 +51,12 @@ class BAM(ForensicArtifact):
                             continue
 
                         data = c_bam.entry(entry.value)
-                        yield BamDamRecord(
-                            ts=self.ts.wintimestamp(data.ts),
-                            path=uri.from_windows(entry.name),
-                            _target=self._target,
-                        )
+
+                        if not (ts := self.ts.wintimestamp(data.ts)):
+                            ts = self.ts.base_datetime_windows
+
+                        yield {
+                            "ts": ts,
+                            "path": uri.from_windows(entry.name),
+                            "evidence_id": self.evidence_id,
+                        }

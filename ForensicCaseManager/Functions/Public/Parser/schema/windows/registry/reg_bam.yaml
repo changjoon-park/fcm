@@ -1,0 +1,9 @@
+Name: BAM Registry
+Desc: BAM data from the Windows Registry
+Table:
+  - TableName: reg_bam
+    Columns:
+      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
+      - ts: [INTEGER]
+      - path: [TEXT]
+      - evidence_id: [TEXT]

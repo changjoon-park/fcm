@@ -19,7 +19,7 @@ from artifacts.windows.registry import (
     reg_user_account,
     reg_userassist,
     shimcache,
-    bam,
+    reg_bam,
     network_info,
     shellbags,
     reg_usb,
@@ -117,6 +117,9 @@ ARTIFACT_SCHEMA = {
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_SAM}.yaml",
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST}.yaml",
     ],
+    ART_REGISTRY_BAM: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_BAM}.yaml",
+    ],
 }
 
 
@@ -206,8 +209,8 @@ WINDOWS_PLUGINS = {
         artifact=shimcache.ShimCache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_BAM: Plugin(
-        artifact=bam.BAM,
+    ART_REGISTRY_BAM: Plugin(
+        artifact=reg_bam.BAM,
         category=CAT_APPLICATION_EXECUTION,
     ),
     ART_NETWORK_INFO: Plugin(

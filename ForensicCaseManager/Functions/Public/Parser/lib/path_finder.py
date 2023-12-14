@@ -236,7 +236,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_SHIMCACHE,
     ),
-    ART_BAM: ArtifactPath(
+    ART_REGISTRY_BAM: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_BAM,
     ),
