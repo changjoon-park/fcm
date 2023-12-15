@@ -196,8 +196,10 @@ class DatabaseManager:
                         )
                         with self.conn:
                             self.c.execute(create_statement)
-                    except:
-                        logger.error(f"Failed executing statement: {create_statement}")
+                    except Exception as e:
+                        logger.error(
+                            f"Failed executing statement: {create_statement} / {e}"
+                        )
                     return table_name
         except Exception as e:
             if not schema_file:
@@ -245,7 +247,7 @@ class DatabaseManager:
                 # Execute batch insertion
                 with self.conn:
                     self.c.executemany(statement, prepared_data)
-            except:
-                logger.error(f"Falied executing statement: {statement}")
+            except Exception as e:
+                logger.error(f"Falied executing statement: {statement} / {e}")
         except Exception as e:
             logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")

@@ -23,7 +23,7 @@ from artifacts.windows.registry import (
     network_info,
     shellbags,
     reg_usb,
-    autorun,
+    reg_autorun,
     system_info,
     mru,
 )
@@ -122,6 +122,9 @@ ARTIFACT_SCHEMA = {
     ],
     ART_REGISTRY_SHIMCACHE: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_SHIMCACHE}.yaml",
+    ],
+    ART_REGISTRY_AUTORUN: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AUTORUN}.yaml",
     ],
 }
 
@@ -228,8 +231,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    ART_AUTORUN: Plugin(
-        artifact=autorun.AutoRun,
+    ART_REGISTRY_AUTORUN: Plugin(
+        artifact=reg_autorun.AutoRun,
         category=CAT_SYSTEM_INFORMATION,
     ),
     ART_SYSTEM_INFO: Plugin(

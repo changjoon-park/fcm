@@ -1,7 +1,8 @@
-import json
+import logging
+
 from flow.record.fieldtypes import uri
-from dissect.target.plugins.os.windows.regf.runkeys import RunKeyRecord
 from forensic_artifact import Source, ForensicArtifact
+from settings import RSLT_REGISTRY_AUTORUN
 
 
 class AutoRun(ForensicArtifact):
@@ -13,16 +14,15 @@ class AutoRun(ForensicArtifact):
     def parse(self, descending: bool = False):
         runkeys = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.runkeys()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.runkeys())
             ],
+            key=lambda record: record["ts"],
             reverse=descending,
         )
 
         self.result = {
-            "runkeys": runkeys,
+            RSLT_REGISTRY_AUTORUN: runkeys,
         }
 
     def runkeys(self):
@@ -47,14 +47,13 @@ class AutoRun(ForensicArtifact):
             for r in self.src.source.registry.keys(reg_path):
                 user = self.src.source.registry.get_user(r)
                 for entry in r.values():
-                    ts = self.ts.to_localtime(r.ts)
+                    if not (ts := self.ts.to_localtime(r.ts)):
+                        ts = self.ts.base_datetime_windows
                     path = uri.from_windows(entry.value)
-                    yield RunKeyRecord(
-                        ts=ts,
-                        name=entry.name,
-                        path=path,
-                        key=reg_path,
-                        _target=self._target,
-                        _key=r,
-                        _user=user,
-                    )
+                    yield {
+                        "ts": ts,
+                        "name": entry.name,
+                        "path": path,
+                        "key": str(reg_path),
+                        "evidence_id": self.evidence_id,
+                    }

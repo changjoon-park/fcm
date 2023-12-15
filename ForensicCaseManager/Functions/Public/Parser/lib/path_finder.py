@@ -256,7 +256,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_USB,
     ),
-    ART_AUTORUN: ArtifactPath(
+    ART_REGISTRY_AUTORUN: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_AUTORUN,
     ),
