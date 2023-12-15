@@ -7,6 +7,10 @@ from dissect.target.helpers.record import TargetRecordDescriptor
 from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import (
+    RSLT_REGISTRY_AMCACHE_APPLICATIONS,
+    RSLT_REGISTRY_AMCACHE_APPLICATION_FILES,
+)
 
 AMCACHE_FILE_KEYS = {
     "0": "product_name",
@@ -364,23 +368,27 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
 
         applications = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.applications()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.applications())
             ],
+            key=lambda record: record["install_date"],
             reverse=descending,
         )
 
-        application_files = sorted(
-            [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.application_files()
-            ],
-            reverse=descending,
-        )
+        # TODO: bug fix on timestamp
+        # application_files = sorted(
+        #     [
+        #         self.validate_record(index=index, record=record)
+        #         for index, record in enumerate(self.application_files())
+        #     ],
+        #     key=lambda record: record["mtime_regf"],
+        #     reverse=descending,
+        # )
+
+        application_files = [
+            self.validate_record(index=index, record=record)
+            for index, record in enumerate(self.application_files())
+        ]
 
         # sorted_applications = sorted(
         #     [record._packdict() for record in self.applications()],
@@ -415,8 +423,8 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         self.result = {
             # "files": files,
             # "programs": programs,
-            "amcache_applications": applications,
-            "amcache_application_files": application_files,
+            RSLT_REGISTRY_AMCACHE_APPLICATIONS: applications,
+            RSLT_REGISTRY_AMCACHE_APPLICATION_FILES: application_files,
             # "drivers": drivers,
             # "shortcuts": shortcuts,
             # "device_containers": device_containers,
@@ -468,39 +476,45 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             #      "Version": ""
             # }
 
+            install_date = parse_win_datetime(entry_data.get("InstallDate"))
+            if install_date:
+                install_date = self.ts.to_localtime(install_date)
+            else:
+                install_date = self.ts.base_datetime_windows
+
             install_date_arp_last_modified = (
                 entry_data["InstallDateArpLastModified"][0]
                 if entry_data.get("InstallDateArpLastModified")
                 else None
             )
 
-            yield ApplicationAppcompatRecord(
-                install_date=parse_win_datetime(entry_data.get("InstallDate")),
-                name=entry_data.get("Name"),
-                type=entry_data.get("Type"),
-                publisher=entry_data.get("Publisher"),
-                uninstall_string=entry_data.get("UninstallString"),
-                root_dir_path=entry_data.get("RootDirPath"),
-                program_id=entry_data.get("ProgramId"),
-                program_instance_id=entry_data.get("ProgramInstanceId"),
-                msi_package_code=entry_data.get("MsiPackageCode"),
-                msi_product_code=entry_data.get("MsiProductCode"),
-                mtime_regf=entry.timestamp,
-                install_date_arp_last_modified=parse_win_datetime(
+            yield {
+                "install_date": install_date,
+                "name": entry_data.get("Name"),
+                "type": entry_data.get("Type"),
+                "publisher": entry_data.get("Publisher"),
+                "uninstall_string": entry_data.get("UninstallString"),
+                "root_dir_path": entry_data.get("RootDirPath"),
+                "program_id": entry_data.get("ProgramId"),
+                "program_instance_id": entry_data.get("ProgramInstanceId"),
+                "msi_package_code": entry_data.get("MsiPackageCode"),
+                "msi_product_code": entry_data.get("MsiProductCode"),
+                "mtime_regf": entry.timestamp,
+                "install_date_arp_last_modified": parse_win_datetime(
                     install_date_arp_last_modified
                 ),
-                install_date_from_link_file=[
+                "install_date_from_link_file": [
                     parse_win_datetime(dt)
                     for dt in entry_data.get("InstallDateFromLinkFile", [])
                 ],
-                os_version_at_install_time=entry_data.get("OSVersionAtInstallTime"),
-                language_code=entry_data.get("Language"),
-                package_full_name=entry_data.get("PackageFullName"),
-                manifest_path=entry_data.get("ManifestPath"),
-                registry_key_path=entry_data.get("RegistryKeyPath"),
-                source=entry_data.get("Source"),
-                _target=self._target,
-            )
+                "os_version_at_install_time": entry_data.get("OSVersionAtInstallTime"),
+                "language_code": entry_data.get("Language"),
+                "package_full_name": entry_data.get("PackageFullName"),
+                "manifest_path": entry_data.get("ManifestPath"),
+                "registry_key_path": entry_data.get("RegistryKeyPath"),
+                "source": entry_data.get("Source"),
+                "evidence_id": self.evidence_id,
+            }
 
     def parse_inventory_application_file(self):
         """Parse Root\\InventoryApplicationFile registry key subkeys.
@@ -547,26 +561,33 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # and sometimes the FileId is an empty string.
             sha1_digest = sha1_digest[-40:] if sha1_digest else None
 
-            yield ApplicationFileAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                name=entry_data.get("Name"),
-                size=entry_data.get("Size"),
-                publisher=entry_data.get("Publisher"),
-                product_name=entry_data.get("ProductName"),
-                product_version=entry_data.get("ProductVersion"),
-                bin_file_version=entry_data.get("BinFileVersion"),
-                bin_product_version=entry_data.get("BinProductVersion"),
-                version=entry_data.get("Version"),
-                program_id=entry_data.get("ProgramId"),
-                path=uri.from_windows(entry_data.get("LowerCaseLongPath")),
-                hash_path=entry_data.get("LongPathHash"),
-                link_date=parse_win_datetime(entry_data.get("LinkDate")),
-                digests=[None, sha1_digest, None],
-                language=entry_data.get("Language"),
-                is_pefile=entry_data.get("IsPeFile"),
-                is_oscomponent=entry_data.get("IsOsComponent"),
-                _target=self._target,
-            )
+            link_date = parse_win_datetime(entry_data.get("LinkDate"))
+            # TODO: bug fix on timestamp
+            # if link_date:
+            #     link_date = self.ts.to_localtime(link_date)
+            # else:
+            #     link_date = self.ts.base_datetime_windows
+
+            yield {
+                "link_date": link_date,
+                "name": entry_data.get("Name"),
+                "size": entry_data.get("Size"),
+                "publisher": entry_data.get("Publisher"),
+                "product_name": entry_data.get("ProductName"),
+                "product_version": entry_data.get("ProductVersion"),
+                "bin_file_version": entry_data.get("BinFileVersion"),
+                "bin_product_version": entry_data.get("BinProductVersion"),
+                "version": entry_data.get("Version"),
+                "program_id": entry_data.get("ProgramId"),
+                "path": uri.from_windows(entry_data.get("LowerCaseLongPath")),
+                "mtime_regf": entry.timestamp,
+                "hash_path": entry_data.get("LongPathHash"),
+                "digests": [None, sha1_digest, None],
+                "language": entry_data.get("Language"),
+                "is_pefile": entry_data.get("BinaryType"),
+                "is_oscomponent": None,
+                "evidence_id": self.evidence_id,
+            }
 
     def parse_inventory_driver_binary(self):
         """Return InventoryDriverBinary records from Amcache hive.

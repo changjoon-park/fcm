@@ -15,7 +15,7 @@ from artifacts.windows import (
     eventlog,
 )
 from artifacts.windows.registry import (
-    amcache,
+    reg_amcache,
     reg_user_account,
     reg_userassist,
     reg_shimcache,
@@ -126,6 +126,10 @@ ARTIFACT_SCHEMA = {
     ART_REGISTRY_AUTORUN: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AUTORUN}.yaml",
     ],
+    ART_REGISTRY_AMCACHE: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATIONS}.yaml",
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATION_FILES}.yaml",
+    ],
 }
 
 
@@ -199,8 +203,8 @@ WINDOWS_PLUGINS = {
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
     # ? Windows Registry
-    ART_AMCACHE: Plugin(
-        artifact=amcache.Amcache,
+    ART_REGISTRY_AMCACHE: Plugin(
+        artifact=reg_amcache.Amcache,
         category=CAT_APPLICATION_EXECUTION,
     ),
     ART_REGISTRY_USER_ACCOUNT: Plugin(

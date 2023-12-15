@@ -225,7 +225,7 @@ ARTIFACT_PATH = {
         directory=ARTIFACT_DIRECTORY_EVENTLOG,
         entry=None,
     ),
-    ART_AMCACHE: ArtifactPath(
+    ART_REGISTRY_AMCACHE: ArtifactPath(
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry
     ART_REGISTRY_USERASSIST: ArtifactPath(

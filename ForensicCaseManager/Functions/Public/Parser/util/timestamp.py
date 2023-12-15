@@ -1,8 +1,11 @@
+import logging
 import struct
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, tzinfo, timezone
 from platform import system
 from typing import Dict
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
@@ -43,6 +46,17 @@ class Timestamp:
     @property
     def base_datetime_browser(self):
         return datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+    # TODO: Handle valid datetime input (e.g. 2080.15.50)
+    # def to_localtime(self, dt: datetime) -> datetime:
+    #     try:
+    #         return datetime.fromtimestamp(dt.timestamp(), tz=self.tzinfo)
+    #     except ValueError:
+    #         logger.error(f"Invalid datetime input: {dt}. Defaulting to UTC+0")
+    #         return datetime.now(timezone(timedelta(hours=0)))
+    #     except OSError:
+    #         logger.error(f"Datetime value is out of range. Defaulting to UTC+0. / {dt}")
+    #         return datetime.now(timezone(timedelta(hours=0)))
 
     def to_localtime(self, dt: datetime) -> datetime:
         return datetime.fromtimestamp(dt.timestamp(), tz=self.tzinfo)
