@@ -1,26 +1,26 @@
 import logging
+from pathlib import Path
 from dataclasses import dataclass
 
 from lib.plugins import ARTIFACT_CATEGORIES
+
 from case_config import CaseConfig
+from forensic_evidence import ForensicEvidence
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
 class ForensicCase(CaseConfig):
-    case_name: str
-    forensic_evidences: list
+    case_directory: Path
+    forensic_evidences: list[ForensicEvidence]
 
     def __post_init__(self):
         super().__post_init__()
 
-        # set case_directory
-        self.case_directory = self.root_directory / self.case_name
-
     def investigate_case(self):
-        # create case directory
-        self._create_case_directory()
+        # # create case directory
+        # self._create_case_directory()
 
         # initialize database
         self._init_database()
@@ -31,11 +31,11 @@ class ForensicCase(CaseConfig):
         # export artifacts in all forensic evidences
         self._export_evidences_all()
 
-    def _create_case_directory(self):
-        try:
-            self.case_directory.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            logger.exception(f"Unable to create case directory: {e}")
+    # def _create_case_directory(self):
+    #     try:
+    #         self.case_directory.mkdir(parents=True, exist_ok=True)
+    #     except Exception as e:
+    #         logger.exception(f"Unable to create case directory: {e}")
 
     def _init_database(self):
         # set forensic case table
@@ -63,7 +63,7 @@ class ForensicCase(CaseConfig):
         self.db_manager.close()
 
     def _init_table_evidences(self):
-        for evidence in self.forensic_evidences:
+        for forensic_evidence in self.forensic_evidences:
             self.db_manager.connect()
             # create "evidences" table
             if not self.db_manager.is_table_exist("evidences"):
@@ -71,16 +71,16 @@ class ForensicCase(CaseConfig):
 
             # insert "evidences" table
             if self.db_manager.insert_evidences(
-                id=evidence.evidence_id,
-                evidence_label=evidence.evidence_label,
-                computer_name=evidence.computer_name,
-                registered_owner=evidence.registered_owner,
-                source=evidence.src.source_path,
+                id=forensic_evidence.evidence_id,
+                evidence_label=forensic_evidence.evidence_label,
+                computer_name=forensic_evidence.computer_name,
+                registered_owner=forensic_evidence.registered_owner,
+                source=forensic_evidence.src.source_path,
                 case_id=self.case_id,
-                evidence_number=evidence._evidence_number,
+                evidence_number=forensic_evidence._evidence_number,
             ):
                 logger.info(
-                    f"Inserted {evidence.evidence_id} into evidences table in {self.case_name} case"
+                    f"Inserted {forensic_evidence.evidence_id} into evidences table in {self.case_name} case"
                 )
             self.db_manager.close()
 

@@ -29,17 +29,10 @@ class ForensicEvidence(CaseConfig):
         super().__post_init__()
 
         # set src
-        self.src = Source(
-            _evidence=self._evidence,
-        )
+        self.src = Source(_evidence=self._evidence)
 
         # set evidence_id
-        self.evidence_id = "-".join(
-            [
-                str(self.case_id),
-                str(self._evidence_number),
-            ]
-        )
+        self.evidence_id = "-".join([str(self.case_id), str(self._evidence_number)])
 
         # set forensic_artifacts
         for artifact, plugin in WINDOWS_PLUGINS.items():

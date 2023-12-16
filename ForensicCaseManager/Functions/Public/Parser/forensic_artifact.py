@@ -19,15 +19,10 @@ class Source:
     _evidence: str = None
     source: Target = field(init=False)
     source_path: str = field(init=False)
-    type: str = field(init=False)
 
     def __post_init__(self):
-        if self._evidence:
-            self.source = Target.open(self._evidence)
-            self.source_path = self._evidence
-            self._target = self.source  #
-        else:
-            logger.error(f"Invalid source: {self._evidence}")
+        self.source = Target.open(self._evidence)
+        self.source_path = self._evidence
 
 
 @dataclass(kw_only=True)

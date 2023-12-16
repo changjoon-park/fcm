@@ -3,11 +3,9 @@ from pathlib import Path
 current_directory = Path(__file__).parent.absolute()
 
 
-# Root Directory Name
-ROOT_DIRECTORY_NAME = "_fcm"
-
 # Database Name
-DATABASE_NAME = "forensic_data.sqlite"
+DATABASE_NAME = "case.db"
+LOGFILE_NAME = "test.log"
 
 # Artifact Schema
 ARTIFACT_SCHEMA_FILESYSTEM = current_directory / "schema" / "filesystem"
