@@ -7,19 +7,19 @@ from forensic_evidence import ForensicEvidence
 from settings import ROOT_DIRECTORY_NAME
 
 
-def get_container_files(container_input):
-    container_files = []
-    for path_str in container_input.split(","):
+def get_evidence_files(evidence_input):
+    evidence_files = []
+    for path_str in evidence_input.split(","):
         path = Path(path_str)
         if path.is_dir():
-            container_files.extend(
+            evidence_files.extend(
                 [str(file) for file in path.glob("*.E01")]
-            )  # Assuming .E01 as container file extension
+            )  # Assuming .E01 as evidence file extension
         elif path.is_file():
-            container_files.append(str(path))
+            evidence_files.append(str(path))
         else:
             print(f"Warning: Path {path} is neither a valid file nor a directory")
-    return container_files
+    return evidence_files
 
 
 if __name__ == "__main__":
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         "-n", "--case_name", default=None, help="case name", dest="case_name"
     )
     parser.add_argument(
-        "-c", "--container", default=None, help="container to parse", dest="container"
+        "-c", "--evidence", default=None, help="evidence to parse", dest="evidence"
     )
     parser.add_argument(
         "-o", "--out", default=None, help="output directory", dest="out"
@@ -59,8 +59,8 @@ if __name__ == "__main__":
     # Assigning values to case_name
     case_name = args.case_name
 
-    # Get container files from 'container' input
-    containers = get_container_files(args.container) if args.container else []
+    # Get evidence files from 'evidence' input
+    evidences = get_evidence_files(args.evidence) if args.evidence else []
 
     # Assigning values to artifact
     artifacts = args.artifact.split(",") if args.artifact else None
@@ -80,11 +80,11 @@ if __name__ == "__main__":
             root_directory=root_directory,
             case_name=case_name,
             _evidence_number=index,
-            _container=container,
+            _evidence=evidence,
             _artifacts=artifacts,
             _categories=categories,
         )
-        for index, container in enumerate(containers)
+        for index, evidence in enumerate(evidences)
     ]
 
     # Set ForensicCase instance

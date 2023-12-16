@@ -11,27 +11,23 @@ from lib.path_finder import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
 
-SOURCE_TYPE_CONTAINER = "Container"
-
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Source:
-    _local: bool = False
-    _container: str = None
+    _evidence: str = None
     source: Target = field(init=False)
     source_path: str = field(init=False)
     type: str = field(init=False)
 
     def __post_init__(self):
-        if self._container:
-            self.source = Target.open(self._container)
-            self.source_path = self._container
-            self.type = SOURCE_TYPE_CONTAINER
+        if self._evidence:
+            self.source = Target.open(self._evidence)
+            self.source_path = self._evidence
             self._target = self.source  #
         else:
-            logger.error(f"Invalid source: {self._container}")
+            logger.error(f"Invalid source: {self._evidence}")
 
 
 @dataclass(kw_only=True)
