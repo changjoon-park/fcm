@@ -18,8 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass(kw_only=True)
 class ForensicEvidence(CaseConfig):
     _evidence_number: int
-    _local: Optional[bool] = False
-    _container: Optional[str] = None
+    _evidence: Optional[str] = None
     _artifacts: Optional[list] = None
     _categories: Optional[list] = None
     src: Source = field(init=False)
@@ -30,18 +29,10 @@ class ForensicEvidence(CaseConfig):
         super().__post_init__()
 
         # set src
-        self.src = Source(
-            _local=self._local,
-            _container=self._container,
-        )
+        self.src = Source(_evidence=self._evidence)
 
         # set evidence_id
-        self.evidence_id = "-".join(
-            [
-                str(self.case_id),
-                str(self._evidence_number),
-            ]
-        )
+        self.evidence_id = "-".join([str(self.session_id), str(self._evidence_number)])
 
         # set forensic_artifacts
         for artifact, plugin in WINDOWS_PLUGINS.items():
