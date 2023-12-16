@@ -93,9 +93,9 @@ class DatabaseManager:
                     computer_name TEXT,
                     registered_owner TEXT,
                     source TEXT NOT NULL,
-                    case_id TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
                     evidence_number INTEGER NOT NULL,
-                    FOREIGN KEY (case_id) REFERENCES forensic_case (id)
+                    FOREIGN KEY (session_id) REFERENCES forensic_case (id)
                 )
                 """
                 )
@@ -109,7 +109,7 @@ class DatabaseManager:
         computer_name: str,
         registered_owner: str,
         source: str,
-        case_id: str,
+        session_id: str,
         evidence_number: int,
     ) -> bool:
         try:
@@ -122,7 +122,7 @@ class DatabaseManager:
                     computer_name, 
                     registered_owner, 
                     source, 
-                    case_id,
+                    session_id,
                     evidence_number)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -132,7 +132,7 @@ class DatabaseManager:
                         computer_name,
                         registered_owner,
                         source,
-                        case_id,
+                        session_id,
                         evidence_number,
                     ),
                 )

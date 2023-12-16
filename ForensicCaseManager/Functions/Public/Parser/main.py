@@ -1,6 +1,7 @@
 import os
 import argparse
 import logging
+import uuid
 from pathlib import Path
 
 from forensic_case import ForensicCase
@@ -21,9 +22,12 @@ def handle_case(case_directory, evidences, artifacts, categories):
     logger = logging.getLogger(__name__)
     logger.info("Starting Forensic Case Manager...")
 
+    session_id = str(uuid.uuid4())
+
     # Set ForensicEvidence list
     forensic_evidences = [
         ForensicEvidence(
+            session_id=session_id,
             case_directory=case_directory,
             _evidence_number=index,
             _evidence=evidence,
@@ -35,6 +39,7 @@ def handle_case(case_directory, evidences, artifacts, categories):
 
     # Set ForensicCase instance
     case = ForensicCase(
+        session_id=session_id,
         case_directory=case_directory,
         forensic_evidences=forensic_evidences,
     )

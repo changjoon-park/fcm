@@ -56,7 +56,7 @@ class ForensicCase(CaseConfig):
 
         # insert forensic_case data
         self.db_manager.insert_forensic_case(
-            id=self.case_id,
+            id=self.session_id,
             case_name=self.case_name,
             case_directory=str(self.case_directory),
         )
@@ -76,7 +76,7 @@ class ForensicCase(CaseConfig):
                 computer_name=forensic_evidence.computer_name,
                 registered_owner=forensic_evidence.registered_owner,
                 source=forensic_evidence.src.source_path,
-                case_id=self.case_id,
+                session_id=self.session_id,
                 evidence_number=forensic_evidence._evidence_number,
             ):
                 logger.info(
