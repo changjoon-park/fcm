@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 @dataclass(kw_only=True)
 class ForensicEvidence(CaseConfig):
     _evidence_number: int
-    _local: Optional[bool] = False
     _container: Optional[str] = None
     _artifacts: Optional[list] = None
     _categories: Optional[list] = None
@@ -31,7 +30,6 @@ class ForensicEvidence(CaseConfig):
 
         # set src
         self.src = Source(
-            _local=self._local,
             _container=self._container,
         )
 

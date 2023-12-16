@@ -37,9 +37,6 @@ if __name__ == "__main__":
         "-n", "--case_name", default=None, help="case name", dest="case_name"
     )
     parser.add_argument(
-        "-l", "--local", action="store_true", help="local to parse", dest="local"
-    )
-    parser.add_argument(
         "-c", "--container", default=None, help="container to parse", dest="container"
     )
     parser.add_argument(
@@ -62,9 +59,6 @@ if __name__ == "__main__":
     # Assigning values to case_name
     case_name = args.case_name
 
-    # Assigning values to local
-    local = args.local
-
     # Get container files from 'container' input
     containers = get_container_files(args.container) if args.container else []
 
@@ -86,7 +80,6 @@ if __name__ == "__main__":
             root_directory=root_directory,
             case_name=case_name,
             _evidence_number=index,
-            _local=local,
             _container=container,
             _artifacts=artifacts,
             _categories=categories,

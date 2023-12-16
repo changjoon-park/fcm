@@ -11,7 +11,6 @@ from lib.path_finder import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
 
-SOURCE_TYPE_LOCAL = "Local"
 SOURCE_TYPE_CONTAINER = "Container"
 
 logger = logging.getLogger(__name__)
@@ -26,12 +25,7 @@ class Source:
     type: str = field(init=False)
 
     def __post_init__(self):
-        if self._local:
-            self.source = Target.open("local")
-            self.source_path = "Local"
-            self.type = SOURCE_TYPE_LOCAL
-            self._target = self.source  #
-        elif self._container:
+        if self._container:
             self.source = Target.open(self._container)
             self.source_path = self._container
             self.type = SOURCE_TYPE_CONTAINER
