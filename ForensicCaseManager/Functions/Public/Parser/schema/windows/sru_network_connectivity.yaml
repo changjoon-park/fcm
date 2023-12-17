@@ -1,15 +1,15 @@
 Name: SRU Network
 Desc: Network Data extracted from the SRU Database
 Table:
-  - TableName: sru_network_connectivity
-    Columns:
-      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - ts: [TEXT]
-      - app: [TEXT]
-      - user: [TEXT]
-      - interface_luid: [INTEGER]
-      - l2_profile_id: [INTEGER]
-      - connected_time: [INTEGER]
-      - connect_start_time: [INTEGER]
-      - l2_profile_flags: [INTEGER]
-      - evidence_id: [TEXT]
+  TableName: sru_network_connectivity
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - ts: "TEXT"
+    - app: "TEXT"
+    - user: "TEXT"
+    - interface_luid: "INTEGER"
+    - l2_profile_id: "INTEGER"
+    - connected_time: "INTEGER"
+    - connect_start_time: "INTEGER"
+    - l2_profile_flags: "INTEGER"
+    - evidence_id: "TEXT"

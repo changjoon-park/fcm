@@ -1,14 +1,14 @@
 Name: EdgeAutofill
 Desc: Autofill data from the Edge browser
 Table:
-  - TableName: edge_autofill
-    Columns:
-      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - ts_created: [TEXT]
-      - value: [TEXT]
-      - count: [INTEGER]
-      - name: [TEXT]
-      - ts_last_used: [TEXT]
-      - browser_type: [TEXT]
-      - source: [TEXT]
-      - evidence_id: [TEXT]
+  TableName: edge_autofill
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - ts_created: "TEXT"
+    - value: "TEXT"
+    - count: "INTEGER"
+    - name: "TEXT"
+    - ts_last_used: "TEXT"
+    - browser_type: "TEXT"
+    - source: "TEXT"
+    - evidence_id: "TEXT"

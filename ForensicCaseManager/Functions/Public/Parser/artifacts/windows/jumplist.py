@@ -245,7 +245,6 @@ class JumpList(ForensicArtifact):
         parse_results = parser.dest_list
 
         if parse_results:
-            print(parse_results)
             # Get the application name from the app_id_list
             entry_filename = os.path.split(entry)[1]
             app_id = entry_filename[: entry_filename.rfind(".")]

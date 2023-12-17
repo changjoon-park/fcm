@@ -1,11 +1,11 @@
 Name: Runs and Runkeys Registry
 Desc: Auro run program data from the Windows Registry
 Table:
-  - TableName: reg_autorun
-    Columns:
-      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - ts: [INTEGER]
-      - name: [TEXT]
-      - path: [TEXT]
-      - key: [TEXT]
-      - evidence_id: [TEXT]
+  TableName: reg_autorun
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - ts: "INTEGER"
+    - name: "TEXT"
+    - path: "TEXT"
+    - key: "TEXT"
+    - evidence_id: "TEXT"

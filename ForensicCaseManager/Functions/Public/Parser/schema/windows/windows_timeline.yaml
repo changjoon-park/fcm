@@ -1,31 +1,31 @@
 Name: WindowsTimeline
 Desc: Data extracted from the Windows Timeline
 Table:
-  - TableName: windows_timeline
-    Columns:
-      - id: [INTEGER PRIMARY KEY AUTOINCREMENT]
-      - start_time: [INTEGER]
-      - end_time: [INTEGER]
-      # - last_modified_time: [INTEGER]
-      # - last_modified_on_client: [INTEGER]
-      # - original_last_modified_on_client: [INTEGER]
-      # - expiration_time: [INTEGER]
-      # - app_id: [TEXT]
-      # - enterprise_id: [TEXT]
-      # - app_activity_id: [TEXT]
-      # - group_app_activity_id: [TEXT]
-      # - group: [TEXT]
-      # - activity_type: [TEXT]
-      # - activity_status: [TEXT]
-      # - priority: [INTEGER]
-      # - match_id: [TEXT]
-      # - etag: [TEXT]
-      # - tag: [TEXT]
-      # - is_local_only: [INTEGER]
-      # - created_in_cloud: [INTEGER]
-      # - platform_device_id: [TEXT]
-      # - package_id_hash: [TEXT]
-      # - payload: [TEXT]
-      # - original_payload: [TEXT]
-      # - clipboard_payload: [TEXT]
-      - evidence_id: [TEXT]
+  TableName: windows_timeline
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - start_time: "INTEGER"
+    - end_time: "INTEGER"
+    # - last_modified_time: "INTEGER"
+    # - last_modified_on_client: "INTEGER"
+    # - original_last_modified_on_client: "INTEGER"
+    # - expiration_time: "INTEGER"
+    # - app_id: "TEXT"
+    # - enterprise_id: "TEXT"
+    # - app_activity_id: "TEXT"
+    # - group_app_activity_id: "TEXT"
+    # - group: "TEXT"
+    # - activity_type: "TEXT"
+    # - activity_status: "TEXT"
+    # - priority: "INTEGER"
+    # - match_id: "TEXT"
+    # - etag: "TEXT"
+    # - tag: "TEXT"
+    # - is_local_only: "INTEGER"
+    # - created_in_cloud: "INTEGER"
+    # - platform_device_id: "TEXT"
+    # - package_id_hash: "TEXT"
+    # - payload: "TEXT"
+    # - original_payload: "TEXT"
+    # - clipboard_payload: "TEXT"
+    - evidence_id: "TEXT"

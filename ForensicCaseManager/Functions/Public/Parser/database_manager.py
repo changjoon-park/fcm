@@ -157,52 +157,46 @@ class DatabaseManager:
                     ),
                 )
 
-    # create/insert artifact table
-    def create_artifact_table_from_yaml(self, schema_file: Path) -> str:
+    def create_artifact_table_from_yaml(self, schema_file: Path):
+        if not schema_file or not schema_file.exists():
+            logger.error(f"Schema file {schema_file} does not exist")
+            return
+
         try:
             with open(schema_file, "r", encoding="utf-8") as f:
-                # load schema file (yaml)
-                schema = yaml.load(f, Loader=yaml.FullLoader)  # ? dict
+                schema = yaml.load(f, Loader=yaml.FullLoader)
 
-                for table in schema.get("Table", []):
-                    # get table name and columns
-                    table_name = table.get("TableName", None)  # ? str
-                    columns = table.get("Columns", [])  # ? list of dict(entity: type)
+            table_info = schema.get("Table", {})
+            table_name = table_info.get("TableName")
+            if not table_name:
+                logger.error("No table name specified in schema")
+                return
 
-                    entity_defs = ", ".join(
-                        [
-                            f"{entity} {types[0]}"
-                            for column in columns
-                            for entity, types in column.items()
-                        ]
-                    )
+            column_defs = ", ".join(
+                f"{column_name} {column_type}"
+                for column in table_info["Columns"]
+                for column_name, column_type in column.items()
+            )
 
-                    try:
-                        create_statement = (
-                            f"CREATE TABLE IF NOT EXISTS {table_name} ({entity_defs})"
-                        )
-                        with open_db(self.database) as cursor:
-                            cursor.execute(create_statement)
-                    except Exception as e:
-                        logger.error(
-                            f"Failed executing statement: {create_statement} / {e}"
-                        )
-                    return table_name
+            create_statement = (
+                f"CREATE TABLE IF NOT EXISTS {table_name} ({column_defs})"
+            )
+
+            with open_db(self.database) as cursor:
+                cursor.execute(create_statement)
+
         except Exception as e:
-            if not schema_file:
-                logger.exception(
-                    f"Input Error: None yaml file is given. Please check your input yaml file. / {e}"
-                )
-            else:
-                logger.exception(
-                    f"Error: Unable to create artifact table from [{schema_file}]: {e}"
-                )
+            logger.exception(f"Failed to create table {table_name} from YAML: {e}")
 
     def insert_artifact_data(
         self,
         artifact: str,
         data: list[dict],
     ):
+        if not data:
+            logger.warning("No data provided to insert into artifact table")
+            return
+
         try:
             # Prepare the list of tuples for batch insertion
             prepared_data = []
@@ -231,5 +225,9 @@ class DatabaseManager:
             )
             with open_db(self.database) as cursor:
                 cursor.executemany(statement, prepared_data)
+                logger.info(
+                    f"Inserted {len(data)} {artifact} entries into {artifact} table"
+                )
+
         except Exception as e:
-            logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")
+            logger.exception(f"Error inserting data into {artifact} table: {e}")

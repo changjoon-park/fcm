@@ -112,7 +112,7 @@ class ForensicEvidence(CaseConfig):
             ):
                 for schema_file in schema_files:
                     self.db_manager.create_artifact_table_from_yaml(
-                        schema_file=schema_file,
+                        schema_file=schema_file
                     )
             else:
                 logger.error(
@@ -125,7 +125,7 @@ class ForensicEvidence(CaseConfig):
                 # execute insert query when data is not empty
                 if data:
                     logger.info(
-                        f"{len(data)} {artifact} entries has been parsed from {self.evidence_id}"
+                        f"Parsed {len(data)} {artifact} entries from {self.evidence_id}"
                     )
                     self.db_manager.insert_artifact_data(
                         artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
