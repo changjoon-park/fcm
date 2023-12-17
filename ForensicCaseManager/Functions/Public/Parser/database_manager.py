@@ -2,11 +2,31 @@ import sqlite3
 import yaml
 import json
 import logging
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 
+from lib.plugins import ARTIFACT_CATEGORIES
+from settings import (
+    TABLE_NAME_FORENSIC_CASE,
+    TABLE_NAME_EVIDENCES,
+    TABLE_NAME_ARTIFACT_CATEGORY,
+)
+
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def open_db(db_path: Path):
+    try:
+        conn = sqlite3.connect(db_path)
+        yield conn.cursor()
+    except Exception as e:
+        logger.error(f"Error: connect to database {db_path} / failed: {e}")
+    finally:
+        conn.commit()
+        conn.close()
 
 
 @dataclass(kw_only=True)
@@ -16,47 +36,31 @@ class DatabaseManager:
     def __post_init__(self):
         pass
 
-    def connect(self):
-        try:
-            self.conn = sqlite3.connect(self.database)
-            self.c = self.conn.cursor()
-        except Exception as e:
-            logger.error(f"Error: connect to database {self.database} / failed: {e}")
-
-    def close(self):
-        self.conn.close()
-
     def is_table_exist(self, table_name: str) -> bool:
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                SELECT name
-                FROM sqlite_master
-                WHERE type='table' AND name=?
-                """,
-                    (table_name,),
-                )
-                return self.c.fetchone() is not None
-        except Exception as e:
-            logger.error(f"Error: {e}")
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                """
+            SELECT name
+            FROM sqlite_master
+            WHERE type='table' AND name=?
+            """,
+                (table_name,),
+            )
+            return cursor.fetchone() is not None
 
     # create/insert forensic_case table
     def create_forensic_case_table(self):
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                CREATE TABLE IF NOT EXISTS forensic_case (
-                    id TEXT PRIMARY KEY,
-                    case_name TEXT NOT NULL,
-                    case_directory TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-                )
-                """
-                )
-        except Exception as e:
-            logger.error(f"Error: {e}")
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                f"""
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME_FORENSIC_CASE} (
+                id TEXT PRIMARY KEY,
+                case_name TEXT NOT NULL,
+                case_directory TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+            """
+            )
 
     def insert_forensic_case(
         self,
@@ -64,43 +68,37 @@ class DatabaseManager:
         case_name: str,
         case_directory: str,
     ) -> bool:
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                INSERT INTO forensic_case (id, case_name, case_directory)
-                VALUES (?, ?, ?)
-                """,
-                    (
-                        id,
-                        case_name,
-                        case_directory,
-                    ),
-                )
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                f"""
+            INSERT INTO {TABLE_NAME_FORENSIC_CASE} (id, case_name, case_directory)
+            VALUES (?, ?, ?)
+            """,
+                (
+                    id,
+                    case_name,
+                    case_directory,
+                ),
+            )
             return True
-        except Exception as e:
-            logger.error(f"Error: {e}")
 
     # create/insert evidences table
     def create_evidences_table(self):
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                CREATE TABLE IF NOT EXISTS evidences (
-                    id TEXT NOT NULL PRIMARY KEY,
-                    evidence_label TEXT NOT NULL,
-                    computer_name TEXT,
-                    registered_owner TEXT,
-                    source TEXT NOT NULL,
-                    session_id TEXT NOT NULL,
-                    evidence_number INTEGER NOT NULL,
-                    FOREIGN KEY (session_id) REFERENCES forensic_case (id)
-                )
-                """
-                )
-        except Exception as e:
-            logger.error(f"Error: {e}")
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                f"""
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME_EVIDENCES} (
+                id TEXT NOT NULL PRIMARY KEY,
+                evidence_label TEXT NOT NULL,
+                computer_name TEXT,
+                registered_owner TEXT,
+                source TEXT NOT NULL,
+                session_id TEXT NOT NULL,
+                evidence_number INTEGER NOT NULL,
+                FOREIGN KEY (session_id) REFERENCES {TABLE_NAME_FORENSIC_CASE} (id)
+            )
+            """
+            )
 
     def insert_evidences(
         self,
@@ -112,54 +110,45 @@ class DatabaseManager:
         session_id: str,
         evidence_number: int,
     ) -> bool:
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                INSERT INTO evidences (
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                f"""
+            INSERT INTO {TABLE_NAME_EVIDENCES} (
+                id,
+                evidence_label, 
+                computer_name, 
+                registered_owner, 
+                source, 
+                session_id,
+                evidence_number)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
                     id,
-                    evidence_label, 
-                    computer_name, 
-                    registered_owner, 
-                    source, 
+                    evidence_label,
+                    computer_name,
+                    registered_owner,
+                    source,
                     session_id,
-                    evidence_number)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                    (
-                        id,
-                        evidence_label,
-                        computer_name,
-                        registered_owner,
-                        source,
-                        session_id,
-                        evidence_number,
-                    ),
-                )
+                    evidence_number,
+                ),
+            )
             return True
-        except Exception as e:
-            logger.exception(f"Error: Unable to insert evidences table: {e}")
 
     # create/insert artifact category table
     def create_artifact_category_table(self):
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                CREATE TABLE IF NOT EXISTS artifact_category (
-                    id INTEGER PRIMARY KEY,
-                    category TEXT NOT NULL
-                )"""
-                )
-        except Exception as e:
-            logger.exception(f"Error: Unable to create artifact_category table: {e}")
-
-    def insert_artifact_category(self, id: int, category: str):
-        try:
-            with self.conn:
-                self.c.execute(
-                    """
-                INSERT INTO artifact_category (id, category)
+        with open_db(self.database) as cursor:
+            cursor.execute(
+                f"""
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME_ARTIFACT_CATEGORY} (
+                id INTEGER PRIMARY KEY,
+                category TEXT NOT NULL
+            )"""
+            )
+            for id, category in ARTIFACT_CATEGORIES:
+                cursor.execute(
+                    f"""
+                INSERT INTO {TABLE_NAME_ARTIFACT_CATEGORY} (id, category)
                 VALUES (?, ?)
                 """,
                     (
@@ -167,8 +156,6 @@ class DatabaseManager:
                         category,
                     ),
                 )
-        except Exception as e:
-            logger.exception(f"Error: Unable to insert artifact_category table: {e}")
 
     # create/insert artifact table
     def create_artifact_table_from_yaml(self, schema_file: Path) -> str:
@@ -194,8 +181,8 @@ class DatabaseManager:
                         create_statement = (
                             f"CREATE TABLE IF NOT EXISTS {table_name} ({entity_defs})"
                         )
-                        with self.conn:
-                            self.c.execute(create_statement)
+                        with open_db(self.database) as cursor:
+                            cursor.execute(create_statement)
                     except Exception as e:
                         logger.error(
                             f"Failed executing statement: {create_statement} / {e}"
@@ -242,12 +229,7 @@ class DatabaseManager:
             statement = (
                 f"INSERT INTO {artifact} ({', '.join(keys)}) VALUES ({placeholders})"
             )
-
-            try:
-                # Execute batch insertion
-                with self.conn:
-                    self.c.executemany(statement, prepared_data)
-            except Exception as e:
-                logger.error(f"Falied executing statement: {statement} / {e}")
+            with open_db(self.database) as cursor:
+                cursor.executemany(statement, prepared_data)
         except Exception as e:
             logger.exception(f"Unable to insert artifact data to {artifact} table: {e}")

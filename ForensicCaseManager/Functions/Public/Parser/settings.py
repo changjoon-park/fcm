@@ -7,6 +7,11 @@ current_directory = Path(__file__).parent.absolute()
 DATABASE_NAME = "case.db"
 LOGFILE_NAME = "test.log"
 
+# Database Table Name
+TABLE_NAME_FORENSIC_CASE = "forensic_case"
+TABLE_NAME_EVIDENCES = "evidences"
+TABLE_NAME_ARTIFACT_CATEGORY = "artifact_category"
+
 # Artifact Schema
 ARTIFACT_SCHEMA_FILESYSTEM = current_directory / "schema" / "filesystem"
 ARTIFACT_SCHEMA_WINDOWS = current_directory / "schema" / "windows"

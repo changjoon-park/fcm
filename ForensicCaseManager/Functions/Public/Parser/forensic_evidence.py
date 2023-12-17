@@ -105,7 +105,6 @@ class ForensicEvidence(CaseConfig):
             forensic_artifact.parse(descending=descending)
 
     def export_evidence(self) -> None:
-        self.db_manager.connect()
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
             if schema_files := ARTIFACT_SCHEMA.get(
@@ -132,4 +131,3 @@ class ForensicEvidence(CaseConfig):
                         artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
                         data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
                     )
-        self.db_manager.close()

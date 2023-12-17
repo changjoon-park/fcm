@@ -48,8 +48,6 @@ class ForensicCase(CaseConfig):
         self._init_table_artifact_category()
 
     def _init_table_forensic_case(self):
-        self.db_manager.connect()
-
         # create forensic_case table
         if not self.db_manager.is_table_exist("forensic_case"):
             self.db_manager.create_forensic_case_table()
@@ -60,11 +58,9 @@ class ForensicCase(CaseConfig):
             case_name=self.case_name,
             case_directory=str(self.case_directory),
         )
-        self.db_manager.close()
 
     def _init_table_evidences(self):
         for forensic_evidence in self.forensic_evidences:
-            self.db_manager.connect()
             # create "evidences" table
             if not self.db_manager.is_table_exist("evidences"):
                 self.db_manager.create_evidences_table()
@@ -82,18 +78,9 @@ class ForensicCase(CaseConfig):
                 logger.info(
                     f"Inserted {forensic_evidence.evidence_id} into evidences table in {self.case_name} case"
                 )
-            self.db_manager.close()
 
     def _init_table_artifact_category(self):
-        self.db_manager.connect()
-        if not self.db_manager.is_table_exist("artifact_category"):
-            self.db_manager.create_artifact_category_table()
-            for id, category in ARTIFACT_CATEGORIES:
-                self.db_manager.insert_artifact_category(
-                    id=id,
-                    category=category,
-                )
-        self.db_manager.close()
+        self.db_manager.create_artifact_category_table()
 
     def _parse_evidences_all(self):
         for forensic_evidence in self.forensic_evidences:
