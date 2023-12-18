@@ -11,3 +11,4 @@ Table:
     - lease_terminates_time: "TEXT"
     - dhcp_server: "TEXT"
     - source: "TEXT"
+    - evidence_id: "TEXT"

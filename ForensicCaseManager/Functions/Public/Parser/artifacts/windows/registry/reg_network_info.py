@@ -26,7 +26,7 @@ class NetworkInfo(ForensicArtifact):
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.network_interface())
             ],
-            key=lambda record: record["ipaddr"],
+            key=lambda record: record["lease_obtained_time"],
             reverse=descending,
         )
 
@@ -84,6 +84,12 @@ class NetworkInfo(ForensicArtifact):
                         )
                     else:
                         lease_terminates_time = None
+
+                    if not lease_obtained_time:
+                        lease_obtained_time = self.ts.base_datetime_windows
+
+                    if not lease_terminates_time:
+                        lease_terminates_time = self.ts.base_datetime_windows
 
                     yield {
                         "ipaddr": ipaddr,

@@ -44,8 +44,9 @@ class ForensicCase(CaseConfig):
         # set evidences table
         self._init_table_evidences()
 
+        # TODO: Make a connection to the Artifacts
         # set artifact category table
-        self._init_table_artifact_category()
+        # self._init_table_artifact_category()
 
     def _init_table_forensic_case(self):
         # create forensic_case table

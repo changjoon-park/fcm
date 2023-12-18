@@ -14,3 +14,4 @@ Table:
     - default_gateway_mac: "TEXT"
     - signature: "TEXT"
     - source: "TEXT"
+    - evidence_id: "TEXT"
