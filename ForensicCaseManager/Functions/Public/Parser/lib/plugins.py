@@ -20,7 +20,7 @@ from artifacts.windows.registry import (
     reg_userassist,
     reg_shimcache,
     reg_bam,
-    network_info,
+    reg_network_info,
     shellbags,
     reg_usb,
     reg_autorun,
@@ -130,6 +130,10 @@ ARTIFACT_SCHEMA = {
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATIONS}.yaml",
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATION_FILES}.yaml",
     ],
+    ART_REGISTRY_NETWORK_INFO: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_HISTORY}.yaml",
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_INTERFACE}.yaml",
+    ],
 }
 
 
@@ -223,8 +227,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_bam.BAM,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_NETWORK_INFO: Plugin(
-        artifact=network_info.NetworkInfo,
+    ART_REGISTRY_NETWORK_INFO: Plugin(
+        artifact=reg_network_info.NetworkInfo,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
     ART_SHELLBAGS: Plugin(

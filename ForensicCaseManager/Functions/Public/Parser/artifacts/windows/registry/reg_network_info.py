@@ -1,39 +1,11 @@
-import json
 import datetime
 import struct
 
 from dissect.target.exceptions import RegistryError
-from dissect.target.helpers.record import TargetRecordDescriptor
-
 from util.converter import convertfrom_extended_ascii
+
 from forensic_artifact import Source, ForensicArtifact
-
-NetworkHistoryRecord = TargetRecordDescriptor(
-    "windows/registry/nethist",
-    [
-        ("datetime", "created"),
-        ("datetime", "last_connected"),
-        ("string", "profile_guid"),
-        ("string", "profile_name"),
-        ("string", "description"),
-        ("string", "dns_suffix"),
-        ("string", "first_network"),
-        ("string", "default_gateway_mac"),
-        ("string", "signature"),
-    ],
-)
-
-NetworkInterfaceRecord = TargetRecordDescriptor(
-    "windows/registry/network_interface",
-    [
-        # ("bytes", "enable_dhcp"),
-        ("string", "ipaddr"),
-        ("string", "dhcp_ipaddr"),
-        ("datetime", "lease_obtained_time"),
-        ("datetime", "lease_terminates_time"),
-        ("string", "dhcp_server"),
-    ],
-)
+from settings import RSLT_REGISTRY_NETWORK_HISTORY, RSLT_REGISTRY_NETWORK_INTERFACE
 
 
 class NetworkInfo(ForensicArtifact):
@@ -43,27 +15,24 @@ class NetworkInfo(ForensicArtifact):
     def parse(self, descending: bool = False):
         network_history = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.network_history()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.network_history())
             ],
+            key=lambda record: record["created"],
             reverse=descending,
         )
-
         network_interface = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.network_interface()
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.network_interface())
             ],
+            key=lambda record: record["ipaddr"],
             reverse=descending,
         )
 
         self.result = {
-            "network_interface": network_interface,
-            "network_history": network_history,
+            RSLT_REGISTRY_NETWORK_INTERFACE: network_interface,
+            RSLT_REGISTRY_NETWORK_HISTORY: network_history,
         }
 
     def network_interface(self):
@@ -116,14 +85,14 @@ class NetworkInfo(ForensicArtifact):
                     else:
                         lease_terminates_time = None
 
-                    yield NetworkInterfaceRecord(
-                        ipaddr=ipaddr,
-                        dhcp_ipaddr=dhcp_ipaddr,
-                        lease_obtained_time=lease_obtained_time,
-                        lease_terminates_time=lease_terminates_time,
-                        dhcp_server=dhcp_server,
-                        _target=self._target,
-                    )
+                    yield {
+                        "ipaddr": ipaddr,
+                        "dhcp_ipaddr": dhcp_ipaddr,
+                        "lease_obtained_time": lease_obtained_time,
+                        "lease_terminates_time": lease_terminates_time,
+                        "dhcp_server": dhcp_server,
+                        "evidence_id": self.evidence_id,
+                    }
 
     def network_history(self):
         """Return attached network history.
@@ -155,20 +124,20 @@ class NetworkInfo(ForensicArtifact):
                             profile.value("DateLastConnected").value
                         )
 
-                        yield NetworkHistoryRecord(
-                            created=created,
-                            last_connected=last_connected,
-                            profile_guid=guid,
-                            profile_name=profile.value("ProfileName").value,
-                            description=sig.value("Description").value,
-                            dns_suffix=sig.value("DnsSuffix").value,
-                            first_network=sig.value("FirstNetwork").value,
-                            default_gateway_mac=sig.value(
+                        yield {
+                            "created": created,
+                            "last_connected": last_connected,
+                            "profile_guid": guid,
+                            "profile_name": profile_name,
+                            "description": sig.value("Description").value,
+                            "dns_suffix": sig.value("DnsSuffix").value,
+                            "first_network": sig.value("FirstNetwork").value,
+                            "default_gateway_mac": sig.value(
                                 "DefaultGatewayMac"
                             ).value.hex(),
-                            signature=sig.name,
-                            _target=self._target,
-                        )
+                            "signature": sig.name,
+                            "evidence_id": self.evidence_id,
+                        }
 
     def find_profile(self, guid):
         for reg_path in self.iter_key(name="Profiles"):

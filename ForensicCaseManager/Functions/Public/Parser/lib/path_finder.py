@@ -244,7 +244,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_USER_ACCOUNT,
     ),
-    ART_NETWORK_INFO: ArtifactPath(
+    ART_REGISTRY_NETWORK_INFO: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_NETWORK_INFO,
     ),

@@ -1,0 +1,16 @@
+Name: Network History
+Desc: Network History data from Windows Registry 
+Table:
+  TableName: reg_network_history
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - created: "TEXT"
+    - last_connected: "TEXT"
+    - profile_guid: "TEXT"
+    - profile_name: "TEXT"
+    - description: "TEXT"
+    - dns_suffix: "TEXT"
+    - first_network: "TEXT"
+    - default_gateway_mac: "TEXT"
+    - signature: "TEXT"
+    - source: "TEXT"

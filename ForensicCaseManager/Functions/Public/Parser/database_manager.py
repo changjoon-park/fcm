@@ -50,17 +50,18 @@ class DatabaseManager:
 
     # create/insert forensic_case table
     def create_forensic_case_table(self):
-        with open_db(self.database) as cursor:
-            cursor.execute(
-                f"""
-            CREATE TABLE IF NOT EXISTS {TABLE_NAME_FORENSIC_CASE} (
-                id TEXT PRIMARY KEY,
-                case_name TEXT NOT NULL,
-                case_directory TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-            )
-            """
-            )
+        if not self.is_table_exist(TABLE_NAME_FORENSIC_CASE):
+            with open_db(self.database) as cursor:
+                cursor.execute(
+                    f"""
+                CREATE TABLE IF NOT EXISTS {TABLE_NAME_FORENSIC_CASE} (
+                    id TEXT PRIMARY KEY,
+                    case_name TEXT NOT NULL,
+                    case_directory TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+                )
+                """
+                )
 
     def insert_forensic_case(
         self,

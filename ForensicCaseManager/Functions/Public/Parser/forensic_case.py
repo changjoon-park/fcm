@@ -49,8 +49,7 @@ class ForensicCase(CaseConfig):
 
     def _init_table_forensic_case(self):
         # create forensic_case table
-        if not self.db_manager.is_table_exist("forensic_case"):
-            self.db_manager.create_forensic_case_table()
+        self.db_manager.create_forensic_case_table()
 
         # insert forensic_case data
         self.db_manager.insert_forensic_case(
