@@ -98,7 +98,7 @@ REGISTRY_KEY_SHIMCACHE = [
 REGISTRY_KEY_USERASSIST = [
     "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist"
 ]
-REGISTRY_KEY_NETWORK_INFO = {
+REGISTRY_KEY_NETWORKINFO = {
     "Signatures": [
         "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Networklist\\Signatures"
     ],
@@ -325,13 +325,13 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_BAM,
     ),
-    ART_REGISTRY_USER_ACCOUNT: ArtifactPath(
+    ART_REGISTRY_USERACCOUNT: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_USER_ACCOUNT,
     ),
-    ART_REGISTRY_NETWORK_INFO: ArtifactPath(
+    ART_REGISTRY_NETWORKINFO: ArtifactPath(
         directory=None,
-        entry=REGISTRY_KEY_NETWORK_INFO,
+        entry=REGISTRY_KEY_NETWORKINFO,
     ),
     ART_REGISTRY_SHELLBAGS: ArtifactPath(
         directory=None,

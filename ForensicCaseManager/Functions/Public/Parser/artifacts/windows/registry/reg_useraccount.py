@@ -8,8 +8,8 @@ from dissect import cstruct
 
 from forensic_artifact import Source, ForensicArtifact
 from settings import (
-    RSLT_REGISTRY_USER_ACCOUNT_SAM,
-    RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST,
+    RSLT_REGISTRY_USERACCOUNT_SAM,
+    RSLT_REGISTRY_USERACCOUNT_PROFILELIST,
 )
 
 logger = logging.getLogger(__name__)
@@ -287,8 +287,8 @@ class UserAccount(ForensicArtifact):
         )
 
         self.result = {
-            RSLT_REGISTRY_USER_ACCOUNT_SAM: reg_user_account_sam,
-            RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST: reg_user_account_profilelist,
+            RSLT_REGISTRY_USERACCOUNT_SAM: reg_user_account_sam,
+            RSLT_REGISTRY_USERACCOUNT_PROFILELIST: reg_user_account_profilelist,
         }
 
         """

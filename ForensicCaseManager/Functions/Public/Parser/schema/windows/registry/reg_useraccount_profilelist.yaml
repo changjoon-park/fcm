@@ -1,7 +1,7 @@
 Name: User Account Registry
 Desc: UserAccount data from the Windows Registry (ProfileList)
 Table:
-  TableName: reg_user_account_profilelist
+  TableName: reg_useraccount_profilelist
   Columns:
     - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
     - rid: "INTEGER"

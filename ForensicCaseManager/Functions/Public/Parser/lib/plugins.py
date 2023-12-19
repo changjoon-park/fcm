@@ -16,15 +16,15 @@ from artifacts.windows import (
 )
 from artifacts.windows.registry import (
     reg_amcache,
-    reg_user_account,
     reg_userassist,
     reg_shimcache,
     reg_bam,
-    reg_network_info,
     reg_usb,
     reg_autorun,
     reg_shellbags,
     reg_systeminfo,
+    reg_networkinfo,
+    reg_useraccount,
     mru,
 )
 from artifacts.apps.browsers import chrome, edge, iexplore
@@ -113,9 +113,9 @@ ARTIFACT_SCHEMA = {
     ART_REGISTRY_USERASSIST: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USERASSIST}.yaml",
     ],
-    ART_REGISTRY_USER_ACCOUNT: [
-        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_SAM}.yaml",
-        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USER_ACCOUNT_PROFILELIST}.yaml",
+    ART_REGISTRY_USERACCOUNT: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USERACCOUNT_SAM}.yaml",
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_USERACCOUNT_PROFILELIST}.yaml",
     ],
     ART_REGISTRY_BAM: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_BAM}.yaml",
@@ -130,7 +130,7 @@ ARTIFACT_SCHEMA = {
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATIONS}.yaml",
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_AMCACHE_APPLICATION_FILES}.yaml",
     ],
-    ART_REGISTRY_NETWORK_INFO: [
+    ART_REGISTRY_NETWORKINFO: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_HISTORY}.yaml",
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_INTERFACE}.yaml",
     ],
@@ -217,8 +217,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_amcache.Amcache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_USER_ACCOUNT: Plugin(
-        artifact=reg_user_account.UserAccount,
+    ART_REGISTRY_USERACCOUNT: Plugin(
+        artifact=reg_useraccount.UserAccount,
         category=CAT_ACCOUNT_USAGE,
     ),
     ART_REGISTRY_USERASSIST: Plugin(
@@ -233,8 +233,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_bam.BAM,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_NETWORK_INFO: Plugin(
-        artifact=reg_network_info.NetworkInfo,
+    ART_REGISTRY_NETWORKINFO: Plugin(
+        artifact=reg_networkinfo.NetworkInfo,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
     ART_REGISTRY_SHELLBAGS: Plugin(

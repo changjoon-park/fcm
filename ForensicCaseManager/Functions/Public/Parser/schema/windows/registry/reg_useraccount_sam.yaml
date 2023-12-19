@@ -1,7 +1,7 @@
 Name: User Account Registry
 Desc: UserAccount data from the Windows Registry (SAM)
 Table:
-  TableName: reg_user_account_sam
+  TableName: reg_useraccount_sam
   Columns:
     - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
     - rid: "INTEGER"
