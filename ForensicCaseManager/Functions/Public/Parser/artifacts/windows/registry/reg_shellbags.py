@@ -1,9 +1,8 @@
-import json
+import logging
 
+from dissect.cstruct import cstruct
 from dissect.target.exceptions import RegistryKeyNotFoundError
 from dissect.target.plugins.os.windows.regf.shellbags import (
-    c_bag,
-    ShellBagRecord,
     DELEGATE_ITEM_IDENTIFIER,
     UNKNOWN,
     UNKNOWN0,
@@ -30,7 +29,238 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
 )
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import RSLT_REGISTRY_SHELLBAGS
 
+logger = logging.getLogger(__name__)
+
+bag_def = """
+enum ROOTFOLDER_ID : uint8 {
+    INTERNET_EXPLORER   = 0x00,
+    LIBRARIES           = 0x42,
+    USERS               = 0x44,
+    MY_DOCUMENTS        = 0x48,
+    MY_COMPUTER         = 0x50,
+    NETWORK             = 0x58,
+    RECYCLE_BIN         = 0x60,
+    INTERNET_EXPLORER   = 0x68,
+    UNKNOWN             = 0x70,
+    MY_GAMES            = 0x80
+};
+
+struct SHITEM_UNKNOWN0 {
+    uint16  size;
+    uint8   type;
+};
+
+struct SHITEM_UNKNOWN1 {
+    uint16  size;
+    uint8   type;
+};
+
+struct SHITEM_ROOT_FOLDER {
+    uint16          size;
+    uint8           type;
+    ROOTFOLDER_ID   folder_id;
+    char            guid[16];
+};
+
+struct SHITEM_VOLUME {
+    uint16  size;
+    uint8   type;
+};
+
+struct SHITEM_FILE_ENTRY {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint32  file_size;
+    uint32  modification_time;
+    uint16  file_attribute_flags;
+};
+
+struct SHITEM_NETWORK {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint8   flags;
+    char    location[];
+};
+
+struct SHITEM_COMPRESSED_FOLDER {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  unk1;
+};
+
+struct SHITEM_URI {
+    uint16  size;
+    uint8   type;
+    uint8   flags;
+    uint16  data_size;
+};
+
+struct SHITEM_CONTROL_PANEL {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    char    unk1[10];
+    char    guid[16];
+};
+
+struct SHITEM_CONTROL_PANEL_CATEGORY {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint32  signature;
+    uint32  category;
+};
+
+struct SHITEM_CDBURN {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint32  signature;
+    uint32  unk1;
+    uint32  unk2;
+};
+
+struct SHITEM_GAME_FOLDER {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint32  signature;
+    char    identifier[16];
+    uint64  unk1;
+};
+
+struct SHITEM_CONTROL_PANEL_CPL_FILE {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint32  signature;
+    uint32  unk1;
+    uint32  unk2;
+    uint32  unk3;
+    uint16  name_offset;
+    uint16  comments_offset;
+    wchar   cpl_path[];
+    wchar   name[];
+    wchar   comments[];
+};
+
+struct SHITEM_MTP_PROPERTY {
+    char    format_identifier[16];
+    uint32  value_identifier;
+    uint32  value_type;
+};
+
+struct SHITEM_MTP_FILE_ENTRY {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  data_size;
+    uint32  data_signature;
+    uint32  unk1;
+    uint16  unk2;
+    uint16  unk3;
+    uint16  unk4;
+    uint16  unk5;
+    uint32  unk6;
+    uint64  modification_time;
+    uint64  creation_time;
+    char    content_type_folder[16];
+    uint32  unk7;
+    uint32  folder_name_size_1;
+    uint32  folder_name_size_2;
+    uint32  folder_identifier_size;
+    wchar   folder_name_1[folder_name_size_1];
+    wchar   folder_name_2[folder_name_size_2];
+    uint32  unk8;
+    char    class_identifier[16];
+    uint32  num_properties;
+};
+
+struct SHITEM_MTP_VOLUME_GUID {
+    wchar   guid[39];
+};
+
+struct SHITEM_MTP_VOLUME {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  data_size;
+    uint32  data_signature;
+    uint32  unk1;
+    uint16  unk2;
+    uint16  unk3;
+    uint16  unk4;
+    uint16  unk5;
+    uint32  unk6;
+    uint64  unk7;
+    uint32  unk8;
+    uint32  name_size;
+    uint32  identifier_size;
+    uint32  filesystem_size;
+    uint32  num_guid;
+    wchar   name[name_size];
+    wchar   identifier[identifier_size];
+    wchar   filesystem[filesystem_size];
+    SHITEM_MTP_VOLUME_GUID     guids[num_guid];
+    uint32  unk9;
+    char    class_identifier[16];
+    uint32  num_properties;
+};
+
+struct SHITEM_USERS_PROPERTY_VIEW {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  data_size;
+    uint32  data_signature;
+    uint16  property_store_size;
+    uint16  identifier_size;
+    char    identifier[identifier_size];
+    char    property_store[property_store_size];
+    uint16  unk1;
+};
+
+struct SHITEM_UNKNOWN_0x74 {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  data_size;
+    uint32  data_signature;
+    uint16  subitem_size;
+};
+
+struct SHITEM_UNKNOWN_0x74_SUBITEM {
+    uint8   type;
+    uint8   unk1;
+    uint32  file_size;
+    uint32  modification_time;
+    uint16  file_attribute_flags;
+    char    primary_name[];
+};
+
+struct SHITEM_DELEGATE {
+    uint16  size;
+    uint8   type;
+    uint8   unk0;
+    uint16  data_size;
+    char    data[data_size - 2];
+    char    delegate_identifier[16];
+    char    shell_identifier[16];
+};
+
+struct EXTENSION_BLOCK_HEADER {
+    uint16  size;
+    uint16  version;
+    uint32  signature;
+};
+"""
+c_bag = cstruct()
+c_bag.load(bag_def)
 
 class ShellBags(ForensicArtifact):
     """Windows Shellbags plugin.
@@ -45,16 +275,13 @@ class ShellBags(ForensicArtifact):
     def parse(self, descending: bool = False):
         shellbags = sorted(
             [
-                json.dumps(
-                    record._packdict(), indent=2, default=str, ensure_ascii=False
-                )
-                for record in self.shellbags()
+                self.validate_record(index=index, record=record) for index, record in enumerate(self.shellbags())
             ],
+            key=lambda record: record["path"],
             reverse=descending,
         )
-
         self.result = {
-            "shellbags": shellbags,
+            RSLT_REGISTRY_SHELLBAGS: shellbags,
         }
 
     def shellbags(self):
@@ -76,7 +303,7 @@ class ShellBags(ForensicArtifact):
                 except RegistryKeyNotFoundError:
                     continue
                 except Exception:  # noqa
-                    # self.target.log.exception("Exception while parsing shellbags")
+                    logger.exception("Exception while parsing shellbags")
                     continue
 
     def _walk_bags(self, key, path_prefix):
@@ -91,18 +318,34 @@ class ShellBags(ForensicArtifact):
             path = None
 
             for item in parse_shell_item_list(value):
-                path = "\\".join(path_prefix + [item.name])
-                yield ShellBagRecord(
-                    path=path,
-                    creation_time=item.creation_time,
-                    modification_time=item.modification_time,
-                    access_time=item.access_time,
-                    regf_modification_time=key.ts,
-                    _target=self._target,
-                    _user=user,
-                    _key=key,
-                )
+                try:
+                    path = "\\".join(path_prefix + [item.name])
+                except UnicodeDecodeError:
+                    continue
+                except Exception:  # noqa
+                    logger.exception(f"Exception while building Shellbag path: {path}")
+                    continue
 
+                # TODO: Handle errors
+                """ ERROR Message
+                path = "\\".join(path_prefix + [item.name])
+                UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc5 in position 17: invalid continuation byte
+
+                ! error example
+                My Computer\{01f256e4-53bd-301f-2975-1b9ac3670110}\<UNKNOWN size=0x0100 type=None>\<UNKNOWN size=0x00fa type=None>\<UNKNOWN size=0x00fc type=None>\<UNKNOWN size=0x0104 type=None>\<UNKNOWN size=0x0112 type=None>\<UNKNOWN size=0x0106 type=None>\<UNKNOWN size=0x011e type=None>\<UNKNOWN size=0x0120 type=None>
+                """
+
+                yield {
+                    "path": path if path else "",
+                    "creation_time": item.creation_time,
+                    "modification_time": item.modification_time,
+                    "access_time": item.access_time,
+                    "regf_modification_time": key.ts,
+                    "user": str(user),
+                    "key": str(key),
+                    "evidence_id": self.evidence_id,
+                }
+                
             for r in self._walk_bags(key.subkey(name), path):
                 yield r
 
@@ -278,7 +521,7 @@ def parse_shell_item_list(buf):
 
                 if ext is None:
                     ext = EXTENSION_BLOCK
-                    # log.debug("Unimplemented extension signature 0x%08x from item %r", extension_signature, entry)
+                    logger.debug("Unimplemented extension signature 0x%08x from item %r", extension_signature, entry)
 
                 ext = ext(extension_buf)
 

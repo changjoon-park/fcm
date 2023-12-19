@@ -333,7 +333,7 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_NETWORK_INFO,
     ),
-    ART_SHELLBAGS: ArtifactPath(
+    ART_REGISTRY_SHELLBAGS: ArtifactPath(
         directory=None,
         entry=REGISTRY_KEY_SHELLBAGS,
     ),

@@ -21,9 +21,9 @@ from artifacts.windows.registry import (
     reg_shimcache,
     reg_bam,
     reg_network_info,
-    shellbags,
     reg_usb,
     reg_autorun,
+    reg_shellbags,
     system_info,
     mru,
 )
@@ -134,6 +134,9 @@ ARTIFACT_SCHEMA = {
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_HISTORY}.yaml",
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_NETWORK_INTERFACE}.yaml",
     ],
+    ART_REGISTRY_SHELLBAGS: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_SHELLBAGS}.yaml",
+    ],
 }
 
 
@@ -231,8 +234,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_network_info.NetworkInfo,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
-    ART_SHELLBAGS: Plugin(
-        artifact=shellbags.ShellBags,
+    ART_REGISTRY_SHELLBAGS: Plugin(
+        artifact=reg_shellbags.ShellBags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
     ART_REGISTRY_USB: Plugin(
