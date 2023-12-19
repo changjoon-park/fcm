@@ -5,33 +5,71 @@ ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 
 ## BROWSER
 ARTIFACT_DIRECTORY_CHROME = [
-    "%USER%/AppData/Local/Google/Chrome/User Data/Default",
-    "%USER%/AppData/Local/Google/Chrome/continuousUpdates/User Data/Default",
-    "%USER%/Local Settings/Application Data/Google/Chrome/User Data/Default",
-    "%USER%/AppData/local/Google/Chromium/User Data/Default",
-    "%USER%/snap/chromium/common/chromium/Default",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/Google/Chrome/User Data/Default",
+            "AppData/Local/Google/Chrome/continuousUpdates/User Data/Default",
+            "Local Settings/Application Data/Google/Chrome/User Data/Default",
+            "AppData/local/Google/Chromium/User Data/Default",
+            "snap/chromium/common/chromium/Default",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_EDGE = [
-    "%USER%/AppData/Local/Microsoft/Edge/User Data/Default",
-    "%USER%/Library/Application Support/Microsoft Edge/Default",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/Microsoft/Edge/User Data/Default",
+            "Library/Application Support/Microsoft Edge/Default",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_INTERNET_EXPLORER = [
-    "%USER%/AppData/Local/Microsoft/Windows/WebCache",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/Microsoft/Windows/WebCache",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_FIREFOX = [
-    "%USER%/AppData/Roaming/Mozilla/Firefox/Profiles",
-    "%USER%/AppData/local/Mozilla/Firefox/Profiles",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Roaming/Mozilla/Firefox/Profiles",
+            "AppData/local/Mozilla/Firefox/Profiles",
+        ],
+    }
 ]
 
 ## FILESYSTEM
 ARTIFACT_DIRECTORY_MFT = [
-    "%ROOT%",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "/",
+        ],
+    }
 ]
-ARTIFACT_DIRECTORY_USNJRNL = ["%ROOT%/$Extend"]
+ARTIFACT_DIRECTORY_USNJRNL = [
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "$Extend",
+        ],
+    },
+]
 
 ## REGISTRY
-ARTIFACT_DIRECTORY_AMCACHE = ["%ROOT%/Windows/appcompat/Programs"]  # Amcache
-
+ARTIFACT_DIRECTORY_AMCACHE = [
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "Windows/appcompat/Programs",
+        ],
+    }
+]  # Amcache
 REGISTRY_KEY_USER_ACCOUNT = {
     "Users": ["HKEY_LOCAL_MACHINE\\SAM\\SAM\\Domains\\Account\\Users"],
     "ProfileList": [
@@ -149,7 +187,12 @@ ARTIFACT_DIRECTORY_PREFETCH = [
     },
 ]
 ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
-    "%USER%/AppData/Local/ConnectedDevicesPlatform",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/ConnectedDevicesPlatform",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_LNK = [
     {
@@ -176,9 +219,6 @@ ARTIFACT_DIRECTORY_JUMPLIST = [
         ],
     }
 ]
-ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
-    "%USER%/AppData/Local/ConnectedDevicesPlatform",
-]
 ARTIFACT_DIRECTORY_SRU = [
     {
         "owner": ARTIFACT_OWNER_SYSTEM,
@@ -188,15 +228,30 @@ ARTIFACT_DIRECTORY_SRU = [
     }
 ]
 ARTIFACT_DIRECTORY_THUMBCACHE = [
-    "%USER%/AppData/Local/Microsoft/Windows/Explorer",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/Microsoft/Windows/Explorer",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_FILEHISTORY = [
-    "%USER%/AppData/Local/Microsoft/Edge/User Data/Default",
-    "%USER%/Library/Application Support/Microsoft Edge/Default",
-    "%USER%/AppData/Local/Microsoft/Windows/WebCache",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Local/Microsoft/Edge/User Data/Default",
+            "Library/Application Support/Microsoft Edge/Default",
+            "AppData/Local/Microsoft/Windows/WebCache",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_EVENTLOG = [
-    "%ROOT%/Windows/System32/winevt/Logs",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "Windows/System32/winevt/Logs",
+        ],
+    }
 ]
 
 
