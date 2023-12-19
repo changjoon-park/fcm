@@ -1,4 +1,5 @@
 import logging
+from icecream import ic
 from pathlib import Path
 from datetime import timedelta, timezone
 from typing import Generator
@@ -6,10 +7,13 @@ from dataclasses import dataclass, field
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
+from dissect.target.helpers.fsutil import TargetPath, PureDissectPath
 
 from lib.path_finder import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
+from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +35,7 @@ class ForensicArtifact:
     artifact: str  # ? user input data, e.g., 'prefetch', 'sru_network'
     category: str
     _evidence_id: str = field(init=False)
-    artifact_directory: list[str] = field(init=False)
+    artifact_directory: list[dict] = field(init=False)
     artifact_entry: str = field(init=False)
     result: dict = field(default_factory=dict)  # result: {name: [data, ...]}
 
@@ -62,22 +66,25 @@ class ForensicArtifact:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
     def iter_directory(self) -> Generator[Path, None, None]:
-        for dir in self.artifact_directory:
-            if dir.startswith("%ROOT%"):
-                dir = Path(dir.replace("%ROOT%", ""))
-                yield from (
-                    root.joinpath(dir)
-                    for root in self.src.source.fs.path("/").iterdir()
-                    if root.joinpath(dir).parts[1] != "sysvol"
-                    and root.joinpath(dir).exists()
-                )
-            elif dir.startswith("%USER%"):
-                dir = Path(dir.replace("%USER%", ""))
-                yield from (
-                    user_details.home_path.joinpath(dir)
-                    for user_details in self.src.source.user_details.all_with_home()
-                    if user_details.home_path.joinpath(dir).exists()
-                )
+        for directory in self.artifact_directory:
+            owner = directory.get("owner", "")  # str
+            paths = directory.get("paths", "")  # list of str
+
+            if owner == ARTIFACT_OWNER_SYSTEM:
+                for root in self.src.source.fs.path("/").iterdir():
+                    if not str(root) == "/sysvol":
+                        yield from (
+                            root.joinpath(path)
+                            for path in paths
+                            if root.joinpath(path).exists()
+                        )
+            elif owner == ARTIFACT_OWNER_USER:
+                for user_details in self.src.source.user_details.all_with_home():
+                    yield from (
+                        ic(user_details.home_path.joinpath(path))
+                        for path in paths
+                        if user_details.home_path.joinpath(path).exists()
+                    )
 
     def iter_entry(
         self, name: str = None, recurse: bool = False

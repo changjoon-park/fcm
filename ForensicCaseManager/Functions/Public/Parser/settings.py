@@ -12,6 +12,10 @@ TABLE_NAME_FORENSIC_CASE = "forensic_case"
 TABLE_NAME_EVIDENCES = "evidences"
 TABLE_NAME_ARTIFACT_CATEGORY = "artifact_category"
 
+# Artifact Path Owner
+ARTIFACT_OWNER_SYSTEM = "SYSTEM"
+ARTIFACT_OWNER_USER = "USER"
+
 # Artifact Schema
 ARTIFACT_SCHEMA_FILESYSTEM = current_directory / "schema" / "filesystem"
 ARTIFACT_SCHEMA_WINDOWS = current_directory / "schema" / "windows"

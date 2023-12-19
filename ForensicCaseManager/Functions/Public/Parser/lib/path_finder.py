@@ -133,29 +133,59 @@ REGISTRY_KEY_SYSTEM_INFO = {
 
 ## WINDOWS
 ARTIFACT_DIRECTORY_RECYCLEBIN = [
-    "%ROOT%/$recycle.bin",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "$recycle.bin",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_PREFETCH = [
-    "%ROOT%/windows/prefetch",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "windows/prefetch",
+        ],
+    },
 ]
 ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
     "%USER%/AppData/Local/ConnectedDevicesPlatform",
 ]
 ARTIFACT_DIRECTORY_LNK = [
-    "%USER%/Desktop",
-    "%USER%/AppData/Roaming/Microsoft/Windows/Recent",
-    "%USER%/AppData/Roaming/Microsoft/Office/Recent",
-    "%ROOT%/ProgramData/Microsoft/Windows/Start Menu/Programs",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "ProgramData/Microsoft/Windows/Start Menu/Programs",
+        ],
+    },
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "Desktop",
+            "AppData/Roaming/Microsoft/Windows/Recent",
+            "AppData/Roaming/Microsoft/Office/Recent",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_JUMPLIST = [
-    "%USER%/AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations",
-    "%USER%/AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations",
+    {
+        "owner": ARTIFACT_OWNER_USER,
+        "paths": [
+            "AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations",
+            "AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_WINDOWS_TIMELINE = [
     "%USER%/AppData/Local/ConnectedDevicesPlatform",
 ]
 ARTIFACT_DIRECTORY_SRU = [
-    "%ROOT%/Windows/System32/sru",
+    {
+        "owner": ARTIFACT_OWNER_SYSTEM,
+        "paths": [
+            "Windows/System32/sru",
+        ],
+    }
 ]
 ARTIFACT_DIRECTORY_THUMBCACHE = [
     "%USER%/AppData/Local/Microsoft/Windows/Explorer",
