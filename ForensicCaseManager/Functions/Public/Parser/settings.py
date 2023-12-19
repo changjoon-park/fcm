@@ -59,7 +59,7 @@ ART_REGISTRY_NETWORK_INFO = "reg_network_info"
 ART_REGISTRY_SHELLBAGS = "reg_shellbags"
 ART_REGISTRY_USB = "reg_usb"
 ART_REGISTRY_AUTORUN = "reg_autorun"
-ART_SYSTEM_INFO = "system_info"
+ART_REGISTRY_SYSTEMINFO = "reg_systeminfo"
 ART_MRU = "mru"
 
 # ! Parsed Artifact Result Name: the name for "result" from 'parse()' method (ForensicArtifact)
@@ -105,4 +105,4 @@ RSLT_REGISTRY_AUTORUN = "reg_autorun"
 RSLT_REGISTRY_NETWORK_HISTORY = "reg_network_history"
 RSLT_REGISTRY_NETWORK_INTERFACE = "reg_network_interface"
 RSLT_REGISTRY_SHELLBAGS = "reg_shellbags"
-
+RSLT_REGISTRY_SYSTEMINFO = "reg_systeminfo"

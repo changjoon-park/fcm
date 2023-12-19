@@ -24,7 +24,7 @@ from artifacts.windows.registry import (
     reg_usb,
     reg_autorun,
     reg_shellbags,
-    system_info,
+    reg_systeminfo,
     mru,
 )
 from artifacts.apps.browsers import chrome, edge, iexplore
@@ -137,6 +137,9 @@ ARTIFACT_SCHEMA = {
     ART_REGISTRY_SHELLBAGS: [
         ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_SHELLBAGS}.yaml",
     ],
+    ART_REGISTRY_SYSTEMINFO: [
+        ARTIFACT_SCHEMA_REGISTRY / f"{RSLT_REGISTRY_SYSTEMINFO}.yaml",
+    ],
 }
 
 
@@ -246,8 +249,8 @@ WINDOWS_PLUGINS = {
         artifact=reg_autorun.AutoRun,
         category=CAT_SYSTEM_INFORMATION,
     ),
-    ART_SYSTEM_INFO: Plugin(
-        artifact=system_info.SystemInfo,
+    ART_REGISTRY_SYSTEMINFO: Plugin(
+        artifact=reg_systeminfo.SystemInfo,
         category=CAT_SYSTEM_INFORMATION,
     ),
     # "MRU": Plugin(artifact=MRU, category=CAT_FILE_FOLDER_OPENING),

@@ -1,0 +1,21 @@
+Name: System Information Registry
+Desc: System Information from the Windows Registry
+Table:
+  TableName: reg_systeminfo
+  Columns:
+    - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+    - product: "TEXT"
+    - install_date: "TEXT"
+    - shutdown_time: "TEXT"
+    - registered_organization: "TEXT"
+    - registered_owner: "TEXT"
+    - product_key: "TEXT"
+    - product_id: "TEXT"
+    - edition_id: "TEXT"
+    - release_id: "TEXT"
+    - system_root: "TEXT"
+    - path_name: "TEXT"
+    - architecture: "TEXT"
+    - timezone: "TEXT"
+    - codepage: "TEXT"
+    - evidence_id: "TEXT"

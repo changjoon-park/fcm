@@ -148,7 +148,7 @@ REGISTRY_KEY_AUTORUN = [
     "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\Setup",
     "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx",
 ]
-REGISTRY_KEY_SYSTEM_INFO = {
+REGISTRY_KEY_SYSTEMINFO = {
     "ComputerName": [
         "HKLM\\SYSTEM\\ControlSet001\\Control\\ComputerName\\ComputerName"
     ],
@@ -208,7 +208,7 @@ ARTIFACT_DIRECTORY_LNK = [
             "AppData/Roaming/Microsoft/Windows/Recent",
             "AppData/Roaming/Microsoft/Office/Recent",
         ],
-    }
+    },
 ]
 ARTIFACT_DIRECTORY_JUMPLIST = [
     {
@@ -345,8 +345,8 @@ ARTIFACT_PATH = {
         directory=None,
         entry=REGISTRY_KEY_AUTORUN,
     ),
-    ART_SYSTEM_INFO: ArtifactPath(
+    ART_REGISTRY_SYSTEMINFO: ArtifactPath(
         directory=None,
-        entry=REGISTRY_KEY_SYSTEM_INFO,
+        entry=REGISTRY_KEY_SYSTEMINFO,
     ),
 }

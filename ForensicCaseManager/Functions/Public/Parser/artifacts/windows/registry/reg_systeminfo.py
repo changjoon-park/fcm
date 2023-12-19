@@ -1,45 +1,24 @@
-import json
-
+import logging
 from dissect.target.exceptions import RegistryError
-from dissect.target.helpers.record import TargetRecordDescriptor
 
 from forensic_artifact import Source, ForensicArtifact
+from settings import RSLT_REGISTRY_SYSTEMINFO
 
-SystemInfoRecord = TargetRecordDescriptor(
-    "windows/systemInfo",
-    [
-        ("string", "product"),
-        ("datetime", "install_date"),
-        ("datetime", "shutdown_time"),
-        ("string", "registered_organization"),
-        ("string", "registered_owner"),
-        ("string", "product_key"),
-        ("string", "product_id"),
-        ("string", "edition_id"),
-        ("string", "release_id"),
-        ("string", "system_root"),
-        ("string", "path_name"),
-        ("string", "architecture"),
-        ("string", "timezone"),
-        ("string", "codepage"),
-    ],
-)
+logger = logging.getLogger(__name__)
 
 
 class SystemInfo(ForensicArtifact):
-    """Plugin that iterates various Runkey locations."""
-
     def __init__(self, src: Source, artifact: str, category: str):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
         system_info = [
-            json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            for record in self.system_info()
+            self.validate_record(index=index, record=record)
+            for index, record in enumerate(self.system_info())
         ]
 
         self.result = {
-            "system_info": system_info,
+            RSLT_REGISTRY_SYSTEMINFO: system_info,
         }
 
     @property
@@ -55,6 +34,7 @@ class SystemInfo(ForensicArtifact):
                 )
                 return self.ts.wintimestamp(int.from_bytes(bin_value, "little"))
             except:
+                logger.info(f"Failed to get last shutdown time from {reg_path}")
                 return ""
 
     @property
@@ -63,6 +43,7 @@ class SystemInfo(ForensicArtifact):
             try:
                 return self.src.source.registry.key(reg_path).value("ACP").value
             except RegistryError:
+                logger.info(f"Failed to get codepage from {reg_path}")
                 return ""
 
     @property
@@ -89,6 +70,7 @@ class SystemInfo(ForensicArtifact):
                 else:
                     return f"{arch}_{bits}-win{bits}".lower()
             except RegistryError:
+                logger.info(f"Failed to get architecture from {reg_path}")
                 pass
 
     # https://dfir.ru/2018/12/08/the-last-access-updates-are-almost-back/?fbclid=IwAR2Q6uj5EIAZ-HqBeRmYXecYCCQa693wc81HCm8KsRHDJ9rwOldaraipy-o
@@ -176,20 +158,20 @@ class SystemInfo(ForensicArtifact):
     def system_info(self):
         current_version = self.get_current_version()
 
-        yield SystemInfoRecord(
-            product=current_version.get("product"),
-            install_date=current_version.get("install_date"),
-            shutdown_time=self.last_shutdown_time,
-            registered_organization=current_version.get("registered_organization"),
-            registered_owner=current_version.get("registered_owner"),
-            product_key=current_version.get("product_key"),
-            product_id=current_version.get("product_id"),
-            edition_id=current_version.get("edition_id"),
-            release_id=current_version.get("release_id"),
-            system_root=current_version.get("system_root"),
-            path_name=current_version.get("path_name"),
-            architecture=self.architecture,
-            timezone=self.timezone,
-            codepage=self.codepage,
-            _target=self._target,
-        )
+        yield {
+            "product": current_version.get("product"),
+            "install_date": current_version.get("install_date"),
+            "shutdown_time": self.last_shutdown_time,
+            "registered_organization": current_version.get("registered_organization"),
+            "registered_owner": current_version.get("registered_owner"),
+            "product_key": current_version.get("product_key"),
+            "product_id": current_version.get("product_id"),
+            "edition_id": current_version.get("edition_id"),
+            "release_id": current_version.get("release_id"),
+            "system_root": current_version.get("system_root"),
+            "path_name": current_version.get("path_name"),
+            "architecture": self.architecture,
+            "timezone": str(self.timezone),
+            "codepage": self.codepage,
+            "evidence_id": self.evidence_id,
+        }
