@@ -27,7 +27,7 @@ from artifacts.windows.registry import (
     system_info,
     mru,
 )
-from artifacts.application.browsers import chrome, edge, iexplore
+from artifacts.apps.browsers import chrome, edge, iexplore
 
 Plugin = namedtuple("Plugin", ["artifact", "category"])
 

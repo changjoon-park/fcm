@@ -1,5 +1,4 @@
 import logging
-from icecream import ic
 from pathlib import Path
 from datetime import timedelta, timezone
 from typing import Generator
@@ -7,7 +6,6 @@ from dataclasses import dataclass, field
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
-from dissect.target.helpers.fsutil import TargetPath, PureDissectPath
 
 from lib.path_finder import ARTIFACT_PATH
 from util.timestamp import Timestamp
@@ -81,7 +79,7 @@ class ForensicArtifact:
             elif owner == ARTIFACT_OWNER_USER:
                 for user_details in self.src.source.user_details.all_with_home():
                     yield from (
-                        ic(user_details.home_path.joinpath(path))
+                        user_details.home_path.joinpath(path)
                         for path in paths
                         if user_details.home_path.joinpath(path).exists()
                     )

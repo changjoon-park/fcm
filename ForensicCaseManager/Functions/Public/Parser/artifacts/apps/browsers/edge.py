@@ -1,5 +1,5 @@
 from forensic_artifact import Source
-from artifacts.application.browsers.browser import ChromiumBrowser
+from artifacts.apps.browsers.browser import ChromiumBrowser
 from settings import (
     ART_EDGE,
     RSLT_EDGE_HISTORY,
