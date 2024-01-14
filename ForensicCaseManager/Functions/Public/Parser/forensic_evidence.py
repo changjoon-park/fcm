@@ -10,7 +10,7 @@ from forensic_artifact import (
     ForensicArtifact,
 )
 from case_config import CaseConfig
-from lib.plugins import WINDOWS_PLUGINS, ARTIFACT_SCHEMA
+from lib.plugins import WINDOWS_PLUGINS
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ class ForensicEvidence(CaseConfig):
                 encoding="UTF-16-LE",
             )
 
-    def parse_evidence(self, descending: bool = False) -> Path:
+    def parse_evidence(self, descending: bool = False) -> None:
         """Return the content of all forensic artifacts."""
         for forensic_artifact in self.forensic_artifacts:
             forensic_artifact.parse(descending=descending)
@@ -107,27 +107,23 @@ class ForensicEvidence(CaseConfig):
     def export_evidence(self) -> None:
         for forensic_artifact in self.forensic_artifacts:
             # create artifact table
-            if schema_files := ARTIFACT_SCHEMA.get(
-                forensic_artifact.artifact,  # ? parameter: ART_ARTIFACT, e.g., 'prefetch', 'sru_network', 'chrome'
-            ):
-                for schema_file in schema_files:
-                    self.db_manager.create_artifact_table_from_yaml(
-                        schema_file=schema_file
-                    )
-            else:
-                logger.error(
-                    f"Invalid artifact: Unable to find schema file - {forensic_artifact.artifact} in {self.evidence_id}"
-                )
-                continue
-
+            self.db_manager.create_artifact_table_from_pydantic_model(
+                forensic_artifact.record_schema
+            )
             # insert artifact data
-            for artifact, data in forensic_artifact.result.items():
-                # execute insert query when data is not empty
-                if data:
-                    logger.info(
-                        f"Parsed {len(data)} {artifact} entries from {self.evidence_id}"
-                    )
+            for generator in forensic_artifact.result:
+                for record in generator:
                     self.db_manager.insert_artifact_data(
-                        artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
-                        data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
+                        artifact=forensic_artifact.artifact,
+                        data=record.model_dump(),
                     )
+            # for artifact, data in forensic_artifact.result.items():
+            #     # execute insert query when data is not empty
+            #     if data:
+            #         logger.info(
+            #             f"Parsed {len(data)} {artifact} entries from {self.evidence_id}"
+            #         )
+            #         self.db_manager.insert_artifact_data(
+            #             artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
+            #             data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
+            #         )

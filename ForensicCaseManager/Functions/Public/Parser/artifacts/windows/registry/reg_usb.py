@@ -2,14 +2,13 @@ import logging
 import json
 import struct
 
+from dataclasses import dataclass, field
 from typing import Optional
 from datetime import datetime
-from icecream import ic
-from pydantic import BaseModel
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings import RSLT_REGISTRY_USB
 
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ USB_DEVICE_PROPERTY_KEYS = {
 }
 
 
-class UsbRegistryRecord(BaseModel):
+class UsbstorRecord(ArtifactRecord):
     """USB registry record."""
 
     first_install: datetime
@@ -51,28 +50,53 @@ class UsbRegistryRecord(BaseModel):
     last_insert: datetime
     last_removal: Optional[datetime]
     info_origin: str
-    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_usb_usbstor"
 
 
+@dataclass
 class USB(ForensicArtifact):
     """USB plugin."""
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    src: Source
+    artifact: str
+    category: str
+
+    def __post_init__(self):
+        self.record_schema = UsbstorRecord
 
     def parse(self, descending: bool = False):
-        usbstor = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.usbstor())
-            ],
-            key=lambda record: record["first_insert"],
-            reverse=descending,
-        )
+        try:
+            usbstor = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.usbstor())
+                ),
+                key=lambda record: record.first_insert,
+                reverse=descending,
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
 
-        self.result = {
-            RSLT_REGISTRY_USB: usbstor,
-        }
+        # usbstor = (
+        #     self.validate_record(index=index, record=record)
+        #     for index, record in enumerate(self.usbstor())
+        # )
+        self.result.append(usbstor)
+
+    #
+    # for record in usbstor:
+    #     yield record
+
+    #     usbstor = [
+    #         self.validate_record(index=index, record=record)
+    #         for index, record in enumerate(self.usbstor())
+    #     ]
+    #     self.result.append(usbstor)
+    #     ic(self.result)
 
     @internal
     def unpack_timestamps(self, usb_reg_properties) -> dict:
@@ -121,7 +145,7 @@ class USB(ForensicArtifact):
         Use the registry to find information about USB devices that have been attached to the system, for example the
         HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR registry key.
 
-        Yields UsbRegistryRecord with fields:
+        Yields UsbstorRecord with fields:
             hostname (string): The target hostname
             domain (string): The target domain
             type (string): Type of USB device
@@ -182,7 +206,7 @@ class USB(ForensicArtifact):
                             "last_removal", self.ts.base_datetime_windows
                         )
 
-                        yield UsbRegistryRecord(
+                        yield UsbstorRecord(
                             first_install=first_install,
                             product=device_info.get("product", None),
                             version=device_info.get("version", None),
@@ -198,4 +222,4 @@ class USB(ForensicArtifact):
                             last_removal=last_removal,
                             info_origin=info_origin,
                             evidence_id=self.evidence_id,
-                        ).model_dump()
+                        )

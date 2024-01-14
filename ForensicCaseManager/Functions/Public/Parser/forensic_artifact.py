@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
+from pydantic import BaseModel
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
@@ -14,6 +15,10 @@ from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 
 
 logger = logging.getLogger(__name__)
+
+
+class ArtifactRecord(BaseModel):
+    evidence_id: str
 
 
 @dataclass
@@ -30,12 +35,13 @@ class Source:
 @dataclass(kw_only=True)
 class ForensicArtifact:
     src: Source
-    artifact: str  # ? user input data, e.g., 'prefetch', 'sru_network'
+    artifact: str
     category: str
     _evidence_id: str = field(init=False)
     artifact_directory: list[dict] = field(init=False)
     artifact_entry: str = field(init=False)
-    result: dict = field(default_factory=dict)  # result: {name: [data, ...]}
+    record_schema: ArtifactRecord = field(init=False)
+    result: list[ArtifactRecord] = field(default_factory=list)
 
     def __post_init__(self):
         self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)
@@ -108,8 +114,8 @@ class ForensicArtifact:
             else:
                 yield from self.artifact_entry.get(name)
 
-    def parse(self, descending: bool = False) -> None:
-        """parse artifact. parsed results update 'self.result' variable.
+    def parse(self, descending: bool = False) -> Generator[ArtifactRecord, None, None]:
+        """parse artifact.
 
         Args:
             descending (bool, optional)
@@ -128,8 +134,8 @@ class ForensicArtifact:
             yield first
             yield from entry
 
-    def validate_record(self, index: int, record: dict) -> dict:
-        if isinstance(record, dict):
+    def validate_record(self, index: int, record: ArtifactRecord) -> dict:
+        if isinstance(record, ArtifactRecord):
             print(f"{self.artifact}-{index}: Parsed successfully")
         else:
             print(

@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 
+from forensic_artifact import ArtifactRecord
 from lib.plugins import ARTIFACT_CATEGORIES
 from settings import (
     TABLE_NAME_FORENSIC_CASE,
@@ -188,6 +189,38 @@ class DatabaseManager:
 
         except Exception as e:
             logger.exception(f"Failed to create table {table_name} from YAML: {e}")
+
+    def create_artifact_table_from_pydantic_model(self, model: ArtifactRecord):
+        try:
+            # Extracting table name and column definitions from the Pydantic model
+            table_name = model.Config.record_name
+            columns = []
+            for field_name, field_type in model.__annotations__.items():
+                column_type = "TEXT"  # Default type, adjust as needed
+                if field_type == int:
+                    column_type = "INTEGER"
+                elif field_type == float:
+                    column_type = "REAL"
+                elif field_type == bool:
+                    column_type = "BOOLEAN"
+                elif field_type == datetime:
+                    column_type = "DATETIME"
+                # Add more data types as necessary
+                columns.append(f"{field_name} {column_type}")
+
+            column_definitions = ", ".join(columns)
+
+            # Constructing the CREATE TABLE SQL statement
+            create_statement = (
+                f"CREATE TABLE IF NOT EXISTS {table_name} ({column_definitions})"
+            )
+
+            # Creating the table
+            with open_db(self.database) as cursor:
+                cursor.execute(create_statement)
+
+        except Exception as e:
+            logger.exception(f"Failed to create table {table_name} from Pydantic model")
 
     def insert_artifact_data(
         self,
