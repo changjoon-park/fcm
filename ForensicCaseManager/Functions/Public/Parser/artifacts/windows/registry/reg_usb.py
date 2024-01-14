@@ -2,11 +2,17 @@ import logging
 import json
 import struct
 
+from typing import Optional
+from datetime import datetime
+from icecream import ic
+from pydantic import BaseModel
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
 from forensic_artifact import Source, ForensicArtifact
 from settings import RSLT_REGISTRY_USB
+
+logger = logging.getLogger(__name__)
 
 USB_DEVICE_PROPERTY_KEYS = {
     "first_install": (
@@ -26,6 +32,26 @@ USB_DEVICE_PROPERTY_KEYS = {
         "00000067",
     ),  # Windows 8 and higer. USB device last removal date.
 }
+
+
+class UsbRegistryRecord(BaseModel):
+    """USB registry record."""
+
+    first_install: datetime
+    product: str
+    version: str
+    vendor: str
+    friendlyname: str
+    serial: str
+    vid: Optional[str]
+    pid: Optional[str]
+    device_type: str
+    containerid: str
+    first_insert: datetime
+    last_insert: datetime
+    last_removal: Optional[datetime]
+    info_origin: str
+    evidence_id: str
 
 
 class USB(ForensicArtifact):
@@ -156,20 +182,20 @@ class USB(ForensicArtifact):
                             "last_removal", self.ts.base_datetime_windows
                         )
 
-                        yield {
-                            "first_install": first_install,
-                            "product": device_info.get("product", None),
-                            "version": device_info.get("version", None),
-                            "vendor": device_info.get("vendor", None),
-                            "friendlyname": friendlyname,
-                            "serial": serial,
-                            "vid": None,
-                            "pid": None,
-                            "device_type": device_info.get("device_type", None),
-                            "containerid": containerid,
-                            "first_insert": first_insert,
-                            "last_insert": last_insert,  # AKA first arrival
-                            "last_removal": last_removal,
-                            "info_origin": info_origin,
-                            "evidence_id": self.evidence_id,
-                        }
+                        yield UsbRegistryRecord(
+                            first_install=first_install,
+                            product=device_info.get("product", None),
+                            version=device_info.get("version", None),
+                            vendor=device_info.get("vendor", None),
+                            friendlyname=friendlyname,
+                            serial=serial,
+                            vid=None,
+                            pid=None,
+                            device_type=device_info.get("device_type", None),
+                            containerid=containerid,
+                            first_insert=first_insert,
+                            last_insert=last_insert,  # AKA first arrival
+                            last_removal=last_removal,
+                            info_origin=info_origin,
+                            evidence_id=self.evidence_id,
+                        ).model_dump()
