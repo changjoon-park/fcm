@@ -106,24 +106,25 @@ class ForensicEvidence(CaseConfig):
 
     def export_evidence(self) -> None:
         for forensic_artifact in self.forensic_artifacts:
-            # create artifact table
-            self.db_manager.create_artifact_table_from_pydantic_model(
-                forensic_artifact.record_schema
-            )
-            # insert artifact data
-            for generator in forensic_artifact.result:
-                for record in generator:
-                    self.db_manager.insert_artifact_data(
-                        artifact=forensic_artifact.artifact,
-                        data=record.model_dump(),
-                    )
-            # for artifact, data in forensic_artifact.result.items():
-            #     # execute insert query when data is not empty
-            #     if data:
-            #         logger.info(
-            #             f"Parsed {len(data)} {artifact} entries from {self.evidence_id}"
-            #         )
+            for schema, record in forensic_artifact.records:
+                # create artifact table
+                self.db_manager.create_artifact_table_from_pydantic_model(schema)
+
+                # insert artifact data
+                for generator in record:
+                    for data in generator:
+                        self.db_manager.insert_artifact_data(
+                            artifact=forensic_artifact.artifact,
+                            data=data.model_dump(),
+                        )
+            # # create artifact table
+            # self.db_manager.create_artifact_table_from_pydantic_model(
+            #     forensic_artifact.record_schema
+            # )
+            # # insert artifact data
+            # for generator in forensic_artifact.result:
+            #     for record in generator:
             #         self.db_manager.insert_artifact_data(
-            #             artifact=artifact,  # ? RSLT_ARTIFACT: 'prefetch', 'sru_network_DATA', 'chrome_history'
-            #             data=data,  # ? list[dict]: [{'ts': datetime, 'path': uri,}, ...]
+            #             artifact=forensic_artifact.artifact,
+            #             data=record.model_dump(),
             #         )

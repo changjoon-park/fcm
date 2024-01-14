@@ -4,6 +4,7 @@ from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
+from collections import namedtuple
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
@@ -15,6 +16,8 @@ from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 
 
 logger = logging.getLogger(__name__)
+
+Record = namedtuple("Records", ["schema", "record"])
 
 
 class ArtifactRecord(BaseModel):
@@ -40,8 +43,7 @@ class ForensicArtifact:
     _evidence_id: str = field(init=False)
     artifact_directory: list[dict] = field(init=False)
     artifact_entry: str = field(init=False)
-    record_schema: ArtifactRecord = field(init=False)
-    result: list[ArtifactRecord] = field(default_factory=list)
+    records: list[Record] = field(default_factory=list)
 
     def __post_init__(self):
         self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)

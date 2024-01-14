@@ -8,8 +8,7 @@ from datetime import datetime
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings import RSLT_REGISTRY_USB
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
 
@@ -55,48 +54,37 @@ class UsbstorRecord(ArtifactRecord):
         record_name: str = "reg_usb_usbstor"
 
 
-@dataclass
 class USB(ForensicArtifact):
     """USB plugin."""
 
-    src: Source
-    artifact: str
-    category: str
-
-    def __post_init__(self):
-        self.record_schema = UsbstorRecord
+    def __init__(self, src: Source, artifact: str, category: str):
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        try:
-            usbstor = sorted(
-                (
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.usbstor())
-                ),
-                key=lambda record: record.first_insert,
-                reverse=descending,
+        # try:
+        #     usbstor = sorted(
+        #         (
+        #             self.validate_record(index=index, record=record)
+        #             for index, record in enumerate(self.usbstor())
+        #         ),
+        #         key=lambda record: record.first_insert,
+        #         reverse=descending,
+        #     )
+        # except Exception as e:
+        #     logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+        #     logger.error(e)
+        #     return
+
+        usbstor = (
+            self.validate_record(index=index, record=record)
+            for index, record in enumerate(self.usbstor())
+        )
+        self.records.append(
+            Record(
+                schema=UsbstorRecord,
+                record=usbstor,
             )
-        except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
-            logger.error(e)
-            return
-
-        # usbstor = (
-        #     self.validate_record(index=index, record=record)
-        #     for index, record in enumerate(self.usbstor())
-        # )
-        self.result.append(usbstor)
-
-    #
-    # for record in usbstor:
-    #     yield record
-
-    #     usbstor = [
-    #         self.validate_record(index=index, record=record)
-    #         for index, record in enumerate(self.usbstor())
-    #     ]
-    #     self.result.append(usbstor)
-    #     ic(self.result)
+        )
 
     @internal
     def unpack_timestamps(self, usb_reg_properties) -> dict:
