@@ -151,7 +151,11 @@ mypath = os.path.dirname(os.path.abspath(__file__))
 names_to_try = (
     (("MSCompression", "MSCompression64") if is64bit else ("MSCompression",))
     if isWindows
-    else ("libMSCompression.so",)
+    else ("libMSCompression.so",)  # ! TODO: add file
+    if sys.platform.startswith("linux")
+    else ("libMSCompression.dylib",)  # ! TODO: add file
+    if sys.platform == "darwin"
+    else None
 )
 for path, name in product((mypath, os.path.dirname(mypath)), names_to_try):
     try:

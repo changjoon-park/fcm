@@ -1,11 +1,12 @@
+import os
 import logging
 from typing import Generator, BinaryIO
 from pathlib import Path
+from io import BytesIO
 
 from dissect import cstruct
 from flow.record.fieldtypes import uri
 
-from util.lzxpress_huffman import LZXpressHuffman
 from forensic_artifact import Source, ForensicArtifact
 from settings import RSLT_PREFETCH
 
@@ -150,8 +151,15 @@ class PrefetchParser:
     def __init__(self, fh: BinaryIO):
         header_detect = prefetch.PREFETCH_HEADER_DETECT(fh.read(8))
         if header_detect.signature == b"MAM\x04":
-            fh.seek(0)
-            fh = LZXpressHuffman.decompress(fh=fh)
+            if os.name == "nt":
+                from util.lzxpress_huffman import LZXpressHuffman
+
+                fh.seek(0)
+                fh = LZXpressHuffman.decompress(fh=fh)
+            else:
+                from dissect.util import lzxpress_huffman
+
+                fh = BytesIO(lzxpress_huffman.decompress(fh))
 
         self.fh = fh
         self.fh.seek(0)
