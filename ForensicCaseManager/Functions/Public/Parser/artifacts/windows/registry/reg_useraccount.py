@@ -7,10 +7,6 @@ from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import (
-    RSLT_REGISTRY_USERACCOUNT_SAM,
-    RSLT_REGISTRY_USERACCOUNT_PROFILELIST,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -285,11 +281,6 @@ class UserAccount(ForensicArtifact):
             key=lambda record: record["rid"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_REGISTRY_USERACCOUNT_SAM: reg_user_account_sam,
-            RSLT_REGISTRY_USERACCOUNT_PROFILELIST: reg_user_account_profilelist,
-        }
 
         """
         References:

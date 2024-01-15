@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from database_manager import DatabaseManager
-from settings import DATABASE_NAME
+from settings.config import DATABASE_NAME
 
 
 @dataclass(kw_only=True)

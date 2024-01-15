@@ -2,6 +2,7 @@ import yaml
 from pathlib import Path
 from collections import namedtuple
 
+from icecream import ic
 from settings.config import *
 
 current_directory = Path(__file__).parent.absolute()
@@ -351,7 +352,7 @@ ARTIFACT_PATH = {
     ),
     ART_REGISTRY_USB: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("usb"),
+        entry=registry_path.get("USB"),
     ),
     ART_REGISTRY_AUTORUN: ArtifactPath(
         directory="registry",

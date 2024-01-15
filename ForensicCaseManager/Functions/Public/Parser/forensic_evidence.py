@@ -10,7 +10,7 @@ from forensic_artifact import (
     ForensicArtifact,
 )
 from case_config import CaseConfig
-from lib.plugins import WINDOWS_PLUGINS
+from settings.plugins import WINDOWS_PLUGINS
 
 logger = logging.getLogger(__name__)
 

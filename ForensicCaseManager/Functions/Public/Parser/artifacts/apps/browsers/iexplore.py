@@ -6,7 +6,6 @@ from typing import BinaryIO, Generator
 from dissect.esedb import esedb, record, table
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_IEXPLORER, RSLT_IEXPLORER_HISTORY, RSLT_IEXPLORER_DOWNLOADS
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ class InternetExplorer(ForensicArtifact):
 
     @property
     def browser_type(self) -> str:
-        return ART_IEXPLORER
+        return "iExplorer"
 
     # set default datetime to sort by timestamp
     @property
@@ -76,11 +75,6 @@ class InternetExplorer(ForensicArtifact):
         #     json.dumps(record, indent=2, default=str, ensure_ascii=False)
         #     for record in sorted_downloads
         # ]
-
-        self.result = {
-            RSLT_IEXPLORER_HISTORY: history,
-            # "ie_downloads": downloads,
-        }
 
     def history(self) -> Generator[dict, None, None]:
         """Return browser history records from Chrome.

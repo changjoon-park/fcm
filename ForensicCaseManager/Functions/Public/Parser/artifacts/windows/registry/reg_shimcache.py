@@ -11,7 +11,6 @@ from dissect.util.ts import wintimestamp
 from dissect.target.exceptions import Error, RegistryError
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_SHIMCACHE
 
 logger = logging.getLogger(__name__)
 
@@ -305,9 +304,6 @@ class ShimCache(ForensicArtifact):
             key=lambda record: record["last_modified"],
             reverse=descending,
         )
-        self.result = {
-            RSLT_REGISTRY_SHIMCACHE: shimcache,
-        }
 
     def shimcache(self) -> Generator[dict, None, None]:
         """Return the shimcache.

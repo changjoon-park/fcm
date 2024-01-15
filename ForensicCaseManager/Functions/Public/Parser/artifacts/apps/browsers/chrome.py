@@ -1,14 +1,5 @@
 from forensic_artifact import Source
 from artifacts.apps.browsers.browser import ChromiumBrowser
-from settings import (
-    ART_CHROME,
-    RSLT_CHROME_HISTORY,
-    RSLT_CHROME_DOWNLOADS,
-    RSLT_CHROME_KEYWORD_SEARCH_TERMS,
-    RSLT_CHROME_AUTOFILL,
-    RSLT_CHROME_LOGIN_DATA,
-    RSLT_CHROME_BOOKMARKS,
-)
 
 
 class Chrome(ChromiumBrowser):
@@ -17,7 +8,7 @@ class Chrome(ChromiumBrowser):
 
     @property
     def browser_type(self) -> str:
-        return ART_CHROME
+        return "Chrome"
 
     def parse(self, descending: bool = False) -> None:
         history = sorted(
@@ -68,12 +59,3 @@ class Chrome(ChromiumBrowser):
             key=lambda record: record["ts_added"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_CHROME_HISTORY: history,
-            RSLT_CHROME_DOWNLOADS: downloads,
-            RSLT_CHROME_KEYWORD_SEARCH_TERMS: keyword_search_terms,
-            RSLT_CHROME_AUTOFILL: autofill,
-            RSLT_CHROME_LOGIN_DATA: login_data,
-            RSLT_CHROME_BOOKMARKS: bookmarks,
-        }

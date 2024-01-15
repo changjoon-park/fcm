@@ -8,8 +8,8 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from forensic_artifact import ArtifactRecord, ArtifactRecord
-from lib.plugins import ARTIFACT_CATEGORIES
-from settings import (
+from settings.plugins import ARTIFACT_CATEGORIES
+from settings.config import (
     TABLE_NAME_FORENSIC_CASE,
     TABLE_NAME_EVIDENCES,
     TABLE_NAME_ARTIFACT_CATEGORY,

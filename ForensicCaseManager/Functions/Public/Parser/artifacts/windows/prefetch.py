@@ -8,7 +8,6 @@ from dissect import cstruct
 from flow.record.fieldtypes import uri
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_PREFETCH
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +254,6 @@ class Prefetch(ForensicArtifact):
             key=lambda record: record["ts"],
             reverse=descending,
         )
-        self.result = {RSLT_PREFETCH: prefetch}
 
     def prefetch(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry()):

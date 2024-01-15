@@ -2,7 +2,6 @@ import logging
 from dissect.target.exceptions import RegistryError
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_SYSTEMINFO
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +15,6 @@ class SystemInfo(ForensicArtifact):
             self.validate_record(index=index, record=record)
             for index, record in enumerate(self.system_info())
         ]
-
-        self.result = {
-            RSLT_REGISTRY_SYSTEMINFO: system_info,
-        }
 
     @property
     def timezone(self):

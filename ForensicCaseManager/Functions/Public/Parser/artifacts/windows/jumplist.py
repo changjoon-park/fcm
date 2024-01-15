@@ -13,7 +13,6 @@ from lib.lnk.lnk import TLNKFileParser
 from util.delphi import ExtractFileName, ExtractFilePath, ExtractFileExt, StrToIntDef
 from lib.jumplist.app_id_list import app_id_list
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_JUMPLIST
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +231,6 @@ class JumpList(ForensicArtifact):
             ],  # Sorting based on the 'last_opened' field
             reverse=descending,
         )
-        self.result = {ART_JUMPLIST: jumplist}
 
     def parse_jumplist_entry(self, entry):
         # Initialize the JumpList parser with the file handle

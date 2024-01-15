@@ -9,7 +9,6 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers.fsutil import TargetPath
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_RECYCLEBIN
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +95,6 @@ class RecycleBin(ForensicArtifact):
             key=lambda record: record["ts"],
             reverse=descending,
         )
-        self.result = {RSLT_RECYCLEBIN: recyclebin}
 
     def recyclebin(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry(recurse=True)):

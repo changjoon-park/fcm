@@ -4,7 +4,6 @@ from flow.record.fieldtypes import uri
 from dissect.cstruct import cstruct
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_BAM
 
 c_bamdef = """
     struct entry {
@@ -30,9 +29,6 @@ class BAM(ForensicArtifact):
             key=lambda record: record["ts"],
             reverse=descending,
         )
-        self.result = {
-            RSLT_REGISTRY_BAM: bam,
-        }
 
     def bam(self):
         """Parse bam and dam registry keys.

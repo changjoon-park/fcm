@@ -29,7 +29,6 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
 )
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_SHELLBAGS
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +261,7 @@ struct EXTENSION_BLOCK_HEADER {
 c_bag = cstruct()
 c_bag.load(bag_def)
 
+
 class ShellBags(ForensicArtifact):
     """Windows Shellbags plugin.
 
@@ -275,14 +275,12 @@ class ShellBags(ForensicArtifact):
     def parse(self, descending: bool = False):
         shellbags = sorted(
             [
-                self.validate_record(index=index, record=record) for index, record in enumerate(self.shellbags())
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.shellbags())
             ],
             key=lambda record: record["path"],
             reverse=descending,
         )
-        self.result = {
-            RSLT_REGISTRY_SHELLBAGS: shellbags,
-        }
 
     def shellbags(self):
         """Return Windows Shellbags.
@@ -345,7 +343,7 @@ class ShellBags(ForensicArtifact):
                     "key": str(key),
                     "evidence_id": self.evidence_id,
                 }
-                
+
             for r in self._walk_bags(key.subkey(name), path):
                 yield r
 
@@ -521,7 +519,11 @@ def parse_shell_item_list(buf):
 
                 if ext is None:
                     ext = EXTENSION_BLOCK
-                    logger.debug("Unimplemented extension signature 0x%08x from item %r", extension_signature, entry)
+                    logger.debug(
+                        "Unimplemented extension signature 0x%08x from item %r",
+                        extension_signature,
+                        entry,
+                    )
 
                 ext = ext(extension_buf)
 

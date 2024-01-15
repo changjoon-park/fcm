@@ -4,13 +4,10 @@ from typing import Generator
 from dissect.eventlog.evtx import Evtx
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import (
+from settings.config import (
     ART_EVENT_LOGON,
     ART_EVENT_USB,
     ART_EVENT_WLAN,
-    RSLT_EVENT_LOGON,
-    RSLT_EVENT_USB,
-    RSLT_EVENT_WLAN,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,9 +27,6 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-            self.result = {
-                RSLT_EVENT_LOGON: event_logon,
-            }
         elif self.artifact == ART_EVENT_USB:
             event_usb = sorted(
                 [
@@ -42,9 +36,6 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-            self.result = {
-                RSLT_EVENT_USB: event_usb,
-            }
         elif self.artifact == ART_EVENT_WLAN:
             event_wlan = sorted(
                 [
@@ -54,9 +45,6 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record["ts"],
                 reverse=descending,
             )
-            self.result = {
-                RSLT_EVENT_WLAN: event_wlan,
-            }
 
     def event_logon(self) -> Generator[dict, None, None]:
         event_logon = {

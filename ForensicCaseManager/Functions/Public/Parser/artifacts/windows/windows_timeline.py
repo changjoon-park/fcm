@@ -6,7 +6,6 @@ from dissect.sql import sqlite3
 from dissect.util.ts import from_unix
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import ART_WINDOWS_TIMELINE
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +63,6 @@ class WindowsTimeline(ForensicArtifact):
             key=lambda record: record["start_time"],  # Sorting based on the 'ts' field
             reverse=descending,
         )
-        self.result = {ART_WINDOWS_TIMELINE: windows_timeline}
 
     def windows_timeline(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry()):

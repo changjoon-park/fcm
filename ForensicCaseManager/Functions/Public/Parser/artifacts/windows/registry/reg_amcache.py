@@ -7,10 +7,6 @@ from dissect.target.helpers.record import TargetRecordDescriptor
 from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import (
-    RSLT_REGISTRY_AMCACHE_APPLICATIONS,
-    RSLT_REGISTRY_AMCACHE_APPLICATION_FILES,
-)
 
 AMCACHE_FILE_KEYS = {
     "0": "product_name",
@@ -419,16 +415,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
         #     for record in self.device_containers()
         # ]
-
-        self.result = {
-            # "files": files,
-            # "programs": programs,
-            RSLT_REGISTRY_AMCACHE_APPLICATIONS: applications,
-            RSLT_REGISTRY_AMCACHE_APPLICATION_FILES: application_files,
-            # "drivers": drivers,
-            # "shortcuts": shortcuts,
-            # "device_containers": device_containers,
-        }
 
     def parse_inventory_application(self):
         """Parse Root\\InventoryApplication registry key subkeys.

@@ -8,7 +8,6 @@ from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_FILE_HISTORY
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +59,6 @@ class FileHistory(ForensicArtifact):
             key=lambda record: record["ts"],  # Sorting based on the 'ts' field
             reverse=descending,
         )
-        self.result = {
-            RSLT_FILE_HISTORY: file_history,
-        }
 
     def file_history(self) -> Generator[dict, None, None]:
         # Edge History

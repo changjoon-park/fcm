@@ -8,7 +8,6 @@ from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_USERASSIST
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +45,6 @@ class UserAssist(ForensicArtifact):
             key=lambda record: record["ts"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_REGISTRY_USERASSIST: userassist,
-        }
 
     def userassist(self):
         """Return the UserAssist information for each user.

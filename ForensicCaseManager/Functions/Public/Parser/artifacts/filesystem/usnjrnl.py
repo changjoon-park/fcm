@@ -8,7 +8,6 @@ from flow.record.fieldtypes import uri
 from dissect.target.plugins.filesystem.ntfs.utils import get_drive_letter
 
 from forensic_artifact import Source, ForensicArtifact
-from settings.config import RSLT_USNJRNL
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +37,6 @@ class UsnJrnl(ForensicArtifact):
             key=lambda x: x["ts"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_USNJRNL: usnjrnl,
-        }
 
     def read_records(
         self, entry: Path, fs: Optional[NtfsFilesystem] = None

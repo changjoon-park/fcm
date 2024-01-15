@@ -5,7 +5,6 @@ from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_NETWORK_HISTORY, RSLT_REGISTRY_NETWORK_INTERFACE
 
 
 class NetworkInfo(ForensicArtifact):
@@ -29,11 +28,6 @@ class NetworkInfo(ForensicArtifact):
             key=lambda record: record["lease_obtained_time"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_REGISTRY_NETWORK_INTERFACE: network_interface,
-            RSLT_REGISTRY_NETWORK_HISTORY: network_history,
-        }
 
     def network_interface(self):
         for reg_path in self.iter_key(name="Interfaces"):

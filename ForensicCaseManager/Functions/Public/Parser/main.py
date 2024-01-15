@@ -6,7 +6,7 @@ from pathlib import Path
 
 from forensic_case import ForensicCase
 from forensic_evidence import ForensicEvidence
-from settings import LOGFILE_NAME
+from settings.config import LOGFILE_NAME
 
 
 def handle_case(case_directory, evidences, artifacts, categories):

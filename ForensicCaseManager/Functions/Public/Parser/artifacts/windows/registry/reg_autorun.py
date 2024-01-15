@@ -2,7 +2,6 @@ import logging
 
 from flow.record.fieldtypes import uri
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_REGISTRY_AUTORUN
 
 
 class AutoRun(ForensicArtifact):
@@ -20,10 +19,6 @@ class AutoRun(ForensicArtifact):
             key=lambda record: record["ts"],
             reverse=descending,
         )
-
-        self.result = {
-            RSLT_REGISTRY_AUTORUN: runkeys,
-        }
 
     def runkeys(self):
         """Iterate various run key locations. See source for all locations.

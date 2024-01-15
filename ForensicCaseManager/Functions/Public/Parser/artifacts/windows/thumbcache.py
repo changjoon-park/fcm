@@ -8,7 +8,6 @@ from lib.thumbcache.exceptions import Error
 from lib.thumbcache.tools.extract_with_index import dump_entry_data_through_index
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_THUMBCACHE, RSLT_ICONCACHE
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +99,6 @@ class Thumbcache(ForensicArtifact):
             ],  # Sorting based on the 'identifier' field
             reverse=descending,
         )
-        self.result = {
-            RSLT_THUMBCACHE: thumbcache,
-            RSLT_ICONCACHE: iconcache,
-        }
 
     def _create_entries(self, cache: ThumbcacheParser) -> Iterator[dict]:
         for path, entry in cache.entries():

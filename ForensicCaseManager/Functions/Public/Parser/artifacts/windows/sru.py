@@ -5,13 +5,9 @@ from dissect.esedb.tools.sru import SRU as SRUParser
 from dissect.target.plugins.os.windows.sru import FIELD_MAPPINGS, TRANSFORMS
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import (
+from settings.config import (
     ART_SRU_NETWORK,
     ART_SRU_APPLICATION,
-    RSLT_SRU_NETWORK_CONNECTIVITY,
-    RSLT_SRU_NETWORK_DATA,
-    RSLT_SRU_APPLICATION,
-    RSLT_SRU_APPLICATION_TIMELINE,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,10 +35,6 @@ class SRU(ForensicArtifact):
                 key=lambda record: record["ts"],  # Sorting based on the 'ts' field
                 reverse=descending,
             )
-            self.result = {
-                RSLT_SRU_NETWORK_CONNECTIVITY: network_connectivity,
-                RSLT_SRU_NETWORK_DATA: network_data,
-            }
         elif self.artifact == ART_SRU_APPLICATION:
             application = sorted(
                 [
@@ -56,10 +48,6 @@ class SRU(ForensicArtifact):
             #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
             #     for record in self.application_timeline()
             # ]
-            self.result = {
-                RSLT_SRU_APPLICATION: application,
-                # "application_timeline": application_timeline,
-            }
 
         # energy_estimator = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
