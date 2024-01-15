@@ -1,0 +1,80 @@
+RegistryPath:
+  Amcache:
+    - owner: ARTIFACT_OWNER_SYSTEM
+      paths:
+        - Windows/appcompat/Programs
+  UserAccount:
+    Users:
+      - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
+    ProfileList:
+      - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
+  BAM:
+    - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings
+    - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\UserSettings
+    - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings
+    - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings
+  Shellbags:
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\ShellNoRoam
+    - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell
+    - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\ShellNoRoam
+    - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\Shell
+    - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\ShellNoRoam
+    - HKEY_CURRENT_USER\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
+  Shimcache:
+    - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
+    - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility
+  UserAssist:
+    - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
+  NetworkInfo:
+    Signatures:
+      - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
+    Profiles:
+      - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Profiles
+    Interfaces:
+      - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
+  USB:
+    USB:
+      - HKLM\SYSTEM\CurrentControlSet\Enum\USB
+    USBSTOR:
+      - HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR
+    DeviceContainers:
+      - HKLM\SYSTEM\CurrentControlSet\Control\DeviceContainers
+    HID:
+      - HKLM\SYSTEM\CurrentControlSet\Enum\HID
+    SCSI:
+      - HKLM\SYSTEM\CurrentControlSet\Enum\SCSI
+  Autorun:
+    - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run
+    - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run
+    - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
+    - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce\Setup
+    - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceE
+    - HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+    - HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+    - HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce\Setup
+    - HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx
+    - HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce\Setup
+    - HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnceEx
+    - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run
+    - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+    - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+    - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce\Setup
+    - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx
+  SystemInfo:
+    ComputerName:
+      - HKLM\SYSTEM\ControlSet001\Control\ComputerName\ComputerName
+    CurrentVersion:
+      - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion
+    Environment:
+      - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+    CodePage:
+      - HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage
+    FileSystem:
+      - HKLM\SYSTEM\ControlSet001\Control\FileSystem
+    Windows:
+      - HKLM\SYSTEM\ControlSet001\Control\Windows

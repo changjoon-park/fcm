@@ -9,7 +9,7 @@ from collections import namedtuple
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
-from lib.path_finder import ARTIFACT_PATH
+from lib.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
 from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
@@ -73,24 +73,25 @@ class ForensicArtifact:
 
     def iter_directory(self) -> Generator[Path, None, None]:
         for directory in self.artifact_directory:
-            owner = directory.get("owner", "")  # str
-            paths = directory.get("paths", "")  # list of str
+            if isinstance(directory, dict):
+                owner = directory.get("owner", "")  # str
+                paths = directory.get("paths", "")  # list of str
 
-            if owner == ARTIFACT_OWNER_SYSTEM:
-                for root in self.src.source.fs.path("/").iterdir():
-                    if not str(root) == "/sysvol":
+                if owner == ARTIFACT_OWNER_SYSTEM:
+                    for root in self.src.source.fs.path("/").iterdir():
+                        if not str(root) == "/sysvol":
+                            yield from (
+                                root.joinpath(path)
+                                for path in paths
+                                if root.joinpath(path).exists()
+                            )
+                elif owner == ARTIFACT_OWNER_USER:
+                    for user_details in self.src.source.user_details.all_with_home():
                         yield from (
-                            root.joinpath(path)
+                            user_details.home_path.joinpath(path)
                             for path in paths
-                            if root.joinpath(path).exists()
+                            if user_details.home_path.joinpath(path).exists()
                         )
-            elif owner == ARTIFACT_OWNER_USER:
-                for user_details in self.src.source.user_details.all_with_home():
-                    yield from (
-                        user_details.home_path.joinpath(path)
-                        for path in paths
-                        if user_details.home_path.joinpath(path).exists()
-                    )
 
     def iter_entry(
         self, name: str = None, recurse: bool = False
@@ -110,7 +111,7 @@ class ForensicArtifact:
                 yield Path(self.src.source)
 
     def iter_key(self, name: str = None) -> Generator:
-        if self.artifact_directory == None:
+        if self.artifact_directory == "registry":
             if name == None:
                 yield from self.artifact_entry
             else:

@@ -1,7 +1,18 @@
+import yaml
+from pathlib import Path
 from collections import namedtuple
+
 from settings import *
 
+current_directory = Path(__file__).parent.absolute()
+
+# schema file path
+schema_registry = current_directory / "schemas" / "path_registry.yaml"
+
 ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
+
+with open(schema_registry, "r") as file:
+    registry_path = yaml.safe_load(file).get("registry_path")
 
 ## BROWSER
 ARTIFACT_DIRECTORY_CHROME = [
@@ -314,39 +325,39 @@ ARTIFACT_PATH = {
         directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
     ),  # ! Registry
     ART_REGISTRY_USERASSIST: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_USERASSIST,
     ),
     ART_REGISTRY_SHIMCACHE: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_SHIMCACHE,
     ),
     ART_REGISTRY_BAM: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_BAM,
     ),
     ART_REGISTRY_USERACCOUNT: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_USER_ACCOUNT,
     ),
     ART_REGISTRY_NETWORKINFO: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_NETWORKINFO,
     ),
     ART_REGISTRY_SHELLBAGS: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_SHELLBAGS,
     ),
     ART_REGISTRY_USB: ArtifactPath(
-        directory=None,
-        entry=REGISTRY_KEY_USB,
+        directory="registry",
+        entry=registry_path.get("usb"),
     ),
     ART_REGISTRY_AUTORUN: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_AUTORUN,
     ),
     ART_REGISTRY_SYSTEMINFO: ArtifactPath(
-        directory=None,
+        directory="registry",
         entry=REGISTRY_KEY_SYSTEMINFO,
     ),
 }
