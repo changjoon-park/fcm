@@ -1,10 +1,46 @@
-import datetime
+import logging
 import struct
 
+from typing import Optional
+from datetime import datetime
 from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+
+logger = logging.getLogger(__name__)
+
+
+class NetworkInterfaceRecord(ArtifactRecord):
+    """Network interface registry record."""
+
+    ipaddr: Optional[str]
+    dhcp_ipaddr: Optional[str]
+    lease_obtained_time: datetime
+    lease_terminates_time: datetime
+    dhcp_server: Optional[str]
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_network_interface"
+
+
+class NetworkHistoryRecord(ArtifactRecord):
+    """Network history registry record."""
+
+    created: datetime
+    last_connected: datetime
+    profile_guid: str
+    profile_name: str
+    description: str
+    dns_suffix: str
+    first_network: str
+    default_gateway_mac: str
+    signature: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_network_history"
 
 
 class NetworkInfo(ForensicArtifact):
@@ -13,20 +49,33 @@ class NetworkInfo(ForensicArtifact):
 
     def parse(self, descending: bool = False):
         network_history = sorted(
-            [
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.network_history())
-            ],
-            key=lambda record: record["created"],
+            ),
+            key=lambda record: record.created,
             reverse=descending,
         )
         network_interface = sorted(
-            [
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.network_interface())
-            ],
-            key=lambda record: record["lease_obtained_time"],
+            ),
+            key=lambda record: record.lease_obtained_time,
             reverse=descending,
+        )
+
+        self.records.append(
+            Record(
+                schema=NetworkHistoryRecord,
+                record=network_history,  # record is a generator
+            )
+        )
+        self.records.append(
+            Record(
+                schema=NetworkInterfaceRecord,
+                record=network_interface,  # record is a generator
+            )
         )
 
     def network_interface(self):
@@ -85,14 +134,14 @@ class NetworkInfo(ForensicArtifact):
                     if not lease_terminates_time:
                         lease_terminates_time = self.ts.base_datetime_windows
 
-                    yield {
-                        "ipaddr": ipaddr,
-                        "dhcp_ipaddr": dhcp_ipaddr,
-                        "lease_obtained_time": lease_obtained_time,
-                        "lease_terminates_time": lease_terminates_time,
-                        "dhcp_server": dhcp_server,
-                        "evidence_id": self.evidence_id,
-                    }
+                    yield NetworkInterfaceRecord(
+                        ipaddr=ipaddr,
+                        dhcp_ipaddr=dhcp_ipaddr,
+                        lease_obtained_time=lease_obtained_time,
+                        lease_terminates_time=lease_terminates_time,
+                        dhcp_server=dhcp_server,
+                        evidence_id=self.evidence_id,
+                    )
 
     def network_history(self):
         """Return attached network history.
@@ -124,20 +173,20 @@ class NetworkInfo(ForensicArtifact):
                             profile.value("DateLastConnected").value
                         )
 
-                        yield {
-                            "created": created,
-                            "last_connected": last_connected,
-                            "profile_guid": guid,
-                            "profile_name": profile_name,
-                            "description": sig.value("Description").value,
-                            "dns_suffix": sig.value("DnsSuffix").value,
-                            "first_network": sig.value("FirstNetwork").value,
-                            "default_gateway_mac": sig.value(
+                        yield NetworkHistoryRecord(
+                            created=created,
+                            last_connected=last_connected,
+                            profile_guid=guid,
+                            profile_name=profile_name,
+                            description=sig.value("Description").value,
+                            dns_suffix=sig.value("DnsSuffix").value,
+                            first_network=sig.value("FirstNetwork").value,
+                            default_gateway_mac=sig.value(
                                 "DefaultGatewayMac"
                             ).value.hex(),
-                            "signature": sig.name,
-                            "evidence_id": self.evidence_id,
-                        }
+                            signature=sig.name,
+                            evidence_id=self.evidence_id,
+                        )
 
     def find_profile(self, guid):
         for reg_path in self.iter_key(name="Profiles"):
@@ -152,4 +201,4 @@ def parse_ts(val):
     items = list(struct.unpack("<8H", val))
     # If we remove the weekday (at position 2), this is a valid datetime tuple
     items.pop(2)
-    return datetime.datetime(*items)
+    return datetime(*items)
