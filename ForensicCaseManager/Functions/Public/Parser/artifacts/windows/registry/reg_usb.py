@@ -49,6 +49,7 @@ class UsbstorRecord(ArtifactRecord):
     last_insert: datetime
     last_removal: Optional[datetime]
     info_origin: str
+    evidence_id: str
 
     class Config:
         record_name: str = "reg_usb_usbstor"
@@ -61,28 +62,24 @@ class USB(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        # try:
-        #     usbstor = sorted(
-        #         (
-        #             self.validate_record(index=index, record=record)
-        #             for index, record in enumerate(self.usbstor())
-        #         ),
-        #         key=lambda record: record.first_insert,
-        #         reverse=descending,
-        #     )
-        # except Exception as e:
-        #     logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
-        #     logger.error(e)
-        #     return
+        try:
+            usbstor = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.usbstor())
+                ),
+                key=lambda record: record.first_insert,
+                reverse=descending,
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
 
-        usbstor = (
-            self.validate_record(index=index, record=record)
-            for index, record in enumerate(self.usbstor())
-        )
         self.records.append(
             Record(
                 schema=UsbstorRecord,
-                record=usbstor,
+                record=usbstor,  # record is a generator
             )
         )
 

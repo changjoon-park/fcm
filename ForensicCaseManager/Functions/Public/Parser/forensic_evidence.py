@@ -111,20 +111,6 @@ class ForensicEvidence(CaseConfig):
                 self.db_manager.create_artifact_table_from_pydantic_model(schema)
 
                 # insert artifact data
-                for generator in record:
-                    for data in generator:
-                        self.db_manager.insert_artifact_data(
-                            artifact=forensic_artifact.artifact,
-                            data=data.model_dump(),
-                        )
-            # # create artifact table
-            # self.db_manager.create_artifact_table_from_pydantic_model(
-            #     forensic_artifact.record_schema
-            # )
-            # # insert artifact data
-            # for generator in forensic_artifact.result:
-            #     for record in generator:
-            #         self.db_manager.insert_artifact_data(
-            #             artifact=forensic_artifact.artifact,
-            #             data=record.model_dump(),
-            #         )
+                self.db_manager.insert_artifact_data(
+                    record=record
+                )  # ! record is a generator[Pydantic Model]

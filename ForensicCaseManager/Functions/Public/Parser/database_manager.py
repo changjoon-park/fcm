@@ -2,12 +2,14 @@ import sqlite3
 import yaml
 import json
 import logging
+from typing import Generator
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
+from icecream import ic
 
-from forensic_artifact import ArtifactRecord
+from forensic_artifact import ArtifactRecord, ArtifactRecord
 from lib.plugins import ARTIFACT_CATEGORIES
 from settings import (
     TABLE_NAME_FORENSIC_CASE,
@@ -222,19 +224,14 @@ class DatabaseManager:
         except Exception as e:
             logger.exception(f"Failed to create table {table_name} from Pydantic model")
 
-    def insert_artifact_data(
-        self,
-        artifact: str,
-        data: list[dict],
-    ):
-        if not data:
-            logger.warning("No data provided to insert into artifact table")
-            return
-
+    def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
         try:
             # Prepare the list of tuples for batch insertion
             prepared_data = []
-            for record in data:
+            for data in record:  # ! data is a Pydantic Model
+                # Extract table name from the Pydantic model
+                table_name = data.Config.record_name
+
                 # Convert datetime objects in lists to strings and serialize lists to JSON
                 processed_record = {
                     key: json.dumps(
@@ -242,7 +239,7 @@ class DatabaseManager:
                     )
                     if isinstance(value, list)
                     else value
-                    for key, value in record.items()
+                    for key, value in data.model_dump().items()
                 }
 
                 # Convert the dictionary to a tuple
@@ -251,17 +248,19 @@ class DatabaseManager:
                 # Append the tuple to the list of tuples
                 prepared_data.append(record_tuple)
 
+                # Extract column names from the Pydantic model
+                keys = data.model_dump().keys()
+
             # Prepare SQL statement with placeholders
-            keys = data[0].keys() if data else []
             placeholders = ", ".join(["?"] * len(keys))
             statement = (
-                f"INSERT INTO {artifact} ({', '.join(keys)}) VALUES ({placeholders})"
+                f"INSERT INTO {table_name} ({', '.join(keys)}) VALUES ({placeholders})"
             )
             with open_db(self.database) as cursor:
                 cursor.executemany(statement, prepared_data)
                 logger.info(
-                    f"Inserted {len(data)} {artifact} entries into {artifact} table"
+                    f"Inserted {len(prepared_data)} {table_name} entries into {table_name} table"
                 )
 
         except Exception as e:
-            logger.exception(f"Error inserting data into {artifact} table: {e}")
+            logger.exception(f"Error inserting data into {table_name} table: {e}")

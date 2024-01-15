@@ -17,7 +17,7 @@ from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 
 logger = logging.getLogger(__name__)
 
-Record = namedtuple("Records", ["schema", "record"])
+Record = namedtuple("Record", ["schema", "record"])
 
 
 class ArtifactRecord(BaseModel):
