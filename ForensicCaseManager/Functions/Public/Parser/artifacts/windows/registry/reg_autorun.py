@@ -1,7 +1,25 @@
 import logging
 
+from typing import Optional
+from datetime import datetime
 from flow.record.fieldtypes import uri
-from forensic_artifact import Source, ForensicArtifact
+
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+
+logger = logging.getLogger(__name__)
+
+
+class AutoRunRecord(ArtifactRecord):
+    """Run key record."""
+
+    ts: datetime
+    name: str
+    path: str
+    key: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_autorun"
 
 
 class AutoRun(ForensicArtifact):
@@ -11,13 +29,25 @@ class AutoRun(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        runkeys = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.runkeys())
-            ],
-            key=lambda record: record["ts"],
-            reverse=descending,
+        try:
+            runkeys = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.runkeys())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
+
+        self.records.append(
+            Record(
+                schema=AutoRunRecord,
+                record=runkeys,  # record is a generator
+            )
         )
 
     def runkeys(self):
@@ -45,10 +75,11 @@ class AutoRun(ForensicArtifact):
                     if not (ts := self.ts.to_localtime(r.ts)):
                         ts = self.ts.base_datetime_windows
                     path = uri.from_windows(entry.value)
-                    yield {
-                        "ts": ts,
-                        "name": entry.name,
-                        "path": path,
-                        "key": str(reg_path),
-                        "evidence_id": self.evidence_id,
-                    }
+
+                    yield AutoRunRecord(
+                        ts=ts,
+                        name=entry.name,
+                        path=path,
+                        key=str(reg_path),
+                        evidence_id=self.evidence_id,
+                    )
