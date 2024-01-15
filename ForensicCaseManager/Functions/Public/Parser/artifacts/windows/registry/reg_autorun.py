@@ -1,7 +1,7 @@
 import logging
-
 from typing import Optional
 from datetime import datetime
+
 from flow.record.fieldtypes import uri
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record

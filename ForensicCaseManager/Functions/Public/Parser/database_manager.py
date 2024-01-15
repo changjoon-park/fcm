@@ -160,9 +160,9 @@ class DatabaseManager:
                 )
 
     def create_artifact_table_from_pydantic_model(self, model: ArtifactRecord):
+        table_name = model.Config.record_name
         try:
             # Extracting table name and column definitions from the Pydantic model
-            table_name = model.Config.record_name
             columns = []
             for field_name, field_type in model.__annotations__.items():
                 column_type = "TEXT"  # Default type, adjust as needed
@@ -232,4 +232,4 @@ class DatabaseManager:
                 )
 
         except Exception as e:
-            logger.exception(f"Error inserting data into {table_name} table: {e}")
+            logger.exception(f"Error inserting data into table: {e}")

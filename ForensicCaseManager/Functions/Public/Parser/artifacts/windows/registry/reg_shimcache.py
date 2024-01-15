@@ -10,9 +10,23 @@ from dissect.cstruct import Structure, cstruct
 from dissect.util.ts import wintimestamp
 from dissect.target.exceptions import Error, RegistryError
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
+
+
+class ShimCacheRecord(ArtifactRecord):
+    """Shimcache registry record."""
+
+    last_modified: datetime
+    name: str
+    entry_index: int
+    path: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_shimcache"
+
 
 c_shimdef = """
 struct NT61_HEADER {
@@ -296,13 +310,25 @@ class ShimCache(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        shimcache = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.shimcache())
-            ],
-            key=lambda record: record["last_modified"],
-            reverse=descending,
+        try:
+            shimcache = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.shimcache())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
+
+        self.records.append(
+            Record(
+                schema=ShimCacheRecord,
+                record=shimcache,  # record is a generator
+            )
         )
 
     def shimcache(self) -> Generator[dict, None, None]:
@@ -365,10 +391,10 @@ class ShimCache(ForensicArtifact):
 
             path = uri.from_windows(self.src.source.resolve(path))
 
-            yield {
-                "last_modified": last_modified,
-                "name": name,
-                "entry_index": index,
-                "path": path,
-                "evidence_id": self.evidence_id,
-            }
+            yield ShimCacheRecord(
+                last_modified=last_modified,
+                name=name,
+                entry_index=index,
+                path=path,
+                evidence_id=self.evidence_id,
+            )

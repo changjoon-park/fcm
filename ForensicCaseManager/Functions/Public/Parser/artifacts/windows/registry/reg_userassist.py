@@ -1,15 +1,31 @@
 import logging
 import codecs
-import json
+from typing import Optional
+from datetime import datetime
 
 from flow.record.fieldtypes import uri
 from dissect import cstruct
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
+
+
+class UserAssistRecord(ArtifactRecord):
+    """UserAssist registry record."""
+
+    ts: datetime
+    path: str
+    number_of_executions: Optional[int]
+    application_focus_count: Optional[int]
+    application_focus_duration: Optional[int]
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_userassist"
+
 
 userassist_def = """
 struct VERSION5_ENTRY {
@@ -38,12 +54,19 @@ class UserAssist(ForensicArtifact):
 
     def parse(self, descending: bool = False):
         userassist = sorted(
-            [
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.userassist())
-            ],
-            key=lambda record: record["ts"],
+            ),
+            key=lambda record: record.ts,
             reverse=descending,
+        )
+
+        self.records.append(
+            Record(
+                schema=UserAssistRecord,
+                record=userassist,  # record is a generator
+            )
         )
 
     def userassist(self):
@@ -122,13 +145,11 @@ class UserAssist(ForensicArtifact):
                             if not (ts := self.ts.wintimestamp(timestamp)):
                                 ts = self.ts.base_datetime_windows
 
-                            yield {
-                                "ts": ts,
-                                "path": value,
-                                "number_of_executions": number_of_executions,
-                                "application_focus_count": application_focus_count,
-                                "application_focus_duration": application_focus_duration,
-                                "evidence_id": self.evidence_id,
-                                # "user": user,
-                                # "key": count,
-                            }
+                            yield UserAssistRecord(
+                                ts=ts,
+                                path=value,
+                                number_of_executions=number_of_executions,
+                                application_focus_count=application_focus_count,
+                                application_focus_duration=application_focus_duration,
+                                evidence_id=self.evidence_id,
+                            )

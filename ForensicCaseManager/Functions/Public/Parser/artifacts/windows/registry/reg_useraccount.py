@@ -1,14 +1,52 @@
 import logging
+from typing import Optional, Generator
+from datetime import datetime
 from hashlib import md5, sha256
 from struct import pack
-from typing import Generator
 
 from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
+
+
+class SamRecord(ArtifactRecord):
+    """User account registry (SAM) record."""
+
+    rid: int
+    fullname: str
+    username: str
+    admincomment: str
+    usercomment: str
+    lastlogin: datetime
+    lastpasswordset: datetime
+    lastincorrectlogin: datetime
+    flags: int
+    countrycode: int
+    logins: int
+    failedlogins: int
+    lm: str
+    nt: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_sam"
+
+
+class ProfileListRecord(ArtifactRecord):
+    """Profile list registry record."""
+
+    rid: int
+    username: str
+    sid: str
+    home: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_profilelist"
+
 
 c_sam_def = """
 struct user_F {
@@ -265,21 +303,34 @@ class UserAccount(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        reg_user_account_sam = sorted(
-            [
+        sam = sorted(
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.sam())
-            ],
-            key=lambda record: record["rid"],
+            ),
+            key=lambda record: record.rid,
             reverse=descending,
         )
-        reg_user_account_profilelist = sorted(
-            [
+        profilelist = sorted(
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.profilelist())
-            ],
-            key=lambda record: record["rid"],
+            ),
+            key=lambda record: record.rid,
             reverse=descending,
+        )
+
+        self.records.append(
+            Record(
+                schema=SamRecord,
+                record=sam,  # record is a generator
+            )
+        )
+        self.records.append(
+            Record(
+                schema=ProfileListRecord,
+                record=profilelist,  # record is a generator
+            )
         )
 
         """
@@ -408,25 +459,25 @@ class UserAccount(ForensicArtifact):
                         f.rid, samkey, u_ntpw, antpassword
                     ).hex()
 
-                    yield {
-                        "rid": f.rid,
-                        "fullname": u_fullname,
-                        "username": u_username,
-                        "admincomment": u_admin_comment,
-                        "usercomment": u_user_comment,
-                        "lastlogin": self.ts.wintimestamp(f.t_last_login),
-                        "lastpasswordset": self.ts.wintimestamp(f.t_last_password_set),
-                        "lastincorrectlogin": self.ts.wintimestamp(
+                    yield SamRecord(
+                        rid=f.rid,
+                        fullname=u_fullname,
+                        username=u_username,
+                        admincomment=u_admin_comment,
+                        usercomment=u_user_comment,
+                        lastlogin=self.ts.wintimestamp(f.t_last_login),
+                        lastpasswordset=self.ts.wintimestamp(f.t_last_password_set),
+                        lastincorrectlogin=self.ts.wintimestamp(
                             f.t_last_incorrect_login
                         ),
-                        "flags": f.ACB_bits,
-                        "countrycode": f.country_code,
-                        "logins": f.logins,
-                        "failedlogins": f.failedcnt,
-                        "lm": lm_hash,
-                        "nt": nt_hash,
-                        "evidence_id": self.evidence_id,
-                    }
+                        flags=f.ACB_bits,
+                        countrycode=f.country_code,
+                        logins=f.logins,
+                        failedlogins=f.failedcnt,
+                        lm=lm_hash,
+                        nt=nt_hash,
+                        evidence_id=self.evidence_id,
+                    )
 
     def profilelist(self) -> Generator[dict, None, None]:
         for reg_path in self.iter_key(name="ProfileList"):
@@ -452,10 +503,10 @@ class UserAccount(ForensicArtifact):
                         home = profile_image_path.value
                         name = home.split("\\")[-1]
 
-                    yield {
-                        "rid": rid,
-                        "username": name,
-                        "sid": sid,
-                        "home": home,
-                        "evidence_id": self.evidence_id,
-                    }
+                    yield ProfileListRecord(
+                        rid=rid,
+                        username=name,
+                        sid=sid,
+                        home=home,
+                        evidence_id=self.evidence_id,
+                    )

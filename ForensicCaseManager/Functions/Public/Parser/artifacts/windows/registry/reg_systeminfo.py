@@ -1,9 +1,35 @@
 import logging
+from typing import Optional
+from datetime import datetime
+
 from dissect.target.exceptions import RegistryError
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
+
+
+class SystemInfoRecord(ArtifactRecord):
+    """System info registry record."""
+
+    product: str
+    install_date: datetime
+    shutdown_time: datetime
+    registered_organization: str
+    registered_owner: str
+    product_key: Optional[str]
+    product_id: str
+    edition_id: str
+    release_id: str
+    system_root: str
+    path_name: str
+    architecture: str
+    timezone: str
+    codepage: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_systeminfo"
 
 
 class SystemInfo(ForensicArtifact):
@@ -11,10 +37,22 @@ class SystemInfo(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        system_info = [
-            self.validate_record(index=index, record=record)
-            for index, record in enumerate(self.system_info())
-        ]
+        try:
+            system_info = (
+                self.validate_record(index=index, record=record)
+                for index, record in enumerate(self.system_info())
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
+
+        self.records.append(
+            Record(
+                schema=SystemInfoRecord,
+                record=system_info,  # record is a generator
+            )
+        )
 
     @property
     def timezone(self):
@@ -153,20 +191,20 @@ class SystemInfo(ForensicArtifact):
     def system_info(self):
         current_version = self.get_current_version()
 
-        yield {
-            "product": current_version.get("product"),
-            "install_date": current_version.get("install_date"),
-            "shutdown_time": self.last_shutdown_time,
-            "registered_organization": current_version.get("registered_organization"),
-            "registered_owner": current_version.get("registered_owner"),
-            "product_key": current_version.get("product_key"),
-            "product_id": current_version.get("product_id"),
-            "edition_id": current_version.get("edition_id"),
-            "release_id": current_version.get("release_id"),
-            "system_root": current_version.get("system_root"),
-            "path_name": current_version.get("path_name"),
-            "architecture": self.architecture,
-            "timezone": str(self.timezone),
-            "codepage": self.codepage,
-            "evidence_id": self.evidence_id,
-        }
+        yield SystemInfoRecord(
+            product=current_version.get("product"),
+            install_date=current_version.get("install_date"),
+            shutdown_time=self.last_shutdown_time,
+            registered_organization=current_version.get("registered_organization"),
+            registered_owner=current_version.get("registered_owner"),
+            product_key=current_version.get("product_key"),
+            product_id=current_version.get("product_id"),
+            edition_id=current_version.get("edition_id"),
+            release_id=current_version.get("release_id"),
+            system_root=current_version.get("system_root"),
+            path_name=current_version.get("path_name"),
+            architecture=self.architecture,
+            timezone=str(self.timezone),
+            codepage=self.codepage,
+            evidence_id=self.evidence_id,
+        )

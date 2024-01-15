@@ -1,4 +1,5 @@
-import json
+import logging
+from typing import Optional
 from datetime import datetime
 
 from flow.record.fieldtypes import uri
@@ -6,7 +7,64 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers.record import TargetRecordDescriptor
 from dissect.target.helpers import regutil
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+
+logger = logging.getLogger(__name__)
+
+
+class InventoryApplicationRecord(ArtifactRecord):
+    """InventoryApplication registry record."""
+
+    install_date: datetime
+    name: str
+    type: str
+    publisher: str
+    uninstall_string: str
+    root_dir_path: str
+    program_id: str
+    program_instance_id: str
+    msi_package_code: str
+    msi_product_code: str
+    mtime_regf: datetime
+    install_date_arp_last_modified: Optional[datetime]
+    install_date_from_link_file: Optional[list[datetime]]
+    os_version_at_install_time: str
+    language_code: int
+    package_full_name: str
+    manifest_path: str
+    registry_key_path: str
+    source: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "inventory_application"
+
+
+class InventoryApplicationFileRecord(ArtifactRecord):
+    """InventoryApplicationFile registry record."""
+
+    mtime_regf: datetime
+    name: str
+    size: int
+    publisher: str
+    product_name: str
+    bin_file_version: str
+    product_version: str
+    bin_product_version: str
+    version: str
+    program_id: str
+    path: str
+    hash_path: str
+    link_date: datetime
+    digests: list
+    language: int
+    is_pefile: str
+    is_oscomponent: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "inventory_application_file"
+
 
 AMCACHE_FILE_KEYS = {
     "0": "product_name",
@@ -363,12 +421,19 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         # ]
 
         applications = sorted(
-            [
+            (
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.applications())
-            ],
-            key=lambda record: record["install_date"],
+            ),
+            key=lambda record: record.install_date,
             reverse=descending,
+        )
+
+        self.records.append(
+            Record(
+                schema=ApplicationAppcompatRecord,
+                record=applications,  # record is a generator
+            )
         )
 
         # TODO: bug fix on timestamp
@@ -381,10 +446,17 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     reverse=descending,
         # )
 
-        application_files = [
+        application_files = (
             self.validate_record(index=index, record=record)
             for index, record in enumerate(self.application_files())
-        ]
+        )
+
+        self.records.append(
+            Record(
+                schema=ApplicationFileAppcompatRecord,
+                record=application_files,  # record is a generator
+            )
+        )
 
         # sorted_applications = sorted(
         #     [record._packdict() for record in self.applications()],
@@ -474,33 +546,33 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 else None
             )
 
-            yield {
-                "install_date": install_date,
-                "name": entry_data.get("Name"),
-                "type": entry_data.get("Type"),
-                "publisher": entry_data.get("Publisher"),
-                "uninstall_string": entry_data.get("UninstallString"),
-                "root_dir_path": entry_data.get("RootDirPath"),
-                "program_id": entry_data.get("ProgramId"),
-                "program_instance_id": entry_data.get("ProgramInstanceId"),
-                "msi_package_code": entry_data.get("MsiPackageCode"),
-                "msi_product_code": entry_data.get("MsiProductCode"),
-                "mtime_regf": entry.timestamp,
-                "install_date_arp_last_modified": parse_win_datetime(
+            yield InventoryApplicationRecord(
+                install_date=install_date,
+                name=entry_data.get("Name"),
+                type=entry_data.get("Type"),
+                publisher=entry_data.get("Publisher"),
+                uninstall_string=entry_data.get("UninstallString"),
+                root_dir_path=entry_data.get("RootDirPath"),
+                program_id=entry_data.get("ProgramId"),
+                program_instance_id=entry_data.get("ProgramInstanceId"),
+                msi_package_code=entry_data.get("MsiPackageCode"),
+                msi_product_code=entry_data.get("MsiProductCode"),
+                mtime_regf=entry.timestamp,
+                install_date_arp_last_modified=parse_win_datetime(
                     install_date_arp_last_modified
                 ),
-                "install_date_from_link_file": [
+                install_date_from_link_file=[
                     parse_win_datetime(dt)
                     for dt in entry_data.get("InstallDateFromLinkFile", [])
                 ],
-                "os_version_at_install_time": entry_data.get("OSVersionAtInstallTime"),
-                "language_code": entry_data.get("Language"),
-                "package_full_name": entry_data.get("PackageFullName"),
-                "manifest_path": entry_data.get("ManifestPath"),
-                "registry_key_path": entry_data.get("RegistryKeyPath"),
-                "source": entry_data.get("Source"),
-                "evidence_id": self.evidence_id,
-            }
+                os_version_at_install_time=entry_data.get("OSVersionAtInstallTime"),
+                language_code=entry_data.get("Language"),
+                package_full_name=entry_data.get("PackageFullName"),
+                manifest_path=entry_data.get("ManifestPath"),
+                registry_key_path=entry_data.get("RegistryKeyPath"),
+                source=entry_data.get("Source"),
+                evidence_id=self.evidence_id,
+            )
 
     def parse_inventory_application_file(self):
         """Parse Root\\InventoryApplicationFile registry key subkeys.
@@ -554,26 +626,26 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # else:
             #     link_date = self.ts.base_datetime_windows
 
-            yield {
-                "link_date": link_date,
-                "name": entry_data.get("Name"),
-                "size": entry_data.get("Size"),
-                "publisher": entry_data.get("Publisher"),
-                "product_name": entry_data.get("ProductName"),
-                "product_version": entry_data.get("ProductVersion"),
-                "bin_file_version": entry_data.get("BinFileVersion"),
-                "bin_product_version": entry_data.get("BinProductVersion"),
-                "version": entry_data.get("Version"),
-                "program_id": entry_data.get("ProgramId"),
-                "path": uri.from_windows(entry_data.get("LowerCaseLongPath")),
-                "mtime_regf": entry.timestamp,
-                "hash_path": entry_data.get("LongPathHash"),
-                "digests": [None, sha1_digest, None],
-                "language": entry_data.get("Language"),
-                "is_pefile": entry_data.get("BinaryType"),
-                "is_oscomponent": None,
-                "evidence_id": self.evidence_id,
-            }
+            yield InventoryApplicationFileRecord(
+                mtime_regf=entry.timestamp,
+                name=entry_data.get("Name"),
+                size=entry_data.get("Size"),
+                publisher=entry_data.get("Publisher"),
+                product_name=entry_data.get("ProductName"),
+                bin_file_version=entry_data.get("BinFileVersion"),
+                product_version=entry_data.get("ProductVersion"),
+                bin_product_version=entry_data.get("BinProductVersion"),
+                version=entry_data.get("Version"),
+                program_id=entry_data.get("ProgramId"),
+                path=uri.from_windows(entry_data.get("LowerCaseLongPath")),
+                hash_path=entry_data.get("LongPathHash"),
+                link_date=link_date,
+                digests=[None, sha1_digest, None],
+                language=entry_data.get("Language"),
+                is_pefile=entry_data.get("BinaryType"),
+                is_oscomponent=None,
+                evidence_id=self.evidence_id,
+            )
 
     def parse_inventory_driver_binary(self):
         """Return InventoryDriverBinary records from Amcache hive.

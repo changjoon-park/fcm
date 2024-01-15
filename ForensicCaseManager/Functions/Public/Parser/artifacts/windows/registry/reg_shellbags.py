@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+from datetime import datetime
 
 from dissect.cstruct import cstruct
 from dissect.target.exceptions import RegistryKeyNotFoundError
@@ -28,7 +30,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
     EXTENSION_BLOCK_BEEF0005,
 )
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +264,22 @@ c_bag = cstruct()
 c_bag.load(bag_def)
 
 
+class ShellBagRecord(ArtifactRecord):
+    """Shellbag record."""
+
+    path: str
+    creation_time: Optional[datetime]
+    modification_time: Optional[datetime]
+    access_time: Optional[datetime]
+    regf_modification_time: datetime
+    user: str
+    key: str
+    evidence_id: str
+
+    class Config:
+        record_name: str = "reg_shellbags"
+
+
 class ShellBags(ForensicArtifact):
     """Windows Shellbags plugin.
 
@@ -273,13 +291,25 @@ class ShellBags(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        shellbags = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.shellbags())
-            ],
-            key=lambda record: record["path"],
-            reverse=descending,
+        try:
+            shellbags = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.shellbags())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(e)
+            return
+
+        self.records.append(
+            Record(
+                schema=ShellBagRecord,
+                record=shellbags,  # record is a generator
+            )
         )
 
     def shellbags(self):
@@ -333,16 +363,16 @@ class ShellBags(ForensicArtifact):
                 My Computer\{01f256e4-53bd-301f-2975-1b9ac3670110}\<UNKNOWN size=0x0100 type=None>\<UNKNOWN size=0x00fa type=None>\<UNKNOWN size=0x00fc type=None>\<UNKNOWN size=0x0104 type=None>\<UNKNOWN size=0x0112 type=None>\<UNKNOWN size=0x0106 type=None>\<UNKNOWN size=0x011e type=None>\<UNKNOWN size=0x0120 type=None>
                 """
 
-                yield {
-                    "path": path if path else "",
-                    "creation_time": item.creation_time,
-                    "modification_time": item.modification_time,
-                    "access_time": item.access_time,
-                    "regf_modification_time": key.ts,
-                    "user": str(user),
-                    "key": str(key),
-                    "evidence_id": self.evidence_id,
-                }
+                yield ShellBagRecord(
+                    path=path if path else "",
+                    creation_time=item.creation_time,
+                    modification_time=item.modification_time,
+                    access_time=item.access_time,
+                    regf_modification_time=key.ts,
+                    user=str(user),
+                    key=str(key),
+                    evidence_id=self.evidence_id,
+                )
 
             for r in self._walk_bags(key.subkey(name), path):
                 yield r
