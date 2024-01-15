@@ -16,12 +16,6 @@ TABLE_NAME_ARTIFACT_CATEGORY = "artifact_category"
 ARTIFACT_OWNER_SYSTEM = "SYSTEM"
 ARTIFACT_OWNER_USER = "USER"
 
-# Artifact Schema
-ARTIFACT_SCHEMA_FILESYSTEM = current_directory / "schema" / "filesystem"
-ARTIFACT_SCHEMA_WINDOWS = current_directory / "schema" / "windows"
-ARTIFACT_SCHEMA_REGISTRY = current_directory / "schema" / "windows" / "registry"
-ARTIFACT_SCHEMA_BROWSER = current_directory / "schema" / "application" / "browsers"
-
 # Categories
 CAT_APPLICATION_EXECUTION = "APPLICATION_EXECUTION"
 CAT_FILE_FOLDER_OPENING = "FILE_FOLDER_OPENING"

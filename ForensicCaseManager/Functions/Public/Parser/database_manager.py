@@ -1,5 +1,4 @@
 import sqlite3
-import yaml
 import json
 import logging
 from typing import Generator
@@ -7,7 +6,6 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-from icecream import ic
 
 from forensic_artifact import ArtifactRecord, ArtifactRecord
 from lib.plugins import ARTIFACT_CATEGORIES
@@ -161,37 +159,6 @@ class DatabaseManager:
                     ),
                 )
 
-    def create_artifact_table_from_yaml(self, schema_file: Path):
-        if not schema_file or not schema_file.exists():
-            logger.error(f"Schema file {schema_file} does not exist")
-            return
-
-        try:
-            with open(schema_file, "r", encoding="utf-8") as f:
-                schema = yaml.load(f, Loader=yaml.FullLoader)
-
-            table_info = schema.get("Table", {})
-            table_name = table_info.get("TableName")
-            if not table_name:
-                logger.error("No table name specified in schema")
-                return
-
-            column_defs = ", ".join(
-                f"{column_name} {column_type}"
-                for column in table_info["Columns"]
-                for column_name, column_type in column.items()
-            )
-
-            create_statement = (
-                f"CREATE TABLE IF NOT EXISTS {table_name} ({column_defs})"
-            )
-
-            with open_db(self.database) as cursor:
-                cursor.execute(create_statement)
-
-        except Exception as e:
-            logger.exception(f"Failed to create table {table_name} from YAML: {e}")
-
     def create_artifact_table_from_pydantic_model(self, model: ArtifactRecord):
         try:
             # Extracting table name and column definitions from the Pydantic model
@@ -222,7 +189,9 @@ class DatabaseManager:
                 cursor.execute(create_statement)
 
         except Exception as e:
-            logger.exception(f"Failed to create table {table_name} from Pydantic model")
+            logger.exception(
+                f"Failed to create table {table_name} from Pydantic model: {e}"
+            )
 
     def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
         try:
