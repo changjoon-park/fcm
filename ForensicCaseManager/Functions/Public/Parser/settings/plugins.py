@@ -1,5 +1,4 @@
-from settings import *  # artifacts,
-from settings import Artifact
+from settings.config import *  # artifacts,
 from collections import namedtuple
 
 from artifacts.filesystem import usnjrnl

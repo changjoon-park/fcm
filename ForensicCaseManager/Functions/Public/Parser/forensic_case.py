@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from dataclasses import dataclass
 
-from lib.plugins import ARTIFACT_CATEGORIES
+from settings.plugins import ARTIFACT_CATEGORIES
 
 from case_config import CaseConfig
 from forensic_evidence import ForensicEvidence

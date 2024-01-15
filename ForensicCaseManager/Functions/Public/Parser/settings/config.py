@@ -1,8 +1,4 @@
-from pathlib import Path
 from enum import Enum
-
-current_directory = Path(__file__).parent.absolute()
-
 
 # Database Name
 DATABASE_NAME = "case.db"

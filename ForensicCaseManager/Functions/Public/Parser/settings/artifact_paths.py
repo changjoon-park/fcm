@@ -2,18 +2,19 @@ import yaml
 from pathlib import Path
 from collections import namedtuple
 
-from settings import *
+from settings.config import *
 
 current_directory = Path(__file__).parent.absolute()
 
 # schema file path
 schema_registry = current_directory / "schemas" / "path_registry.yaml"
 
-ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 
 with open(schema_registry, "r") as file:
-    registry_path = yaml.safe_load(file).get("registry_path")
+    registry_path = yaml.safe_load(file).get("RegistryPath")
 
+
+ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 ## BROWSER
 ARTIFACT_DIRECTORY_CHROME = [
     {

@@ -8,7 +8,7 @@ from flow.record.fieldtypes import uri
 from dissect.target.plugins.filesystem.ntfs.utils import get_drive_letter
 
 from forensic_artifact import Source, ForensicArtifact
-from settings import RSLT_USNJRNL
+from settings.config import RSLT_USNJRNL
 
 logger = logging.getLogger(__name__)
 

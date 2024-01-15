@@ -9,10 +9,10 @@ from collections import namedtuple
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
-from lib.artifact_paths import ARTIFACT_PATH
+from settings.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
-from settings import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
+from settings.config import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 
 
 logger = logging.getLogger(__name__)
