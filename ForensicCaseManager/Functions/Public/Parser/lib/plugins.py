@@ -1,5 +1,5 @@
 from settings import *  # artifacts,
-
+from settings import Artifact
 from collections import namedtuple
 
 from artifacts.filesystem import usnjrnl
@@ -144,7 +144,7 @@ WINDOWS_PLUGINS = {
         artifact=reg_shellbags.ShellBags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    ART_REGISTRY_USB: Plugin(
+    Artifact.REG_USB.value: Plugin(
         artifact=reg_usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),

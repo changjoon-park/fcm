@@ -1,8 +1,6 @@
 import logging
-import json
 import struct
 
-from dataclasses import dataclass, field
 from typing import Optional
 from datetime import datetime
 from dissect.target.exceptions import RegistryValueNotFoundError
