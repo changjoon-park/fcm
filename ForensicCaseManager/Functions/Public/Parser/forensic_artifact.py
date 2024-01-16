@@ -70,10 +70,10 @@ class ForensicArtifact:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
     def iter_directory(self) -> Generator[Path, None, None]:
-        owner = self.schema.owner  # str
+        root = self.schema.root  # str
         directories = self.schema.directories  # list[str]
 
-        if owner == "system":
+        if root == "system":
             for root in self.src.source.fs.path("/").iterdir():
                 if not str(root) == "/sysvol":
                     yield from (
@@ -81,7 +81,7 @@ class ForensicArtifact:
                         for directory in directories
                         if root.joinpath(directory).exists()
                     )
-        elif owner == "user":
+        elif root == "user":
             for user_details in self.src.source.user_details.all_with_home():
                 yield from (
                     user_details.home_path.joinpath(directory)
@@ -92,16 +92,23 @@ class ForensicArtifact:
     def iter_entry(
         self, name: str = None, recurse: bool = False
     ) -> Generator[Path, None, None]:
-        if name == None:
-            artifact_entry = self.schema.entry
-        else:
-            artifact_entry = name
+        # for dir in self.iter_directory():
+        #     if name == None:
+        #         for entry in self.schema.entries:
+        #             if recurse == True:
+        #                 yield from dir.rglob(entry)
+        #             else:
+        #                 yield from dir.glob(entry)
+        #     else:
+        #         if recurse == True:
+        #             yield from dir.rglob(name)
+        #         else:
+        #             yield from dir.glob(name)
 
         for dir in self.iter_directory():
-            if recurse == True:
-                yield from dir.rglob(artifact_entry)
-            else:
-                yield from dir.glob(artifact_entry)
+            entries = [name] if name else self.schema.entries
+            for entry in entries:
+                yield from (dir.rglob(entry) if recurse else dir.glob(entry))
 
     def iter_key(self, name: str = None) -> Generator:
         if self.artifact_directory == "registry":

@@ -1,4 +1,5 @@
 import yaml
+from typing import Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 from collections import namedtuple
@@ -25,18 +26,24 @@ ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 class ArtifactSchema:
     name: str
     category: str
+    root: str = field(default_factory=str)
     owner: str = field(default_factory=str)
-    directories: list[str] = field(default_factory=list)
-    entry: str = field(default_factory=str)
+    directories: Optional[list[str]] = field(default_factory=list)
+    entries: Optional[list[str]] = field(default_factory=list)
     _schema: dict = field(init=False)
 
     def __post_init__(self):
         if self.name == Artifact.REG_AMCACHE.value:
             self._schema = registry_schema.get("Amcache")
 
+        self.root = self._schema.get("root")
         self.owner = self._schema.get("owner")
-        self.directories = self._schema.get("directories")
-        self.entry = self._schema.get("entry")
+        self.directories = (
+            self._schema.get("directories") if self._schema.get("directories") else []
+        )
+        self.entries = (
+            self._schema.get("entries") if self._schema.get("entries") else []
+        )
 
 
 ## BROWSER
