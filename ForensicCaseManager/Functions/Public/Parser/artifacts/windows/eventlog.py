@@ -5,7 +5,7 @@ from datetime import datetime
 from dissect.eventlog.evtx import Evtx
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
-from settings.config import Artifact
+from settings.artifacts import Artifact
 
 logger = logging.getLogger(__name__)
 

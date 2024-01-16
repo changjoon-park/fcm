@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from icecream import ic
 from settings.config import *
+from settings.artifacts import Artifact
 
 current_directory = Path(__file__).parent.absolute()
 
@@ -324,43 +325,43 @@ ARTIFACT_PATH = {
         directory=ARTIFACT_DIRECTORY_EVENTLOG,
         entry=None,
     ),
-    ART_REGISTRY_AMCACHE: ArtifactPath(
+    Artifact.REG_AMCACHE.value: ArtifactPath(
         directory=registry_path.get("Amcache"),
         entry="Amcache.hve",
     ),  # ! Registry
-    ART_REGISTRY_USERASSIST: ArtifactPath(
+    Artifact.REG_USERASSIST.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("UserAssist"),
     ),
-    ART_REGISTRY_SHIMCACHE: ArtifactPath(
+    Artifact.REG_SHIMCACHE.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("ShimCache"),
     ),
-    ART_REGISTRY_BAM: ArtifactPath(
+    Artifact.REG_BAM.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("BAM"),
     ),
-    ART_REGISTRY_USERACCOUNT: ArtifactPath(
+    Artifact.REG_USERACCOUNT.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("UserAccount"),
     ),
-    ART_REGISTRY_NETWORKINFO: ArtifactPath(
+    Artifact.REG_NETWORKINFO.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("NetworkInfo"),
     ),
-    ART_REGISTRY_SHELLBAGS: ArtifactPath(
+    Artifact.REG_SHELLBAGS.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("ShellBags"),
     ),
-    ART_REGISTRY_USB: ArtifactPath(
+    Artifact.REG_USB.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("USB"),
     ),
-    ART_REGISTRY_AUTORUN: ArtifactPath(
+    Artifact.REG_AUTORUN.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("Autorun"),
     ),
-    ART_REGISTRY_SYSTEMINFO: ArtifactPath(
+    Artifact.REG_SYSTEMINFO.value: ArtifactPath(
         directory="registry",
         entry=registry_path.get("SystemInfo"),
     ),
