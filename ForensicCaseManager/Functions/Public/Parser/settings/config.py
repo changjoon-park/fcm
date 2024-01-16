@@ -1,5 +1,3 @@
-from enum import Enum
-
 # Database Name
 DATABASE_NAME = "case.db"
 LOGFILE_NAME = "test.log"
@@ -26,35 +24,6 @@ CAT_EXTERNAL_DEVICE_USB_USAGE = "EXTERNAL_DEVICE_USB_USAGE"
 
 
 # ! Artifacts: program input(artifact) must be same as these artifact name
-class Artifact(Enum):
-    APP_CHROME = "app_chrome"
-    APP_EDGE = "app_edge"
-    APP_IEXPLORER = "app_iexplorer"
-    FS_MFT = "fs_mft"
-    FS_USNJRNL = "fs_usnjrnl"
-    WIN_RECYCLEBIN = "win_recyclebin"
-    WIN_PREFETCH = "win_prefetch"
-    WIN_SRU_NETWORK = "win_sru_network"
-    WIN_SRU_APPLICATION = "win_sru_application"
-    WIN_FILE_HISTORY = "win_file_history"
-    WIN_THUMBCACHE = "win_thumbcache"
-    WIN_JUMPLIST = "win_jumplist"
-    WIN_WINDOWSTIMELINE = "win_windowstimeline"
-    WIN_EVENT_LOGON = "win_event_logon"
-    WIN_EVENT_USB = "win_event_usb"
-    WIN_EVENT_WLAN = "win_event_wlan"
-    REG_AMCACHE = "reg_amcache"
-    REG_USERACCOUNT = "reg_useraccount"
-    REG_USERASSIST = "reg_userassist"
-    REG_SHIMCACHE = "reg_shimcache"
-    REG_BAM = "reg_bam"
-    REG_NETWORKINFO = "reg_networkinfo"
-    REG_SHELLBAGS = "reg_shellbags"
-    REG_USB = "reg_usb"
-    REG_AUTORUN = "reg_autorun"
-    REG_SYSTEMINFO = "reg_systeminfo"
-    REG_MRU = "reg_mru"
-
 
 ART_CHROME = "chrome"
 ART_EDGE = "edge"

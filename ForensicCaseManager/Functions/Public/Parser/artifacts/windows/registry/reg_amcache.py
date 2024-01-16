@@ -6,6 +6,8 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
+
 
 logger = logging.getLogger(__name__)
 
@@ -346,8 +348,8 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
 
     """
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     @property
     def amcache(self):

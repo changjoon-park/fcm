@@ -2,15 +2,14 @@ import logging
 from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field
+from icecream import ic
 
 from util.converter import convertfrom_extended_ascii
 from pathlib import Path
-from forensic_artifact import (
-    Source,
-    ForensicArtifact,
-)
+from forensic_artifact import Source, ForensicArtifact
 from case_config import CaseConfig
 from settings.plugins import WINDOWS_PLUGINS
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +34,18 @@ class ForensicEvidence(CaseConfig):
         self.evidence_id = "-".join([str(self.session_id), str(self._evidence_number)])
 
         # set forensic_artifacts
-        for artifact, plugin in WINDOWS_PLUGINS.items():
+        for plugin_name, plugin in WINDOWS_PLUGINS.items():
             ForensicArtifact, category = plugin
             if self._artifacts:
-                for artifact_entry in self._artifacts:
-                    if artifact == artifact_entry:
+                for artifact_name in self._artifacts:
+                    if plugin_name == artifact_name:
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src,
-                                artifact=artifact,
-                                category=category,
+                                schema=ArtifactSchema(
+                                    name=artifact_name,
+                                    category=category,
+                                ),
                             )
                         )
             if self._categories:
@@ -53,8 +54,10 @@ class ForensicEvidence(CaseConfig):
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src,
-                                artifact=artifact,
-                                category=category,
+                                schema=ArtifactSchema(
+                                    name=plugin_name,
+                                    category=category,
+                                ),
                             )
                         )
 

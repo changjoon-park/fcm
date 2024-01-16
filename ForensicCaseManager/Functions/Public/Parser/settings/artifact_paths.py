@@ -1,4 +1,5 @@
 import yaml
+from dataclasses import dataclass, field
 from pathlib import Path
 from collections import namedtuple
 
@@ -9,15 +10,35 @@ from settings.artifacts import Artifact
 current_directory = Path(__file__).parent.absolute()
 
 # schema file path
-schema_registry = current_directory / "schemas" / "path_registry.yaml"
-schema_windows = current_directory / "schemas" / "path_windows.yaml"
+schema_registry = current_directory / "schemas" / "registry.yaml"
+schema_windows = current_directory / "schemas" / "windows.yaml"
 
 
 with open(schema_registry, "r") as file:
-    registry_path = yaml.safe_load(file).get("RegistryPath")
+    registry_schema = yaml.safe_load(file).get("RegistrySchema")
 
 
 ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
+
+
+@dataclass
+class ArtifactSchema:
+    name: str
+    category: str
+    owner: str = field(default_factory=str)
+    directories: list[str] = field(default_factory=list)
+    entry: str = field(default_factory=str)
+    _schema: dict = field(init=False)
+
+    def __post_init__(self):
+        if self.name == Artifact.REG_AMCACHE.value:
+            self._schema = registry_schema.get("Amcache")
+
+        self.owner = self._schema.get("owner")
+        self.directories = self._schema.get("directories")
+        self.entry = self._schema.get("entry")
+
+
 ## BROWSER
 ARTIFACT_DIRECTORY_CHROME = [
     {
@@ -326,43 +347,43 @@ ARTIFACT_PATH = {
         entry=None,
     ),
     Artifact.REG_AMCACHE.value: ArtifactPath(
-        directory=registry_path.get("Amcache"),
+        directory=registry_schema.get("Amcache"),
         entry="Amcache.hve",
     ),  # ! Registry
     Artifact.REG_USERASSIST.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("UserAssist"),
+        entry=registry_schema.get("UserAssist"),
     ),
     Artifact.REG_SHIMCACHE.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("ShimCache"),
+        entry=registry_schema.get("ShimCache"),
     ),
     Artifact.REG_BAM.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("BAM"),
+        entry=registry_schema.get("BAM"),
     ),
     Artifact.REG_USERACCOUNT.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("UserAccount"),
+        entry=registry_schema.get("UserAccount"),
     ),
     Artifact.REG_NETWORKINFO.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("NetworkInfo"),
+        entry=registry_schema.get("NetworkInfo"),
     ),
     Artifact.REG_SHELLBAGS.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("ShellBags"),
+        entry=registry_schema.get("ShellBags"),
     ),
     Artifact.REG_USB.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("USB"),
+        entry=registry_schema.get("USB"),
     ),
     Artifact.REG_AUTORUN.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("Autorun"),
+        entry=registry_schema.get("Autorun"),
     ),
     Artifact.REG_SYSTEMINFO.value: ArtifactPath(
         directory="registry",
-        entry=registry_path.get("SystemInfo"),
+        entry=registry_schema.get("SystemInfo"),
     ),
 }

@@ -1,8 +1,8 @@
 import logging
 import struct
-
 from typing import Optional
 from datetime import datetime
+
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 

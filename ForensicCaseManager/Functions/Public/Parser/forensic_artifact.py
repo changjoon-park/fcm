@@ -5,6 +5,7 @@ from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
 from collections import namedtuple
+from icecream import ic
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
@@ -13,7 +14,7 @@ from settings.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
 from settings.config import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
-
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +39,12 @@ class Source:
 @dataclass(kw_only=True)
 class ForensicArtifact:
     src: Source
-    artifact: str
-    category: str
-    _evidence_id: str = field(init=False)
-    artifact_directory: list[dict] = field(init=False)
-    artifact_entry: str = field(init=False)
+    schema: ArtifactSchema
     records: list[Record] = field(default_factory=list)
+    _evidence_id: str = field(init=False)
 
     def __post_init__(self):
-        self.artifact_directory, self.artifact_entry = ARTIFACT_PATH.get(self.artifact)
+        pass
 
     @property
     def evidence_id(self) -> str:
@@ -72,43 +70,38 @@ class ForensicArtifact:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
     def iter_directory(self) -> Generator[Path, None, None]:
-        for directory in self.artifact_directory:
-            if isinstance(directory, dict):
-                owner = directory.get("owner", "")  # str
-                paths = directory.get("paths", "")  # list of str
+        owner = self.schema.owner  # str
+        directories = self.schema.directories  # list[str]
 
-                if owner == ARTIFACT_OWNER_SYSTEM:
-                    for root in self.src.source.fs.path("/").iterdir():
-                        if not str(root) == "/sysvol":
-                            yield from (
-                                root.joinpath(path)
-                                for path in paths
-                                if root.joinpath(path).exists()
-                            )
-                elif owner == ARTIFACT_OWNER_USER:
-                    for user_details in self.src.source.user_details.all_with_home():
-                        yield from (
-                            user_details.home_path.joinpath(path)
-                            for path in paths
-                            if user_details.home_path.joinpath(path).exists()
-                        )
+        if owner == "system":
+            for root in self.src.source.fs.path("/").iterdir():
+                if not str(root) == "/sysvol":
+                    yield from (
+                        root.joinpath(directory)
+                        for directory in directories
+                        if root.joinpath(directory).exists()
+                    )
+        elif owner == "user":
+            for user_details in self.src.source.user_details.all_with_home():
+                yield from (
+                    user_details.home_path.joinpath(directory)
+                    for directory in directories
+                    if user_details.home_path.joinpath(directory).exists()
+                )
 
     def iter_entry(
         self, name: str = None, recurse: bool = False
     ) -> Generator[Path, None, None]:
         if name == None:
-            artifact_entry = self.artifact_entry
+            artifact_entry = self.schema.entry
         else:
             artifact_entry = name
 
         for dir in self.iter_directory():
-            if dir.is_dir():
-                if recurse == True:
-                    yield from dir.rglob(artifact_entry)
-                else:
-                    yield from dir.glob(artifact_entry)
+            if recurse == True:
+                yield from dir.rglob(artifact_entry)
             else:
-                yield Path(self.src.source)
+                yield from dir.glob(artifact_entry)
 
     def iter_key(self, name: str = None) -> Generator:
         if self.artifact_directory == "registry":
@@ -131,7 +124,7 @@ class ForensicArtifact:
             first = next(entry)
         except StopIteration:
             logger.info(
-                f"No entries found in the {self.artifact} from {self.evidence_id}"
+                f"No entries found in the {self.schema.name} from {self.evidence_id}"
             )
         else:
             yield first
@@ -139,12 +132,12 @@ class ForensicArtifact:
 
     def validate_record(self, index: int, record: ArtifactRecord) -> dict:
         if isinstance(record, ArtifactRecord):
-            print(f"{self.artifact}-{index}: Parsed successfully")
+            print(f"{self.schema.name}-{index}: Parsed successfully")
         else:
             print(
-                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+                f"{self.schema.name}-{index}: error during parsing, type: {type(record)}"
             )
             logging.error(
-                f"{self.artifact}-{index}: error during parsing, type: {type(record)}"
+                f"{self.schema.name}-{index}: error during parsing, type: {type(record)}"
             )
         return record

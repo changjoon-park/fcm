@@ -1,8 +1,9 @@
-RegistryPath:
+RegistrySchema:
   Amcache:
-    - owner: SYSTEM
-      paths:
-        - Windows/appcompat/Programs
+    owner: system
+    entry: Amcache.hve
+    directories:
+      - Windows/appcompat/Programs
   UserAccount:
     Users:
       - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
