@@ -6,6 +6,7 @@ from flow.record.fieldtypes import uri
 from dissect.cstruct import cstruct
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +33,8 @@ class BamRecord(ArtifactRecord):
 class BAM(ForensicArtifact):
     """Plugin for bam/dam registry keys."""
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -45,7 +46,9 @@ class BAM(ForensicArtifact):
                 key=lambda record: record.ts,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(
+                f"Error while parsing {self.schema.name} from {self.evidence_id}"
+            )
             logger.error(e)
             return
 
@@ -65,7 +68,7 @@ class BAM(ForensicArtifact):
             ts (datetime): The parsed timestamp.
             path (uri): The parsed path.
         """
-        for reg_path in self.iter_key():
+        for reg_path in self.iter_entry():
             for r in self.src.source.registry.keys(reg_path):
                 for sub in r.subkeys():
                     for entry in sub.values():

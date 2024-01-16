@@ -35,6 +35,8 @@ class ArtifactSchema:
     def __post_init__(self):
         if self.name == Artifact.REG_AMCACHE.value:
             self._schema = registry_schema.get("Amcache")
+        if self.name == Artifact.REG_BAM.value:
+            self._schema = registry_schema.get("BAM")
 
         self.root = self._schema.get("root")
         self.owner = self._schema.get("owner")
