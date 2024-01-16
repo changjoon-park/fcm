@@ -1,5 +1,5 @@
 RegistrySchema:
-  Amcache:
+  reg_amcache:
     root: system
     owner: windows
     directories:
@@ -11,7 +11,7 @@ RegistrySchema:
       - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
     ProfileList:
       - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
-  BAM:
+  reg_bam:
     root: system
     owner: registry
     directories: null
