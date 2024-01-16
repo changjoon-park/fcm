@@ -3,8 +3,6 @@ from typing import Optional
 from datetime import datetime
 
 from flow.record.fieldtypes import uri
-
-from dissect.target.helpers.record import TargetRecordDescriptor
 from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
@@ -12,7 +10,7 @@ from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 logger = logging.getLogger(__name__)
 
 
-class InventoryApplicationRecord(ArtifactRecord):
+class ApplicationAppcompatRecord(ArtifactRecord):
     """InventoryApplication registry record."""
 
     install_date: datetime
@@ -37,10 +35,10 @@ class InventoryApplicationRecord(ArtifactRecord):
     evidence_id: str
 
     class Config:
-        record_name: str = "inventory_application"
+        record_name: str = "reg_amcache_application"
 
 
-class InventoryApplicationFileRecord(ArtifactRecord):
+class ApplicationFileAppcompatRecord(ArtifactRecord):
     """InventoryApplicationFile registry record."""
 
     mtime_regf: datetime
@@ -55,15 +53,117 @@ class InventoryApplicationFileRecord(ArtifactRecord):
     program_id: str
     path: str
     hash_path: str
-    link_date: datetime
+    link_date: Optional[datetime]
     digests: list
     language: int
     is_pefile: str
-    is_oscomponent: str
+    is_oscomponent: Optional[str]
     evidence_id: str
 
     class Config:
-        record_name: str = "inventory_application_file"
+        record_name: str = "reg_amcache_application_file"
+
+
+class FileAppcompatRecord(ArtifactRecord):
+    """File registry record."""
+
+    last_modified_store_timestamp: datetime
+    last_modified_timestamp: datetime
+    link_timestamp: datetime
+    created_timestamp: datetime
+    mtime_regf: datetime
+    reference: int
+    path: str
+    language_code: str
+    digests: list
+    program_id: str
+    pe_header_checksum: str
+    pe_size_of_image: str
+    product_name: str
+    company_name: str
+    file_size: int
+
+    class Config:
+        record_name: str = "reg_amcache_file"
+
+
+class ProgramsAppcompatRecord(ArtifactRecord):
+    """Programs registry record."""
+
+    mtime_regf: datetime
+    install_date: datetime
+    name: str
+    version: str
+    publisher: str
+    language_code: str
+    entry_type: str
+    uninstall_key: str
+    path: str
+    product_code: str
+    package_code: str
+    msi_package_code: str
+    msi_package_code2: str
+
+    class Config:
+        record_name: str = "reg_amcache_programs"
+
+
+class BinaryAppcompatRecord(ArtifactRecord):
+    """InventoryDriverBinary registry record."""
+
+    mtime_regf: datetime
+    driver_name: str
+    inf: str
+    driver_version: str
+    product: str
+    product_version: str
+    wdf_version: str
+    driver_company: str
+    driver_package_strong_name: str
+    service: str
+    driver_signed: str
+    driver_is_kernel_mode: str
+    last_write_time: datetime
+    driver_timestamp: datetime
+    image_size: str
+
+    class Config:
+        record_name: str = "reg_amcache_binary"
+
+
+class ContainerAppcompatRecord(ArtifactRecord):
+    """InventoryDeviceContainer registry record."""
+
+    mtime_regf: datetime
+    categories: str
+    discovery_method: str
+    friendly_name: str
+    icon: str
+    is_active: str
+    is_connected: str
+    is_machine_container: str
+    is_networked: str
+    is_paired: str
+    manufacturer: str
+    model_id: str
+    model_name: str
+    model_number: str
+    primary_category: str
+    state: str
+
+    class Config:
+        record_name: str = "reg_amcache_container"
+        protected_namespaces = ()
+
+
+class ShortcutAppcompatRecord(ArtifactRecord):
+    """ApplicationShortcut registry record."""
+
+    mtime_regf: datetime
+    path: str
+
+    class Config:
+        record_name: str = "reg_amcache_shortcut"
 
 
 AMCACHE_FILE_KEYS = {
@@ -102,147 +202,6 @@ AMCACHE_PROGRAM_KEYS = {
     "12": "MisPackageCode2",
     "Files": "Files",
 }
-
-ShortcutAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/ApplicationShortcut",
-    [
-        ("datetime", "mtime_regf"),
-        ("uri", "path"),
-    ],
-)
-
-FileAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/file",
-    [
-        ("datetime", "last_modified_timestamp"),
-        ("datetime", "last_modified_store_timestamp"),
-        ("datetime", "link_timestamp"),
-        ("datetime", "created_timestamp"),
-        ("datetime", "mtime_regf"),
-        ("varint", "reference"),
-        ("uri", "path"),
-        ("string", "language_code"),
-        ("digest", "digests"),
-        ("string", "program_id"),
-        ("string", "pe_header_checksum"),
-        ("string", "pe_size_of_image"),
-        ("wstring", "product_name"),
-        ("wstring", "company_name"),
-        ("filesize", "file_size"),
-    ],
-)
-
-ProgramsAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/programs",
-    [
-        ("datetime", "install_date"),
-        ("datetime", "mtime_regf"),
-        ("wstring", "name"),
-        ("string", "version"),
-        ("wstring", "publisher"),
-        ("string", "language_code"),
-        ("string", "entry_type"),
-        ("string", "uninstall_key"),
-        ("uri", "path"),
-        ("string", "product_code"),
-        ("string", "package_code"),
-        ("string", "msi_package_code"),
-        ("string", "msi_package_code2"),
-    ],
-)
-
-ApplicationAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/InventoryApplication",
-    [
-        ("datetime", "install_date"),
-        ("string", "name"),
-        ("string", "type"),
-        ("string", "publisher"),
-        ("string", "uninstall_string"),
-        ("uri", "root_dir_path"),
-        ("string", "program_id"),
-        ("string", "program_instance_id"),
-        ("string", "msi_package_code"),
-        ("string", "msi_product_code"),
-        ("datetime", "mtime_regf"),
-        ("datetime", "install_date_arp_last_modified"),
-        ("datetime[]", "install_date_from_link_file"),
-        ("string", "os_version_at_install_time"),
-        ("string", "language_code"),
-        ("string", "package_full_name"),
-        ("string", "manifest_path"),
-        ("string", "registry_key_path"),
-        ("string", "source"),
-    ],
-)
-
-
-ApplicationFileAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/InventoryApplicationFile",
-    [
-        ("datetime", "mtime_regf"),
-        ("wstring", "name"),
-        ("filesize", "size"),
-        ("wstring", "publisher"),
-        ("wstring", "product_name"),
-        ("string", "bin_file_version"),
-        ("string", "product_version"),
-        ("string", "bin_product_version"),
-        ("string", "version"),
-        ("string", "program_id"),
-        ("uri", "path"),
-        ("string", "hash_path"),
-        ("datetime", "link_date"),
-        ("digest", "digests"),
-        ("string", "language"),
-        ("varint", "is_pefile"),
-        ("varint", "is_oscomponent"),
-    ],
-)
-
-BinaryAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/InventoryDriverBinary",
-    [
-        ("datetime", "mtime_regf"),
-        ("uri", "driver_name"),
-        ("uri", "inf"),
-        ("string", "driver_version"),
-        ("wstring", "product"),
-        ("string", "product_version"),
-        ("string", "wdf_version"),
-        ("wstring", "driver_company"),
-        ("string", "driver_package_strong_name"),
-        ("string", "service"),
-        ("string", "driver_signed"),
-        ("varint", "driver_is_kernel_mode"),
-        ("datetime", "last_write_time"),
-        ("datetime", "driver_timestamp"),
-        ("filesize", "image_size"),
-    ],
-)
-
-
-ContainerAppcompatRecord = TargetRecordDescriptor(
-    "windows/appcompat/DeviceContainer",
-    [
-        ("datetime", "mtime_regf"),
-        ("string", "categories"),
-        ("string", "discovery_method"),
-        ("string", "friendly_name"),
-        ("string", "icon"),
-        ("varint", "is_active"),
-        ("varint", "is_connected"),
-        ("varint", "is_machine_container"),
-        ("varint", "is_networked"),
-        ("varint", "is_paired"),
-        ("string", "manufacturer"),
-        ("string", "model_id"),
-        ("string", "model_name"),
-        ("string", "model_number"),
-        ("string", "primary_category"),
-        ("string", "state"),
-    ],
-)
 
 
 class AmcachePluginOldMixin:
@@ -291,7 +250,6 @@ class AmcachePluginOldMixin:
                     product_name=subkey_data.get("product_name"),
                     company_name=subkey_data.get("company_name"),
                     file_size=subkey_data.get("file_size"),
-                    _target=self.target,
                 )
 
     def parse_programs(self):
@@ -313,7 +271,6 @@ class AmcachePluginOldMixin:
                 package_code=entry_data.get("PackageCode"),
                 msi_package_code=entry_data.get("MsiPackageCode"),
                 msi_package_code2=entry_data.get("MsiPackageCode2"),
-                _target=self.target,
             )
 
             if "FilePaths" in entry_data:
@@ -334,7 +291,6 @@ class AmcachePluginOldMixin:
                         package_code=entry_data.get("PackageCode"),
                         msi_package_code=entry_data.get("MsiPackageCode"),
                         msi_package_code2=entry_data.get("MsiPackageCode2"),
-                        _target=self.target,
                     )
 
             if "Files" in entry_data:
@@ -355,7 +311,6 @@ class AmcachePluginOldMixin:
                         package_code=entry_data.get("PackageCode"),
                         msi_package_code=entry_data.get("MsiPackageCode"),
                         msi_package_code2=entry_data.get("MsiPackageCode2"),
-                        _target=self.target,
                     )
 
     def programs(self):
@@ -546,7 +501,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 else None
             )
 
-            yield InventoryApplicationRecord(
+            yield ApplicationAppcompatRecord(
                 install_date=install_date,
                 name=entry_data.get("Name"),
                 type=entry_data.get("Type"),
@@ -626,7 +581,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # else:
             #     link_date = self.ts.base_datetime_windows
 
-            yield InventoryApplicationFileRecord(
+            yield ApplicationFileAppcompatRecord(
                 mtime_regf=entry.timestamp,
                 name=entry_data.get("Name"),
                 size=entry_data.get("Size"),
@@ -683,7 +638,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                     entry_data.get("DriverTimestamp")
                 ),
                 image_size=entry_data.get("ImageSize"),
-                _target=self._target,
             )
 
     def parse_inventory_application_shortcut(self):
@@ -704,7 +658,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             yield ShortcutAppcompatRecord(
                 mtime_regf=entry.timestamp,
                 path=uri.from_windows(entry.value("ShortCutPath").value),
-                _target=self._target,
             )
 
     def parse_inventory_device_container(self):
@@ -740,7 +693,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 model_number=entry_data.get("ModelNumber"),
                 primary_category=entry_data.get("PrimaryCategory"),
                 state=entry_data.get("State"),
-                _target=self._target,
             )
 
     def applications(self):
