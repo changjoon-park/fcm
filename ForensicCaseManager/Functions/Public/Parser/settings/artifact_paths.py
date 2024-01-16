@@ -9,6 +9,7 @@ current_directory = Path(__file__).parent.absolute()
 
 # schema file path
 schema_registry = current_directory / "schemas" / "path_registry.yaml"
+schema_windows = current_directory / "schemas" / "path_windows.yaml"
 
 
 with open(schema_registry, "r") as file:
@@ -324,31 +325,32 @@ ARTIFACT_PATH = {
         entry=None,
     ),
     ART_REGISTRY_AMCACHE: ArtifactPath(
-        directory=ARTIFACT_DIRECTORY_AMCACHE, entry="Amcache.hve"
+        directory=registry_path.get("Amcache"),
+        entry="Amcache.hve",
     ),  # ! Registry
     ART_REGISTRY_USERASSIST: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_USERASSIST,
+        entry=registry_path.get("UserAssist"),
     ),
     ART_REGISTRY_SHIMCACHE: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_SHIMCACHE,
+        entry=registry_path.get("ShimCache"),
     ),
     ART_REGISTRY_BAM: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_BAM,
+        entry=registry_path.get("BAM"),
     ),
     ART_REGISTRY_USERACCOUNT: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_USER_ACCOUNT,
+        entry=registry_path.get("UserAccount"),
     ),
     ART_REGISTRY_NETWORKINFO: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_NETWORKINFO,
+        entry=registry_path.get("NetworkInfo"),
     ),
     ART_REGISTRY_SHELLBAGS: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_SHELLBAGS,
+        entry=registry_path.get("ShellBags"),
     ),
     ART_REGISTRY_USB: ArtifactPath(
         directory="registry",
@@ -356,10 +358,10 @@ ARTIFACT_PATH = {
     ),
     ART_REGISTRY_AUTORUN: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_AUTORUN,
+        entry=registry_path.get("Autorun"),
     ),
     ART_REGISTRY_SYSTEMINFO: ArtifactPath(
         directory="registry",
-        entry=REGISTRY_KEY_SYSTEMINFO,
+        entry=registry_path.get("SystemInfo"),
     ),
 }
