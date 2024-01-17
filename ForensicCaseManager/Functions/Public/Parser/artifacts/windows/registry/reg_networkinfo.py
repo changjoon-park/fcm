@@ -1,15 +1,13 @@
-import logging
 import struct
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 from settings.artifact_paths import ArtifactSchema
-
-logger = logging.getLogger(__name__)
 
 
 class NetworkInterfaceRecord(ArtifactRecord):
@@ -135,14 +133,20 @@ class NetworkInfo(ForensicArtifact):
                     if not lease_terminates_time:
                         lease_terminates_time = self.ts.base_datetime_windows
 
-                    yield NetworkInterfaceRecord(
-                        ipaddr=ipaddr,
-                        dhcp_ipaddr=dhcp_ipaddr,
-                        lease_obtained_time=lease_obtained_time,
-                        lease_terminates_time=lease_terminates_time,
-                        dhcp_server=dhcp_server,
-                        evidence_id=self.evidence_id,
-                    )
+                    parsed_data = {
+                        "ipaddr": ipaddr,
+                        "dhcp_ipaddr": dhcp_ipaddr,
+                        "lease_obtained_time": lease_obtained_time,
+                        "lease_terminates_time": lease_terminates_time,
+                        "dhcp_server": dhcp_server,
+                        "evidence_id": self.evidence_id,
+                    }
+
+                    try:
+                        yield NetworkInterfaceRecord(**parsed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
 
     def network_history(self):
         """Return attached network history.
@@ -174,28 +178,35 @@ class NetworkInfo(ForensicArtifact):
                             profile.value("DateLastConnected").value
                         )
 
-                        yield NetworkHistoryRecord(
-                            created=created,
-                            last_connected=last_connected,
-                            profile_guid=guid,
-                            profile_name=profile_name,
-                            description=sig.value("Description").value,
-                            dns_suffix=sig.value("DnsSuffix").value,
-                            first_network=sig.value("FirstNetwork").value,
-                            default_gateway_mac=sig.value(
+                        parsed_data = {
+                            "created": created,
+                            "last_connected": last_connected,
+                            "profile_guid": guid,
+                            "profile_name": profile_name,
+                            "description": sig.value("Description").value,
+                            "dns_suffix": sig.value("DnsSuffix").value,
+                            "first_network": sig.value("FirstNetwork").value,
+                            "default_gateway_mac": sig.value(
                                 "DefaultGatewayMac"
                             ).value.hex(),
-                            signature=sig.name,
-                            evidence_id=self.evidence_id,
-                        )
+                            "signature": sig.name,
+                            "evidence_id": self.evidence_id,
+                        }
+
+                        try:
+                            yield NetworkHistoryRecord(**parsed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue
 
     def find_profile(self, guid):
         for reg_path in self.iter_entry(entry_name="Profiles"):
             for key in self.src.source.registry.keys(reg_path):
                 try:
                     return key.subkey(guid)  # Just return the first one...
-                except RegistryError:
-                    pass
+                except RegistryError as e:
+                    self.log_error(e)
+                    continue
 
 
 def parse_ts(val):

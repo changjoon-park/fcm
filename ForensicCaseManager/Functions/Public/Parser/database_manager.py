@@ -195,17 +195,26 @@ class DatabaseManager:
 
     def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
         try:
-            with open_db(self.database) as cursor:
-                for data in record:
-                    self._insert_record(cursor, data)
+            all_records = []
+            table_name = None
+            keys = None
+
+            # Accumulate all records
+            for data in record:
+                table_name, prepared_data, keys = self._prepare_record_data(data)
+                all_records.append(prepared_data)
+
+            # Perform batch insertion if there are records to insert
+            if all_records:
+                statement = self._prepare_insert_statement(table_name, keys)
+                with open_db(self.database) as cursor:
+                    cursor.executemany(statement, all_records)
+                    logger.info(
+                        f"Inserted {len(all_records)} entries into {table_name} table"
+                    )
+
         except Exception as e:
             logger.exception(f"Error inserting data into table: {e}")
-
-    def _insert_record(self, cursor, data):
-        table_name, prepared_data, keys = self._prepare_record_data(data)
-        statement = self._prepare_insert_statement(table_name, keys)
-        cursor.execute(statement, prepared_data)
-        # logger.info(f"Inserted an entry into {table_name} table")
 
     def _prepare_record_data(self, data):
         table_name = data.Config.record_name

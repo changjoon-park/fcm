@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 from datetime import datetime
 from pydantic import ValidationError
@@ -8,9 +7,6 @@ from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 from settings.artifact_paths import ArtifactSchema
-
-
-logger = logging.getLogger(__name__)
 
 
 class ApplicationAppcompatRecord(ArtifactRecord):
@@ -225,7 +221,7 @@ class AmcachePluginOldMixin:
                     AMCACHE_FILE_KEYS, subkey
                 )
 
-                data = {
+                parsed_data = {
                     "last_modified_store_timestamp": self.ts.win_timestamp(
                         subkey_data.get("last_modified_store_timestamp")
                     ),
@@ -256,12 +252,9 @@ class AmcachePluginOldMixin:
                 }
 
                 try:
-                    yield FileAppcompatRecord(**data)
+                    yield FileAppcompatRecord(**parsed_data)
                 except ValidationError as e:
-                    logger.error(
-                        f"Error while parsing {self.name} from {self.evidence_id}"
-                    )
-                    logger.error(e)
+                    self.log_error(e)
                     continue
 
     def parse_programs(self):
@@ -270,7 +263,7 @@ class AmcachePluginOldMixin:
         for entry in self.read_key_subkeys(key):
             entry_data = self._replace_indices_with_fields(AMCACHE_PROGRAM_KEYS, entry)
 
-            data = {
+            parsed_data = {
                 "mtime_regf": entry.timestamp,
                 "install_date": self.ts.win_timestamp(entry_data.get("InstallDate")),
                 "name": entry_data.get("Name"),
@@ -286,15 +279,14 @@ class AmcachePluginOldMixin:
             }
 
             try:
-                yield ProgramsAppcompatRecord(**data)
+                yield ProgramsAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
             if "FilePaths" in entry_data:
                 for file_path_entry in entry_data["FilePaths"]:
-                    data = {
+                    parsed_data = {
                         "mtime_regf": entry.timestamp,
                         "install_date": self.ts.win_timestamp(
                             entry_data.get("InstallDate")
@@ -312,17 +304,14 @@ class AmcachePluginOldMixin:
                         "msi_package_code2": entry_data.get("MsiPackageCode2"),
                     }
                     try:
-                        yield ProgramsAppcompatRecord(**data)
+                        yield ProgramsAppcompatRecord(**parsed_data)
                     except ValidationError as e:
-                        logger.error(
-                            f"Error while parsing {self.name} from {self.evidence_id}"
-                        )
-                        logger.error(e)
+                        self.log_error(e)
                         continue
 
             if "Files" in entry_data:
                 for file_entry in entry_data["Files"]:
-                    data = {
+                    parsed_data = {
                         "mtime_regf": entry.timestamp,
                         "install_date": self.ts.win_timestamp(
                             entry_data.get("InstallDate")
@@ -340,12 +329,9 @@ class AmcachePluginOldMixin:
                         "msi_package_code2": entry_data.get("MsiPackageCode2"),
                     }
                     try:
-                        yield ProgramsAppcompatRecord(**data)
+                        yield ProgramsAppcompatRecord(**parsed_data)
                     except ValidationError as e:
-                        logger.error(
-                            f"Error while parsing {self.name} from {self.evidence_id}"
-                        )
-                        logger.error(e)
+                        self.log_error(e)
                         continue
 
     def programs(self):
@@ -536,7 +522,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 else None
             )
 
-            data = {
+            parsed_data = {
                 "install_date": install_date,
                 "name": entry_data.get("Name"),
                 "type": entry_data.get("Type"),
@@ -565,10 +551,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             }
 
             try:
-                yield ApplicationAppcompatRecord(**data)
+                yield ApplicationAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
     def parse_inventory_application_file(self):
@@ -623,7 +608,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # else:
             #     link_date = self.ts.base_datetime_windows
 
-            data = {
+            parsed_data = {
                 "mtime_regf": entry.timestamp,
                 "name": entry_data.get("Name"),
                 "size": entry_data.get("Size"),
@@ -645,10 +630,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             }
 
             try:
-                yield ApplicationFileAppcompatRecord(**data)
+                yield ApplicationFileAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
     def parse_inventory_driver_binary(self):
@@ -667,7 +651,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         for entry in self.read_key_subkeys(key):
             entry_data = {v.name: v.value for v in entry.values()}
 
-            data = {
+            parsed_data = {
                 "mtime_regf": entry.timestamp,
                 "driver_name": entry_data.get("DriverName"),
                 "inf": entry_data.get("Inf"),
@@ -690,10 +674,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             }
 
             try:
-                yield BinaryAppcompatRecord(**data)
+                yield BinaryAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
     def parse_inventory_application_shortcut(self):
@@ -711,16 +694,15 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         key = "Root\\InventoryApplicationShortcut"
 
         for entry in self.read_key_subkeys(key):
-            data = {
+            parsed_data = {
                 "mtime_regf": entry.timestamp,
                 "path": uri.from_windows(entry.value("Target").value),
             }
 
             try:
-                yield ShortcutAppcompatRecord(**data)
+                yield ShortcutAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
     def parse_inventory_device_container(self):
@@ -740,7 +722,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         for entry in self.read_key_subkeys(key):
             entry_data = {v.name: v.value for v in entry.values()}
 
-            data = {
+            parsed_data = {
                 "mtime_regf": entry.timestamp,
                 "categories": entry_data.get("Categories"),
                 "discovery_method": entry_data.get("DiscoveryMethod"),
@@ -760,10 +742,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             }
 
             try:
-                yield ContainerAppcompatRecord(**data)
+                yield ContainerAppcompatRecord(**parsed_data)
             except ValidationError as e:
-                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-                logger.error(e)
+                self.log_error(e)
                 continue
 
     def applications(self):

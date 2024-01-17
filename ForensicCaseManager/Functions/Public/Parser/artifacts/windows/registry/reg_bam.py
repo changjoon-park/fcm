@@ -1,5 +1,5 @@
-import logging
 from datetime import datetime
+from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 from dissect.cstruct import cstruct
@@ -7,7 +7,6 @@ from dissect.cstruct import cstruct
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 from settings.artifact_paths import ArtifactSchema
 
-logger = logging.getLogger(__name__)
 
 c_bamdef = """
     struct entry {
@@ -45,8 +44,7 @@ class BAM(ForensicArtifact):
                 key=lambda record: record.ts,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-            logger.error(e)
+            self.log_error(e)
             return
 
         self.records.append(
@@ -77,8 +75,14 @@ class BAM(ForensicArtifact):
                         if not (ts := self.ts.wintimestamp(data.ts)):
                             ts = self.ts.base_datetime_windows
 
-                        yield BamRecord(
-                            ts=ts,
-                            path=str(uri.from_windows(entry.name)),
-                            evidence_id=self.evidence_id,
-                        )
+                        parsed_data = {
+                            "ts": ts,
+                            "path": str(uri.from_windows(entry.name)),
+                            "evidence_id": self.evidence_id,
+                        }
+
+                        try:
+                            yield BamRecord(**parsed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue

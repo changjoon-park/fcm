@@ -139,21 +139,20 @@ class ForensicArtifact:
         try:
             first = next(entry)
         except StopIteration:
-            logger.info(
-                f"No entries found in the {self.schema.name} from {self.evidence_id}"
-            )
+            logger.info(f"No entries found in the {self.name} from {self.evidence_id}")
         else:
             yield first
             yield from entry
 
     def validate_record(self, index: int, record: ArtifactRecord) -> dict:
         if isinstance(record, ArtifactRecord):
-            print(f"{self.schema.name}-{index}: Parsed successfully")
+            print(f"{self.name}-{index}: Succeed to parse")
         else:
-            print(
-                f"{self.schema.name}-{index}: error during parsing, type: {type(record)}"
-            )
+            print(f"{self.name}-{index}: Failed to parse")
             logging.error(
-                f"{self.schema.name}-{index}: error during parsing, type: {type(record)}"
+                f"{self.name}-{index}: error during parsing, type: {type(record)}"
             )
         return record
+
+    def log_error(self, error: Exception) -> None:
+        logger.error(f"{self.evidence_id}:{self.name} - {error}")
