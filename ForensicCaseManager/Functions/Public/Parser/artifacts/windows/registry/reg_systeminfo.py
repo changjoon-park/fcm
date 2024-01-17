@@ -214,5 +214,5 @@ class SystemInfo(ForensicArtifact):
         try:
             yield SystemInfoRecord(**data)
         except ValidationError as e:
-            logger.error(e)
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             pass

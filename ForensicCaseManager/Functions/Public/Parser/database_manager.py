@@ -205,7 +205,7 @@ class DatabaseManager:
         table_name, prepared_data, keys = self._prepare_record_data(data)
         statement = self._prepare_insert_statement(table_name, keys)
         cursor.execute(statement, prepared_data)
-        logger.info(f"Inserted an entry into {table_name} table")
+        # logger.info(f"Inserted an entry into {table_name} table")
 
     def _prepare_record_data(self, data):
         table_name = data.Config.record_name

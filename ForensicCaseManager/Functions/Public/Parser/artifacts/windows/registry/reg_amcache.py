@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
@@ -224,35 +225,44 @@ class AmcachePluginOldMixin:
                     AMCACHE_FILE_KEYS, subkey
                 )
 
-                yield FileAppcompatRecord(
-                    last_modified_store_timestamp=self.ts.wintimestamp(
+                data = {
+                    "last_modified_store_timestamp": self.ts.win_timestamp(
                         subkey_data.get("last_modified_store_timestamp")
                     ),
-                    last_modified_timestamp=self.ts.wintimestamp(
+                    "last_modified_timestamp": self.ts.win_timestamp(
                         subkey_data.get("last_modified_timestamp")
                     ),
-                    link_timestamp=subkey_data.get("link_timestamp"),
-                    created_timestamp=self.ts.wintimestamp(
+                    "link_timestamp": subkey_data.get("link_timestamp"),
+                    "created_timestamp": self.ts.win_timestamp(
                         subkey_data.get("created_timestamp")
                     ),
-                    mtime_regf=subkey.timestamp,
-                    reference=int(subkey.name, 16),
-                    path=uri.from_windows(subkey_data["full_path"])
+                    "mtime_regf": subkey.timestamp,
+                    "reference": int(subkey.name, 16),
+                    "path": uri.from_windows(subkey_data["full_path"])
                     if subkey_data.get("full_path")
                     else None,
-                    language_code=subkey_data.get("language_code"),
-                    digests=[
+                    "language_code": subkey_data.get("language_code"),
+                    "digests": [
                         None,
                         subkey_data["sha1"][-40:] if subkey_data.get("sha1") else None,
                         None,
                     ],
-                    program_id=subkey_data.get("program_id"),
-                    pe_header_checksum=subkey_data.get("pe_header_checksum"),
-                    pe_size_of_image=subkey_data.get("pe_size_of_image"),
-                    product_name=subkey_data.get("product_name"),
-                    company_name=subkey_data.get("company_name"),
-                    file_size=subkey_data.get("file_size"),
-                )
+                    "program_id": subkey_data.get("program_id"),
+                    "pe_header_checksum": subkey_data.get("pe_header_checksum"),
+                    "pe_size_of_image": subkey_data.get("pe_size_of_image"),
+                    "product_name": subkey_data.get("product_name"),
+                    "company_name": subkey_data.get("company_name"),
+                    "file_size": subkey_data.get("file_size"),
+                }
+
+                try:
+                    yield FileAppcompatRecord(**data)
+                except ValidationError as e:
+                    logger.error(
+                        f"Error while parsing {self.name} from {self.evidence_id}"
+                    )
+                    logger.error(e)
+                    continue
 
     def parse_programs(self):
         key = "Root\\Programs"
@@ -260,60 +270,83 @@ class AmcachePluginOldMixin:
         for entry in self.read_key_subkeys(key):
             entry_data = self._replace_indices_with_fields(AMCACHE_PROGRAM_KEYS, entry)
 
-            yield ProgramsAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                install_date=self.ts.wintimestamp(entry_data.get("InstallDate")),
-                name=entry_data.get("Name"),
-                version=entry_data.get("Version"),
-                publisher=entry_data.get("Publisher"),
-                language_code=entry_data.get("LanguageCode"),
-                entry_type=entry_data.get("EntryType"),
-                uninstall_key=entry_data.get("UninstallKey"),
-                product_code=entry_data.get("ProductCode"),
-                package_code=entry_data.get("PackageCode"),
-                msi_package_code=entry_data.get("MsiPackageCode"),
-                msi_package_code2=entry_data.get("MsiPackageCode2"),
-            )
+            data = {
+                "mtime_regf": entry.timestamp,
+                "install_date": self.ts.win_timestamp(entry_data.get("InstallDate")),
+                "name": entry_data.get("Name"),
+                "version": entry_data.get("Version"),
+                "publisher": entry_data.get("Publisher"),
+                "language_code": entry_data.get("LanguageCode"),
+                "entry_type": entry_data.get("EntryType"),
+                "uninstall_key": entry_data.get("UninstallKey"),
+                "product_code": entry_data.get("ProductCode"),
+                "package_code": entry_data.get("PackageCode"),
+                "msi_package_code": entry_data.get("MsiPackageCode"),
+                "msi_package_code2": entry_data.get("MsiPackageCode2"),
+            }
+
+            try:
+                yield ProgramsAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
             if "FilePaths" in entry_data:
                 for file_path_entry in entry_data["FilePaths"]:
-                    yield ProgramsAppcompatRecord(
-                        mtime_regf=entry.timestamp,
-                        install_date=self.ts.wintimestamp(
+                    data = {
+                        "mtime_regf": entry.timestamp,
+                        "install_date": self.ts.win_timestamp(
                             entry_data.get("InstallDate")
                         ),
-                        name=entry_data.get("Name"),
-                        version=entry_data.get("Version"),
-                        publisher=entry_data.get("Publisher"),
-                        language_code=entry_data.get("LanguageCode"),
-                        entry_type=entry_data.get("EntryType"),
-                        uninstall_key=entry_data.get("UninstallKey"),
-                        path=uri.from_windows(file_path_entry),
-                        product_code=entry_data.get("ProductCode"),
-                        package_code=entry_data.get("PackageCode"),
-                        msi_package_code=entry_data.get("MsiPackageCode"),
-                        msi_package_code2=entry_data.get("MsiPackageCode2"),
-                    )
+                        "name": entry_data.get("Name"),
+                        "version": entry_data.get("Version"),
+                        "publisher": entry_data.get("Publisher"),
+                        "language_code": entry_data.get("LanguageCode"),
+                        "entry_type": entry_data.get("EntryType"),
+                        "uninstall_key": entry_data.get("UninstallKey"),
+                        "path": uri.from_windows(file_path_entry),
+                        "product_code": entry_data.get("ProductCode"),
+                        "package_code": entry_data.get("PackageCode"),
+                        "msi_package_code": entry_data.get("MsiPackageCode"),
+                        "msi_package_code2": entry_data.get("MsiPackageCode2"),
+                    }
+                    try:
+                        yield ProgramsAppcompatRecord(**data)
+                    except ValidationError as e:
+                        logger.error(
+                            f"Error while parsing {self.name} from {self.evidence_id}"
+                        )
+                        logger.error(e)
+                        continue
 
             if "Files" in entry_data:
                 for file_entry in entry_data["Files"]:
-                    yield ProgramsAppcompatRecord(
-                        mtime_regf=entry.timestamp,
-                        install_date=self.ts.wintimestamp(
+                    data = {
+                        "mtime_regf": entry.timestamp,
+                        "install_date": self.ts.win_timestamp(
                             entry_data.get("InstallDate")
                         ),
-                        name=entry_data.get("Name"),
-                        version=entry_data.get("Version"),
-                        publisher=entry_data.get("Publisher"),
-                        language_code=entry_data.get("LanguageCode"),
-                        entry_type=entry_data.get("EntryType"),
-                        uninstall_key=entry_data.get("UninstallKey"),
-                        path=uri.from_windows(file_entry),
-                        product_code=entry_data.get("ProductCode"),
-                        package_code=entry_data.get("PackageCode"),
-                        msi_package_code=entry_data.get("MsiPackageCode"),
-                        msi_package_code2=entry_data.get("MsiPackageCode2"),
-                    )
+                        "name": entry_data.get("Name"),
+                        "version": entry_data.get("Version"),
+                        "publisher": entry_data.get("Publisher"),
+                        "language_code": entry_data.get("LanguageCode"),
+                        "entry_type": entry_data.get("EntryType"),
+                        "uninstall_key": entry_data.get("UninstallKey"),
+                        "path": uri.from_windows(file_entry),
+                        "product_code": entry_data.get("ProductCode"),
+                        "package_code": entry_data.get("PackageCode"),
+                        "msi_package_code": entry_data.get("MsiPackageCode"),
+                        "msi_package_code2": entry_data.get("MsiPackageCode2"),
+                    }
+                    try:
+                        yield ProgramsAppcompatRecord(**data)
+                    except ValidationError as e:
+                        logger.error(
+                            f"Error while parsing {self.name} from {self.evidence_id}"
+                        )
+                        logger.error(e)
+                        continue
 
     def programs(self):
         """Return Programs records from Amcache hive."""
@@ -503,33 +536,40 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 else None
             )
 
-            yield ApplicationAppcompatRecord(
-                install_date=install_date,
-                name=entry_data.get("Name"),
-                type=entry_data.get("Type"),
-                publisher=entry_data.get("Publisher"),
-                uninstall_string=entry_data.get("UninstallString"),
-                root_dir_path=entry_data.get("RootDirPath"),
-                program_id=entry_data.get("ProgramId"),
-                program_instance_id=entry_data.get("ProgramInstanceId"),
-                msi_package_code=entry_data.get("MsiPackageCode"),
-                msi_product_code=entry_data.get("MsiProductCode"),
-                mtime_regf=entry.timestamp,
-                install_date_arp_last_modified=parse_win_datetime(
+            data = {
+                "install_date": install_date,
+                "name": entry_data.get("Name"),
+                "type": entry_data.get("Type"),
+                "publisher": entry_data.get("Publisher"),
+                "uninstall_string": entry_data.get("UninstallString"),
+                "root_dir_path": entry_data.get("RootDirPath"),
+                "program_id": entry_data.get("ProgramId"),
+                "program_instance_id": entry_data.get("ProgramInstanceId"),
+                "msi_package_code": entry_data.get("MsiPackageCode"),
+                "msi_product_code": entry_data.get("MsiProductCode"),
+                "mtime_regf": entry.timestamp,
+                "install_date_arp_last_modified": parse_win_datetime(
                     install_date_arp_last_modified
                 ),
-                install_date_from_link_file=[
+                "install_date_from_link_file": [
                     parse_win_datetime(dt)
                     for dt in entry_data.get("InstallDateFromLinkFile", [])
                 ],
-                os_version_at_install_time=entry_data.get("OSVersionAtInstallTime"),
-                language_code=entry_data.get("Language"),
-                package_full_name=entry_data.get("PackageFullName"),
-                manifest_path=entry_data.get("ManifestPath"),
-                registry_key_path=entry_data.get("RegistryKeyPath"),
-                source=entry_data.get("Source"),
-                evidence_id=self.evidence_id,
-            )
+                "os_version_at_install_time": entry_data.get("OSVersionAtInstallTime"),
+                "language_code": entry_data.get("Language"),
+                "package_full_name": entry_data.get("PackageFullName"),
+                "manifest_path": entry_data.get("ManifestPath"),
+                "registry_key_path": entry_data.get("RegistryKeyPath"),
+                "source": entry_data.get("Source"),
+                "evidence_id": self.evidence_id,
+            }
+
+            try:
+                yield ApplicationAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
     def parse_inventory_application_file(self):
         """Parse Root\\InventoryApplicationFile registry key subkeys.
@@ -583,26 +623,33 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
             # else:
             #     link_date = self.ts.base_datetime_windows
 
-            yield ApplicationFileAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                name=entry_data.get("Name"),
-                size=entry_data.get("Size"),
-                publisher=entry_data.get("Publisher"),
-                product_name=entry_data.get("ProductName"),
-                bin_file_version=entry_data.get("BinFileVersion"),
-                product_version=entry_data.get("ProductVersion"),
-                bin_product_version=entry_data.get("BinProductVersion"),
-                version=entry_data.get("Version"),
-                program_id=entry_data.get("ProgramId"),
-                path=uri.from_windows(entry_data.get("LowerCaseLongPath")),
-                hash_path=entry_data.get("LongPathHash"),
-                link_date=link_date,
-                digests=[None, sha1_digest, None],
-                language=entry_data.get("Language"),
-                is_pefile=entry_data.get("BinaryType"),
-                is_oscomponent=None,
-                evidence_id=self.evidence_id,
-            )
+            data = {
+                "mtime_regf": entry.timestamp,
+                "name": entry_data.get("Name"),
+                "size": entry_data.get("Size"),
+                "publisher": entry_data.get("Publisher"),
+                "product_name": entry_data.get("ProductName"),
+                "bin_file_version": entry_data.get("BinFileVersion"),
+                "product_version": entry_data.get("ProductVersion"),
+                "bin_product_version": entry_data.get("BinProductVersion"),
+                "version": entry_data.get("Version"),
+                "program_id": entry_data.get("ProgramId"),
+                "path": uri.from_windows(entry_data.get("LowerCaseLongPath")),
+                "hash_path": entry_data.get("LongPathHash"),
+                "link_date": link_date,
+                "digests": [None, sha1_digest, None],
+                "language": entry_data.get("Language"),
+                "is_pefile": entry_data.get("BinaryType"),
+                "is_oscomponent": None,
+                "evidence_id": self.evidence_id,
+            }
+
+            try:
+                yield ApplicationFileAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
     def parse_inventory_driver_binary(self):
         """Return InventoryDriverBinary records from Amcache hive.
@@ -620,27 +667,34 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         for entry in self.read_key_subkeys(key):
             entry_data = {v.name: v.value for v in entry.values()}
 
-            yield BinaryAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                driver_name=uri.from_windows(entry_data.get("DriverName")),
-                inf=uri.from_windows(entry_data.get("Inf")),
-                driver_version=entry_data.get("DriverVersion"),
-                product=entry_data.get("Product"),
-                product_version=entry_data.get("ProductVersion"),
-                wdf_version=entry_data.get("WdfVersion"),
-                driver_company=entry_data.get("DriverCompany"),
-                driver_package_strong_name=entry_data.get("DriverPackageStrongName"),
-                service=entry_data.get("Service"),
-                driver_signed=entry_data.get("DriverSigned"),
-                driver_is_kernel_mode=entry_data.get("DriverIsKernelMode"),
-                last_write_time=parse_win_datetime(
+            data = {
+                "mtime_regf": entry.timestamp,
+                "driver_name": entry_data.get("DriverName"),
+                "inf": entry_data.get("Inf"),
+                "driver_version": entry_data.get("DriverVersion"),
+                "product": entry_data.get("Product"),
+                "product_version": entry_data.get("ProductVersion"),
+                "wdf_version": entry_data.get("WdfVersion"),
+                "driver_company": entry_data.get("DriverCompany"),
+                "driver_package_strong_name": entry_data.get("DriverPackageStrongName"),
+                "service": entry_data.get("Service"),
+                "driver_signed": entry_data.get("DriverSigned"),
+                "driver_is_kernel_mode": entry_data.get("DriverIsKernelMode"),
+                "last_write_time": parse_win_datetime(
                     entry_data.get("DriverLastWriteTime")
                 ),
-                driver_timestamp=self.ts.wintimestamp(
+                "driver_timestamp": self.ts.wintimestamp(
                     entry_data.get("DriverTimestamp")
                 ),
-                image_size=entry_data.get("ImageSize"),
-            )
+                "image_size": entry_data.get("ImageSize"),
+            }
+
+            try:
+                yield BinaryAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
     def parse_inventory_application_shortcut(self):
         """Return InventoryApplicationShortcut records from Amcache hive.
@@ -657,10 +711,17 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         key = "Root\\InventoryApplicationShortcut"
 
         for entry in self.read_key_subkeys(key):
-            yield ShortcutAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                path=uri.from_windows(entry.value("ShortCutPath").value),
-            )
+            data = {
+                "mtime_regf": entry.timestamp,
+                "path": uri.from_windows(entry.value("Target").value),
+            }
+
+            try:
+                yield ShortcutAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
     def parse_inventory_device_container(self):
         """Return InventoryDeviceContainer records from Amcache hive.
@@ -678,24 +739,32 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
 
         for entry in self.read_key_subkeys(key):
             entry_data = {v.name: v.value for v in entry.values()}
-            yield ContainerAppcompatRecord(
-                mtime_regf=entry.timestamp,
-                categories=entry_data.get("Categories"),
-                discovery_method=entry_data.get("DiscoveryMethod"),
-                friendly_name=entry_data.get("FriendlyName"),
-                icon=entry_data.get("Icon"),
-                is_active=entry_data.get("IsActive"),
-                is_connected=entry_data.get("IsConnected"),
-                is_machine_container=entry_data.get("IsMachineContainer"),
-                is_networked=entry_data.get("IsNetworked"),
-                is_paired=entry_data.get("IsPaired"),
-                manufacturer=entry_data.get("Manufacturer"),
-                model_id=entry_data.get("ModelID"),
-                model_name=entry_data.get("ModelName"),
-                model_number=entry_data.get("ModelNumber"),
-                primary_category=entry_data.get("PrimaryCategory"),
-                state=entry_data.get("State"),
-            )
+
+            data = {
+                "mtime_regf": entry.timestamp,
+                "categories": entry_data.get("Categories"),
+                "discovery_method": entry_data.get("DiscoveryMethod"),
+                "friendly_name": entry_data.get("FriendlyName"),
+                "icon": entry_data.get("Icon"),
+                "is_active": entry_data.get("IsActive"),
+                "is_connected": entry_data.get("IsConnected"),
+                "is_machine_container": entry_data.get("IsMachineContainer"),
+                "is_networked": entry_data.get("IsNetworked"),
+                "is_paired": entry_data.get("IsPaired"),
+                "manufacturer": entry_data.get("Manufacturer"),
+                "model_id": entry_data.get("ModelID"),
+                "model_name": entry_data.get("ModelName"),
+                "model_number": entry_data.get("ModelNumber"),
+                "primary_category": entry_data.get("PrimaryCategory"),
+                "state": entry_data.get("State"),
+            }
+
+            try:
+                yield ContainerAppcompatRecord(**data)
+            except ValidationError as e:
+                logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+                logger.error(e)
+                continue
 
     def applications(self):
         """Return InventoryApplication records from Amcache hive.
