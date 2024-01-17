@@ -9,6 +9,7 @@ from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +50,8 @@ c_userassist.load(userassist_def)
 
 
 class UserAssist(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         userassist = sorted(
@@ -88,7 +89,7 @@ class UserAssist(ForensicArtifact):
             application_focus_count (int): The number of focus acount for this entry.
             application_focus_duration (int): The duration of focus for this entry.
         """
-        for reg_path in self.iter_key():
+        for reg_path in self.iter_entry():
             for reg in self.src.source.registry.keys(reg_path):
                 user = self.src.source.registry.get_user(reg)
                 for subkey in reg.subkeys():

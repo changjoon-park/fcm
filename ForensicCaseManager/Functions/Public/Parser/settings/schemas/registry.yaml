@@ -54,8 +54,14 @@ RegistrySchema:
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility
-  UserAssist:
-    - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
+  reg_userassist:
+    root: system
+    owner: registry
+    entries:
+      UserAssist:
+        directories: null
+        nodes:
+          - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
   NetworkInfo:
     Signatures:
       - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
