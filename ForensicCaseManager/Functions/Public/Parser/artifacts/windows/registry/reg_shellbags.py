@@ -31,6 +31,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
 )
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -287,8 +288,8 @@ class ShellBags(ForensicArtifact):
         https://github.com/libyal/libfwsi
     """
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -297,11 +298,11 @@ class ShellBags(ForensicArtifact):
                     self.validate_record(index=index, record=record)
                     for index, record in enumerate(self.shellbags())
                 ),
-                key=lambda record: record.ts,
+                key=lambda record: record.path,
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 
@@ -321,7 +322,7 @@ class ShellBags(ForensicArtifact):
         Sources:
             - https://www.hackingarticles.in/forensic-investigation-shellbags/
         """
-        for reg_path in self.iter_key():
+        for reg_path in self.iter_entry():
             for regkey in self.src.source.registry.keys(reg_path):
                 try:
                     bagsmru = regkey.subkey("BagMRU")

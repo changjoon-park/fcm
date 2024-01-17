@@ -45,9 +45,7 @@ class BAM(ForensicArtifact):
                 key=lambda record: record.ts,
             )
         except Exception as e:
-            logger.error(
-                f"Error while parsing {self.schema.name} from {self.evidence_id}"
-            )
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 

@@ -31,14 +31,20 @@ RegistrySchema:
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\UserSettings
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings
-  Shellbags:
-    - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell
-    - HKEY_CURRENT_USER\Software\Microsoft\Windows\ShellNoRoam
-    - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell
-    - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\ShellNoRoam
-    - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\Shell
-    - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\ShellNoRoam
-    - HKEY_CURRENT_USER\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
+  reg_shellbags:
+    root: system
+    owner: registry
+    entries:
+      Shellbags:
+        directories: null
+        nodes:
+          - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell
+          - HKEY_CURRENT_USER\Software\Microsoft\Windows\ShellNoRoam
+          - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell
+          - HKEY_CURRENT_USER\Software\Classes\Local Settings\Software\Microsoft\Windows\ShellNoRoam
+          - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\Shell
+          - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\ShellNoRoam
+          - HKEY_CURRENT_USER\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
   ShimCache:
     - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
     - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility

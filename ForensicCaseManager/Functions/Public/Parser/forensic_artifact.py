@@ -40,11 +40,20 @@ class Source:
 class ForensicArtifact:
     src: Source
     schema: ArtifactSchema
+    name: str = field(init=False)
+    category: str = field(init=False)
+    root: str = field(init=False)
+    owner: str = field(init=False)
+    entries: dict = field(init=False)
     records: list[Record] = field(default_factory=list)
     _evidence_id: str = field(init=False)
 
     def __post_init__(self):
-        pass
+        self.name = self.schema.name
+        self.category = self.schema.category
+        self.root = self.schema.root
+        self.owner = self.schema.owner
+        self.entries = self.schema.entries
 
     @property
     def evidence_id(self) -> str:
@@ -72,7 +81,7 @@ class ForensicArtifact:
     def iter_directory(
         self, directories: list[str] = []
     ) -> Generator[Path, None, None]:
-        if (root := self.schema.root) == "system":
+        if self.root == "system":
             for root in self.src.source.fs.path("/").iterdir():
                 if not str(root) == "/sysvol":
                     yield from (
@@ -80,7 +89,7 @@ class ForensicArtifact:
                         for directory in directories
                         if root.joinpath(directory).exists()
                     )
-        elif (root := self.schema.root) == "user":
+        elif self.root == "user":
             for user_details in self.src.source.user_details.all_with_home():
                 yield from (
                     user_details.home_path.joinpath(directory)
@@ -91,7 +100,7 @@ class ForensicArtifact:
     def iter_entry(
         self, entry_name: str = None, node_name: str = None, recurse: bool = False
     ) -> Generator[Path, None, None]:
-        for name, entry in self.schema.entries.items():
+        for name, entry in self.entries.items():
             directories = entry.get("directories")
             nodes = entry.get("nodes")
             if entry_name and entry_name != name:
