@@ -2,24 +2,35 @@ RegistrySchema:
   reg_amcache:
     root: system
     owner: windows
-    directories:
-      - Windows/appcompat/Programs
     entries: 
-      - Amcache.hve
-  UserAccount:
-    Users:
-      - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
-    ProfileList:
-      - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
+      Amcache:
+        directories:
+          - Windows/appcompat/Programs
+        nodes:
+          - Amcache.hve
+  reg_useraccount:
+    root: system
+    owner: registry
+    entries:
+      Users:
+        directories: null
+        nodes:
+          - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
+      ProfileList:
+        directories: null
+        nodes:
+          - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
   reg_bam:
     root: system
     owner: registry
-    directories: null
     entries:
-      - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings
-      - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\UserSettings
-      - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings
-      - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings
+      BAM:
+        directories: null
+        nodes:
+          - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings
+          - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\UserSettings
+          - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings
+          - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings
   Shellbags:
     - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell
     - HKEY_CURRENT_USER\Software\Microsoft\Windows\ShellNoRoam

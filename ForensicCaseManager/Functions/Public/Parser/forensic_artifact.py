@@ -69,11 +69,10 @@ class ForensicArtifact:
     def iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 
-    def iter_directory(self) -> Generator[Path, None, None]:
-        root = self.schema.root  # str
-        directories = self.schema.directories  # list[str]
-
-        if root == "system":
+    def iter_directory(
+        self, directories: list[str] = []
+    ) -> Generator[Path, None, None]:
+        if (root := self.schema.root) == "system":
             for root in self.src.source.fs.path("/").iterdir():
                 if not str(root) == "/sysvol":
                     yield from (
@@ -81,7 +80,7 @@ class ForensicArtifact:
                         for directory in directories
                         if root.joinpath(directory).exists()
                     )
-        elif root == "user":
+        elif (root := self.schema.root) == "user":
             for user_details in self.src.source.user_details.all_with_home():
                 yield from (
                     user_details.home_path.joinpath(directory)
@@ -90,15 +89,24 @@ class ForensicArtifact:
                 )
 
     def iter_entry(
-        self, name: str = None, recurse: bool = False
+        self, entry_name: str = None, node_name: str = None, recurse: bool = False
     ) -> Generator[Path, None, None]:
-        entries = [name] if name else self.schema.entries
-        if not self.schema.owner == "registry":
-            for dir in self.iter_directory():
-                for entry in entries:
-                    yield from (dir.rglob(entry) if recurse else dir.glob(entry))
-        else:
-            yield from entries
+        for name, entry in self.schema.entries.items():
+            directories = entry.get("directories")
+            nodes = entry.get("nodes")
+            if entry_name and entry_name != name:
+                continue
+            if directories:
+                for dir in self.iter_directory(directories=directories):
+                    for node in nodes:
+                        if node_name and node_name != node:
+                            continue
+                        yield from (dir.rglob(node) if recurse else dir.glob(node))
+            else:
+                for node in nodes:
+                    if node_name and node_name != node:
+                        continue
+                    yield node
 
     def iter_key(self, name: str = None) -> Generator:
         if self.artifact_directory == "registry":
@@ -106,6 +114,8 @@ class ForensicArtifact:
                 yield from self.artifact_entry
             else:
                 yield from self.artifact_entry.get(name)
+        else:
+            logger.error(f"iter_key() is not supported for {self.schema.name} artifact")
 
     def parse(self, descending: bool = False) -> Generator[ArtifactRecord, None, None]:
         """parse artifact.

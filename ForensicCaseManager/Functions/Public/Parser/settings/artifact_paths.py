@@ -1,5 +1,5 @@
+import logging
 import yaml
-from typing import Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 from collections import namedtuple
@@ -9,6 +9,8 @@ from settings.config import *
 from settings.artifacts import Artifact
 
 current_directory = Path(__file__).parent.absolute()
+
+logger = logging.getLogger(__name__)
 
 # schema file path
 schema_registry = current_directory / "schemas" / "registry.yaml"
@@ -28,24 +30,18 @@ class ArtifactSchema:
     category: str
     root: str = field(default_factory=str)
     owner: str = field(default_factory=str)
-    directories: Optional[list[str]] = field(default_factory=list)
-    entries: Optional[list[str]] = field(default_factory=list)
+    entries: dict[str] = field(default_factory=dict)
     _schema: dict = field(init=False)
 
     def __post_init__(self):
         if registry_schema.get(self.name):
             self._schema = registry_schema.get(self.name)
         else:
-            print(f"ArtifactSchema: {self.name} is not in registry_schema")
+            logger.error(f"ArtifactSchema not found: {self.name}")
 
         self.root = self._schema.get("root")
         self.owner = self._schema.get("owner")
-        self.directories = (
-            self._schema.get("directories") if self._schema.get("directories") else []
-        )
-        self.entries = (
-            self._schema.get("entries") if self._schema.get("entries") else []
-        )
+        self.entries = self._schema.get("entries")
 
 
 ## BROWSER

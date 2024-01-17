@@ -8,6 +8,7 @@ from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -299,8 +300,8 @@ def decrypt_single_hash(rid: int, samkey: bytes, enc_hash: bytes, apwd: bytes) -
 class UserAccount(ForensicArtifact):
     SAM_KEY = "HKEY_LOCAL_MACHINE\\SAM\\SAM\\Domains\\Account"
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         sam = sorted(
@@ -425,7 +426,7 @@ class UserAccount(ForensicArtifact):
         almpassword = b"LMPASSWORD\0"
         antpassword = b"NTPASSWORD\0"
 
-        for reg_path in self.iter_key(name="Users"):
+        for reg_path in self.iter_entry(entry_name="Users"):
             for users_key in self.src.source.registry.keys(reg_path):
                 for user_key in users_key.subkeys():
                     if user_key.name == "Names":
@@ -480,7 +481,7 @@ class UserAccount(ForensicArtifact):
                     )
 
     def profilelist(self) -> Generator[dict, None, None]:
-        for reg_path in self.iter_key(name="ProfileList"):
+        for reg_path in self.iter_entry(entry_name="ProfileList"):
             sids = set()
             for k in self.src.source.registry.keys(reg_path):
                 for subkey in k.subkeys():
