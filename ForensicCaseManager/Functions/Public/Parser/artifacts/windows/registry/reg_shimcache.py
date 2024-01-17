@@ -1,5 +1,6 @@
 import logging
 import binascii
+from icecream import ic
 from datetime import datetime
 from enum import IntEnum, auto
 from io import BytesIO
@@ -11,6 +12,7 @@ from dissect.util.ts import wintimestamp
 from dissect.target.exceptions import Error, RegistryError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -306,8 +308,8 @@ class ShimCache(ForensicArtifact):
     Shimcache plugin.
     """
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -316,11 +318,11 @@ class ShimCache(ForensicArtifact):
                     self.validate_record(index=index, record=record)
                     for index, record in enumerate(self.shimcache())
                 ),
-                key=lambda record: record.ts,
+                key=lambda record: record.last_modified,
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 
@@ -349,7 +351,7 @@ class ShimCache(ForensicArtifact):
             index (varint): The index of the entry.
             path (uri): The parsed path.
         """
-        for reg_path in self.iter_key():
+        for reg_path in self.iter_entry():
             for key in self.src.source.registry.keys(reg_path):
                 for value_name in ("AppCompatCache", "CacheMainSdb"):
                     try:
