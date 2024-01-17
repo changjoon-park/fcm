@@ -396,19 +396,35 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     for record in self.programs()
         # ]
 
-        applications = sorted(
-            (
+        try:
+            applications = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.applications())
+                ),
+                key=lambda record: record.install_date,
+                reverse=descending,
+            )
+
+            application_files = (
                 self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.applications())
-            ),
-            key=lambda record: record.install_date,
-            reverse=descending,
-        )
+                for index, record in enumerate(self.application_files())
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
 
         self.records.append(
             Record(
                 schema=ApplicationAppcompatRecord,
                 record=applications,  # record is a generator
+            )
+        )
+
+        self.records.append(
+            Record(
+                schema=ApplicationFileAppcompatRecord,
+                record=application_files,  # record is a generator
             )
         )
 
@@ -421,18 +437,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
         #     key=lambda record: record["mtime_regf"],
         #     reverse=descending,
         # )
-
-        application_files = (
-            self.validate_record(index=index, record=record)
-            for index, record in enumerate(self.application_files())
-        )
-
-        self.records.append(
-            Record(
-                schema=ApplicationFileAppcompatRecord,
-                record=application_files,  # record is a generator
-            )
-        )
 
         # sorted_applications = sorted(
         #     [record._packdict() for record in self.applications()],

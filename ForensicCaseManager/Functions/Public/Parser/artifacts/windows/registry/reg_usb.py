@@ -1,7 +1,7 @@
-import logging
 import struct
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
@@ -9,7 +9,6 @@ from dissect.target.plugin import internal
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 from settings.artifact_paths import ArtifactSchema
 
-logger = logging.getLogger(__name__)
 
 USB_DEVICE_PROPERTY_KEYS = {
     "first_install": (
@@ -71,8 +70,7 @@ class USB(ForensicArtifact):
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-            logger.error(e)
+            self.log_error(e)
             return
 
         self.records.append(
@@ -190,20 +188,26 @@ class USB(ForensicArtifact):
                             "last_removal", self.ts.base_datetime_windows
                         )
 
-                        yield UsbstorRecord(
-                            first_install=first_install,
-                            product=device_info.get("product", None),
-                            version=device_info.get("version", None),
-                            vendor=device_info.get("vendor", None),
-                            friendlyname=friendlyname,
-                            serial=serial,
-                            vid=None,
-                            pid=None,
-                            device_type=device_info.get("device_type", None),
-                            containerid=containerid,
-                            first_insert=first_insert,
-                            last_insert=last_insert,  # AKA first arrival
-                            last_removal=last_removal,
-                            info_origin=info_origin,
-                            evidence_id=self.evidence_id,
-                        )
+                        parsed_data = {
+                            "first_install": first_install,
+                            "product": device_info.get("product", None),
+                            "version": device_info.get("version", None),
+                            "vendor": device_info.get("vendor", None),
+                            "friendlyname": friendlyname,
+                            "serial": serial,
+                            "vid": None,
+                            "pid": None,
+                            "device_type": device_info.get("device_type", None),
+                            "containerid": containerid,
+                            "first_insert": first_insert,
+                            "last_insert": last_insert,  # AKA first arrival
+                            "last_removal": last_removal,
+                            "info_origin": info_origin,
+                            "evidence_id": self.evidence_id,
+                        }
+
+                        try:
+                            yield UsbstorRecord(**parsed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue

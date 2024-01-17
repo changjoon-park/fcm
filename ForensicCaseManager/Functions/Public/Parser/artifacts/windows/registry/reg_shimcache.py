@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import IntEnum, auto
 from io import BytesIO
 from typing import Callable, Generator, Optional, Tuple, Union
+from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 from dissect.cstruct import Structure, cstruct
@@ -321,8 +322,7 @@ class ShimCache(ForensicArtifact):
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-            logger.error(e)
+            self.log_error(e)
             return
 
         self.records.append(
@@ -355,7 +355,8 @@ class ShimCache(ForensicArtifact):
                 for value_name in ("AppCompatCache", "CacheMainSdb"):
                     try:
                         data = key.value(value_name).value
-                    except RegistryError:
+                    except RegistryError as e:
+                        self.log_error(e)
                         continue
 
                     try:
@@ -392,10 +393,16 @@ class ShimCache(ForensicArtifact):
 
             path = uri.from_windows(self.src.source.resolve(path))
 
-            yield ShimCacheRecord(
-                last_modified=last_modified,
-                name=name,
-                entry_index=index,
-                path=path,
-                evidence_id=self.evidence_id,
-            )
+            parsed_data = {
+                "last_modified": last_modified,
+                "name": name,
+                "entry_index": index,
+                "path": path,
+                "evidence_id": self.evidence_id,
+            }
+
+            try:
+                yield ShimCacheRecord(**parsed_data)
+            except ValidationError as e:
+                self.log_error(e)
+                continue

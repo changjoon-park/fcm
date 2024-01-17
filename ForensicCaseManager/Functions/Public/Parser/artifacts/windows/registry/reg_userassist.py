@@ -2,6 +2,7 @@ import logging
 import codecs
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 from dissect import cstruct
@@ -54,14 +55,18 @@ class UserAssist(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        userassist = sorted(
-            (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.userassist())
-            ),
-            key=lambda record: record.ts,
-            reverse=descending,
-        )
+        try:
+            userassist = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.userassist())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
 
         self.records.append(
             Record(
@@ -146,11 +151,17 @@ class UserAssist(ForensicArtifact):
                             if not (ts := self.ts.wintimestamp(timestamp)):
                                 ts = self.ts.base_datetime_windows
 
-                            yield UserAssistRecord(
-                                ts=ts,
-                                path=value,
-                                number_of_executions=number_of_executions,
-                                application_focus_count=application_focus_count,
-                                application_focus_duration=application_focus_duration,
-                                evidence_id=self.evidence_id,
-                            )
+                            parsed_data = {
+                                "ts": ts,
+                                "path": value,
+                                "number_of_executions": number_of_executions,
+                                "application_focus_count": application_focus_count,
+                                "application_focus_duration": application_focus_duration,
+                                "evidence_id": self.evidence_id,
+                            }
+
+                            try:
+                                yield UserAssistRecord(**parsed_data)
+                            except ValidationError as e:
+                                self.log_error(e)
+                                continue

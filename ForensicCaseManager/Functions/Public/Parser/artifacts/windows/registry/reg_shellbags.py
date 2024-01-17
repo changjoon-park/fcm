@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from dissect.cstruct import cstruct
 from dissect.target.exceptions import RegistryKeyNotFoundError
@@ -302,8 +303,7 @@ class ShellBags(ForensicArtifact):
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-            logger.error(e)
+            self.log_error(e)
             return
 
         self.records.append(
@@ -329,10 +329,11 @@ class ShellBags(ForensicArtifact):
 
                     for r in self._walk_bags(bagsmru, None):
                         yield r
-                except RegistryKeyNotFoundError:
+                except RegistryKeyNotFoundError as e:
+                    self.log_error(e)
                     continue
-                except Exception:  # noqa
-                    logger.exception("Exception while parsing shellbags")
+                except Exception as e:  # noqa
+                    self.log_error(e)
                     continue
 
     def _walk_bags(self, key, path_prefix):
@@ -349,10 +350,11 @@ class ShellBags(ForensicArtifact):
             for item in parse_shell_item_list(value):
                 try:
                     path = "\\".join(path_prefix + [item.name])
-                except UnicodeDecodeError:
+                except UnicodeDecodeError as e:
+                    self.log_error(e)
                     continue
-                except Exception:  # noqa
-                    logger.exception(f"Exception while building Shellbag path: {path}")
+                except Exception as e:  # noqa
+                    self.log_error(e)
                     continue
 
                 # TODO: Handle errors
@@ -364,16 +366,22 @@ class ShellBags(ForensicArtifact):
                 My Computer\{01f256e4-53bd-301f-2975-1b9ac3670110}\<UNKNOWN size=0x0100 type=None>\<UNKNOWN size=0x00fa type=None>\<UNKNOWN size=0x00fc type=None>\<UNKNOWN size=0x0104 type=None>\<UNKNOWN size=0x0112 type=None>\<UNKNOWN size=0x0106 type=None>\<UNKNOWN size=0x011e type=None>\<UNKNOWN size=0x0120 type=None>
                 """
 
-                yield ShellBagRecord(
-                    path=path if path else "",
-                    creation_time=item.creation_time,
-                    modification_time=item.modification_time,
-                    access_time=item.access_time,
-                    regf_modification_time=key.ts,
-                    user=str(user),
-                    key=str(key),
-                    evidence_id=self.evidence_id,
-                )
+                parsed_data = {
+                    "path": path if path else "",
+                    "creation_time": item.creation_time,
+                    "modification_time": item.modification_time,
+                    "access_time": item.access_time,
+                    "regf_modification_time": key.ts,
+                    "user": str(user),
+                    "key": str(key),
+                    "evidence_id": self.evidence_id,
+                }
+
+                try:
+                    yield ShellBagRecord(**parsed_data)
+                except ValidationError as e:
+                    self.log_error(e)
+                    continue
 
             for r in self._walk_bags(key.subkey(name), path):
                 yield r

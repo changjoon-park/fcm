@@ -45,8 +45,7 @@ class SystemInfo(ForensicArtifact):
                 for index, record in enumerate(self.system_info())
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
-            logger.error(e)
+            self.log_error(e)
             return
 
         self.records.append(
@@ -193,7 +192,7 @@ class SystemInfo(ForensicArtifact):
     def system_info(self):
         current_version = self.get_current_version()
 
-        data = {
+        parsed_data = {
             "product": current_version.get("product"),
             "install_date": current_version.get("install_date"),
             "shutdown_time": self.last_shutdown_time,
@@ -212,7 +211,7 @@ class SystemInfo(ForensicArtifact):
         }
 
         try:
-            yield SystemInfoRecord(**data)
+            yield SystemInfoRecord(**parsed_data)
         except ValidationError as e:
-            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
+            self.log_error(e)
             pass

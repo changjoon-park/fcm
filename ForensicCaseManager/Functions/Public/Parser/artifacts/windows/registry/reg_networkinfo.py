@@ -47,22 +47,26 @@ class NetworkInfo(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        network_history = sorted(
-            (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.network_history())
-            ),
-            key=lambda record: record.created,
-            reverse=descending,
-        )
-        network_interface = sorted(
-            (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.network_interface())
-            ),
-            key=lambda record: record.lease_obtained_time,
-            reverse=descending,
-        )
+        try:
+            network_history = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.network_history())
+                ),
+                key=lambda record: record.created,
+                reverse=descending,
+            )
+            network_interface = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.network_interface())
+                ),
+                key=lambda record: record.lease_obtained_time,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
 
         self.records.append(
             Record(

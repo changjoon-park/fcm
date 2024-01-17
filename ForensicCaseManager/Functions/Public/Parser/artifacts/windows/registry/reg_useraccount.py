@@ -1,11 +1,11 @@
 import logging
-from typing import Optional, Generator
+from typing import Generator
 from datetime import datetime
 from hashlib import md5, sha256
 from struct import pack
-
 from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
+from pydantic import ValidationError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
 from settings.artifact_paths import ArtifactSchema
@@ -304,22 +304,26 @@ class UserAccount(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        sam = sorted(
-            (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.sam())
-            ),
-            key=lambda record: record.rid,
-            reverse=descending,
-        )
-        profilelist = sorted(
-            (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.profilelist())
-            ),
-            key=lambda record: record.rid,
-            reverse=descending,
-        )
+        try:
+            sam = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.sam())
+                ),
+                key=lambda record: record.rid,
+                reverse=descending,
+            )
+            profilelist = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.profilelist())
+                ),
+                key=lambda record: record.rid,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
 
         self.records.append(
             Record(
@@ -460,25 +464,31 @@ class UserAccount(ForensicArtifact):
                         f.rid, samkey, u_ntpw, antpassword
                     ).hex()
 
-                    yield SamRecord(
-                        rid=f.rid,
-                        fullname=u_fullname,
-                        username=u_username,
-                        admincomment=u_admin_comment,
-                        usercomment=u_user_comment,
-                        lastlogin=self.ts.wintimestamp(f.t_last_login),
-                        lastpasswordset=self.ts.wintimestamp(f.t_last_password_set),
-                        lastincorrectlogin=self.ts.wintimestamp(
+                    parsed_data = {
+                        "rid": f.rid,
+                        "fullname": u_fullname,
+                        "username": u_username,
+                        "admincomment": u_admin_comment,
+                        "usercomment": u_user_comment,
+                        "lastlogin": self.ts.wintimestamp(f.t_last_login),
+                        "lastpasswordset": self.ts.wintimestamp(f.t_last_password_set),
+                        "lastincorrectlogin": self.ts.wintimestamp(
                             f.t_last_incorrect_login
                         ),
-                        flags=f.ACB_bits,
-                        countrycode=f.country_code,
-                        logins=f.logins,
-                        failedlogins=f.failedcnt,
-                        lm=lm_hash,
-                        nt=nt_hash,
-                        evidence_id=self.evidence_id,
-                    )
+                        "flags": f.ACB_bits,
+                        "countrycode": f.country_code,
+                        "logins": f.logins,
+                        "failedlogins": f.failedcnt,
+                        "lm": lm_hash,
+                        "nt": nt_hash,
+                        "evidence_id": self.evidence_id,
+                    }
+
+                    try:
+                        yield SamRecord(**parsed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
 
     def profilelist(self) -> Generator[dict, None, None]:
         for reg_path in self.iter_entry(entry_name="ProfileList"):
@@ -504,10 +514,16 @@ class UserAccount(ForensicArtifact):
                         home = profile_image_path.value
                         name = home.split("\\")[-1]
 
-                    yield ProfileListRecord(
-                        rid=rid,
-                        username=name,
-                        sid=sid,
-                        home=home,
-                        evidence_id=self.evidence_id,
-                    )
+                    parsed_data = {
+                        "rid": rid,
+                        "username": name,
+                        "sid": sid,
+                        "home": home,
+                        "evidence_id": self.evidence_id,
+                    }
+
+                    try:
+                        yield ProfileListRecord(**parsed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
