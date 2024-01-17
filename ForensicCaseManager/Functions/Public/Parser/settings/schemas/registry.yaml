@@ -62,13 +62,22 @@ RegistrySchema:
         directories: null
         nodes:
           - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
-  NetworkInfo:
-    Signatures:
-      - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
-    Profiles:
-      - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Profiles
-    Interfaces:
-      - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
+  reg_networkinfo:
+    root: system
+    owner: registry
+    entries:
+      Signatures:
+        directories: null
+        nodes:
+          - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
+      Profiles:
+        directories: null
+        nodes:
+          - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Profiles
+      Interfaces:
+        directories: null
+        nodes:
+          - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
   USB:
     USB:
       - HKLM\SYSTEM\CurrentControlSet\Enum\USB

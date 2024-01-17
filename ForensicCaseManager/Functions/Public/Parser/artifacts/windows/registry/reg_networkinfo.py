@@ -7,6 +7,7 @@ from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +45,8 @@ class NetworkHistoryRecord(ArtifactRecord):
 
 
 class NetworkInfo(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         network_history = sorted(
@@ -79,7 +80,7 @@ class NetworkInfo(ForensicArtifact):
         )
 
     def network_interface(self):
-        for reg_path in self.iter_key(name="Interfaces"):
+        for reg_path in self.iter_entry(entry_name="Interfaces"):
             for key in self.src.source.registry.keys(reg_path):
                 for s in key.subkeys():
                     # try:
@@ -153,7 +154,7 @@ class NetworkInfo(ForensicArtifact):
         Sources:
             - https://www.weaklink.org/2016/11/windows-network-profile-registry-keys/
         """
-        for reg_path in self.iter_key(name="Signatures"):
+        for reg_path in self.iter_entry(entry_name="Signatures"):
             for key in self.src.source.registry.keys(reg_path):
                 for kind in key.subkeys():
                     for sig in kind.subkeys():
@@ -189,7 +190,7 @@ class NetworkInfo(ForensicArtifact):
                         )
 
     def find_profile(self, guid):
-        for reg_path in self.iter_key(name="Profiles"):
+        for reg_path in self.iter_entry(entry_name="Profiles"):
             for key in self.src.source.registry.keys(reg_path):
                 try:
                     return key.subkey(guid)  # Just return the first one...
