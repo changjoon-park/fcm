@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from datetime import datetime
+from pydantic import ValidationError
 
 from dissect.target.exceptions import RegistryError
 
@@ -192,20 +193,26 @@ class SystemInfo(ForensicArtifact):
     def system_info(self):
         current_version = self.get_current_version()
 
-        yield SystemInfoRecord(
-            product=current_version.get("product"),
-            install_date=current_version.get("install_date"),
-            shutdown_time=self.last_shutdown_time,
-            registered_organization=current_version.get("registered_organization"),
-            registered_owner=current_version.get("registered_owner"),
-            product_key=current_version.get("product_key"),
-            product_id=current_version.get("product_id"),
-            edition_id=current_version.get("edition_id"),
-            release_id=current_version.get("release_id"),
-            system_root=current_version.get("system_root"),
-            path_name=current_version.get("path_name"),
-            architecture=self.architecture,
-            timezone=str(self.timezone),
-            codepage=self.codepage,
-            evidence_id=self.evidence_id,
-        )
+        data = {
+            "product": current_version.get("product"),
+            "install_date": current_version.get("install_date"),
+            "shutdown_time": self.last_shutdown_time,
+            "registered_organization": current_version.get("registered_organization"),
+            "registered_owner": current_version.get("registered_owner"),
+            "product_key": current_version.get("product_key"),
+            "product_id": current_version.get("product_id"),
+            "edition_id": current_version.get("edition_id"),
+            "release_id": current_version.get("release_id"),
+            "system_root": current_version.get("system_root"),
+            "path_name": current_version.get("path_name"),
+            "architecture": self.architecture,
+            "timezone": str(self.timezone),
+            "codepage": self.codepage,
+            "evidence_id": self.evidence_id,
+        }
+
+        try:
+            yield SystemInfoRecord(**data)
+        except ValidationError as e:
+            logger.error(e)
+            pass

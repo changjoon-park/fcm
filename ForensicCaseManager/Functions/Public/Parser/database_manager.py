@@ -195,41 +195,34 @@ class DatabaseManager:
 
     def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
         try:
-            # Prepare the list of tuples for batch insertion
-            prepared_data = []
-            for data in record:  # ! data is a Pydantic Model
-                # Extract table name from the Pydantic model
-                table_name = data.Config.record_name
-
-                # Convert datetime objects in lists to strings and serialize lists to JSON
-                processed_record = {
-                    key: json.dumps(
-                        [v.isoformat() if isinstance(v, datetime) else v for v in value]
-                    )
-                    if isinstance(value, list)
-                    else value
-                    for key, value in data.model_dump().items()
-                }
-
-                # Convert the dictionary to a tuple
-                record_tuple = tuple(processed_record.values())
-
-                # Append the tuple to the list of tuples
-                prepared_data.append(record_tuple)
-
-                # Extract column names from the Pydantic model
-                keys = data.model_dump().keys()
-
-            # Prepare SQL statement with placeholders
-            placeholders = ", ".join(["?"] * len(keys))
-            statement = (
-                f"INSERT INTO {table_name} ({', '.join(keys)}) VALUES ({placeholders})"
-            )
             with open_db(self.database) as cursor:
-                cursor.executemany(statement, prepared_data)
-                logger.info(
-                    f"Inserted {len(prepared_data)} {table_name} entries into {table_name} table"
-                )
-
+                for data in record:
+                    self._insert_record(cursor, data)
         except Exception as e:
             logger.exception(f"Error inserting data into table: {e}")
+
+    def _insert_record(self, cursor, data):
+        table_name, prepared_data, keys = self._prepare_record_data(data)
+        statement = self._prepare_insert_statement(table_name, keys)
+        cursor.execute(statement, prepared_data)
+        logger.info(f"Inserted an entry into {table_name} table")
+
+    def _prepare_record_data(self, data):
+        table_name = data.Config.record_name
+        processed_record = self._process_record_data(data.model_dump())
+        keys = list(processed_record.keys())  # Ensure keys are extracted here
+        return table_name, tuple(processed_record.values()), keys
+
+    def _process_record_data(self, record_data):
+        return {
+            key: json.dumps(
+                [v.isoformat() if isinstance(v, datetime) else v for v in value]
+            )
+            if isinstance(value, list)
+            else value
+            for key, value in record_data.items()
+        }
+
+    def _prepare_insert_statement(self, table_name, keys):
+        placeholders = ", ".join(["?"] * len(keys))
+        return f"INSERT INTO {table_name} ({', '.join(keys)}) VALUES ({placeholders})"
