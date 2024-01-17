@@ -5,6 +5,7 @@ from datetime import datetime
 from dissect.target.exceptions import RegistryError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,8 @@ class SystemInfoRecord(ArtifactRecord):
 
 
 class SystemInfo(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -43,7 +44,7 @@ class SystemInfo(ForensicArtifact):
                 for index, record in enumerate(self.system_info())
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 
@@ -60,7 +61,7 @@ class SystemInfo(ForensicArtifact):
 
     @property
     def last_shutdown_time(self):
-        for reg_path in self.iter_key(name="Windows"):
+        for reg_path in self.iter_entry(entry_name="Windows"):
             try:
                 bin_value = (
                     self.src.source.registry.key(reg_path).value("ShutdownTime").value
@@ -72,7 +73,7 @@ class SystemInfo(ForensicArtifact):
 
     @property
     def codepage(self):
-        for reg_path in self.iter_key(name="CodePage"):
+        for reg_path in self.iter_entry(entry_name="CodePage"):
             try:
                 return self.src.source.registry.key(reg_path).value("ACP").value
             except RegistryError:
@@ -89,7 +90,7 @@ class SystemInfo(ForensicArtifact):
             "AMD64": 64,
         }
 
-        for reg_path in self.iter_key(name="Environment"):
+        for reg_path in self.iter_entry(entry_name="Environment"):
             try:
                 arch = (
                     self.src.source.registry.key(reg_path)
@@ -109,7 +110,7 @@ class SystemInfo(ForensicArtifact):
     # https://dfir.ru/2018/12/08/the-last-access-updates-are-almost-back/?fbclid=IwAR2Q6uj5EIAZ-HqBeRmYXecYCCQa693wc81HCm8KsRHDJ9rwOldaraipy-o
     # @property
     # def ntfs_disable_lastaccess_update(self):
-    #     for reg_path in self.iter_key(name="FileSystem"):
+    #     for reg_path in self.iter_entry(entry_name="FileSystem"):
     #         try:
     #             lastaccess_update_flag = self.src.source.registry.key(reg_path).value("NtfsDisableLastAccessUpdate").value
     #         except RegistryError:
@@ -134,7 +135,7 @@ class SystemInfo(ForensicArtifact):
             "Windows 10 Enterprise G N": "44RPN-FTY23-9VTTB-MP9BX-T84FV",
         }
 
-        for reg_path in self.iter_key(name="CurrentVersion"):
+        for reg_path in self.iter_entry(entry_name="CurrentVersion"):
             try:
                 csd_version = (
                     self.src.source.registry.key(reg_path).value("CSDVersion").value

@@ -5,6 +5,7 @@ from datetime import datetime
 from flow.record.fieldtypes import uri
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ class AutoRunRecord(ArtifactRecord):
 class AutoRun(ForensicArtifact):
     """Plugin that iterates various Runkey locations."""
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -39,7 +40,7 @@ class AutoRun(ForensicArtifact):
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 
@@ -68,7 +69,7 @@ class AutoRun(ForensicArtifact):
             path (string): The run key path.
             key (string): The source key for this run key.
         """
-        for reg_path in self.iter_key():
+        for reg_path in self.iter_entry():
             for r in self.src.source.registry.keys(reg_path):
                 user = self.src.source.registry.get_user(r)
                 for entry in r.values():

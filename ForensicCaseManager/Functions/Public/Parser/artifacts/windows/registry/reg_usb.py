@@ -7,6 +7,7 @@ from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +57,8 @@ class UsbstorRecord(ArtifactRecord):
 class USB(ForensicArtifact):
     """USB plugin."""
 
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
         try:
@@ -70,7 +71,7 @@ class USB(ForensicArtifact):
                 reverse=descending,
             )
         except Exception as e:
-            logger.error(f"Error while parsing {self.artifact} from {self.evidence_id}")
+            logger.error(f"Error while parsing {self.name} from {self.evidence_id}")
             logger.error(e)
             return
 
@@ -145,7 +146,7 @@ class USB(ForensicArtifact):
             info_origin (string): Location of info present in output
         """
 
-        for reg_path in self.check_empty_entry(self.iter_key(name="USBSTOR")):
+        for reg_path in self.check_empty_entry(self.iter_entry(entry_name="USBSTOR")):
             for key in self.src.source.registry.keys(reg_path):
                 info_origin = "\\".join((key.path, key.name))
                 usb_stor = key.subkeys()
