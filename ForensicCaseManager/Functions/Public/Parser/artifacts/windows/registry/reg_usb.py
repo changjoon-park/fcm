@@ -48,6 +48,9 @@ class UsbstorRecord(ArtifactRecord):
     last_removal: Optional[datetime]
     info_origin: str
 
+    class Config:
+        record_name: str = "reg_usb_usbstor"
+
 
 class USB(ForensicArtifact):
     """USB plugin."""
@@ -197,7 +200,6 @@ class USB(ForensicArtifact):
                             "last_removal": last_removal,
                             "info_origin": info_origin,
                             "evidence_id": self.evidence_id,
-                            "record_name": self.get_record_name(entry_name=entry_name),
                         }
 
                         try:

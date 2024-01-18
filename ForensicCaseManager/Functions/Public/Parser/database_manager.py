@@ -159,14 +159,14 @@ class DatabaseManager:
                     ),
                 )
 
-    def create_artifact_table(self, record: list[ArtifactRecord]):
+    def create_artifact_table_from_pydantic_model(self, record: list[ArtifactRecord]):
         if not isinstance(record, list):
             logger.error(f"Error: record must be a list, not {type(record)}")
             return
 
         model = record[0]
         full_annotations = self._get_full_annotations(model)
-        table_name = model.record_name
+        table_name = model.Config.record_name
         try:
             # Extracting table name and column definitions from the Pydantic model
             columns = []
@@ -231,7 +231,7 @@ class DatabaseManager:
             logger.exception(f"Error inserting data into table: {e}")
 
     def _prepare_record_data(self, data):
-        table_name = data.record_name
+        table_name = data.Config.record_name
         processed_record = self._process_record_data(data.model_dump())
         keys = list(processed_record.keys())  # Ensure keys are extracted here
         return table_name, tuple(processed_record.values()), keys

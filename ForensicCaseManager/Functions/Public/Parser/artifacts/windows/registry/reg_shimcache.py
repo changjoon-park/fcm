@@ -25,6 +25,9 @@ class ShimCacheRecord(ArtifactRecord):
     entry_index: int
     path: str
 
+    class Config:
+        record_name: str = "reg_shimcache"
+
 
 c_shimdef = """
 struct NT61_HEADER {
@@ -390,7 +393,6 @@ class ShimCache(ForensicArtifact):
                 "entry_index": index,
                 "path": path,
                 "evidence_id": self.evidence_id,
-                "record_name": self.get_record_name(),
             }
 
             try:

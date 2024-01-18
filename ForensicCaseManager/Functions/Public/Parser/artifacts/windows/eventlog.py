@@ -1,5 +1,5 @@
 import logging
-from typing import Generator, Optional
+from typing import Generator
 from datetime import datetime
 
 from dissect.eventlog.evtx import Evtx
@@ -100,12 +100,7 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record.ts,
                 reverse=descending,
             )
-            self.records.append(
-                Record(
-                    schema=EventLogonRecord,
-                    record=event_logon,  # record is a generator
-                )
-            )
+            self.records.append(event_logon)
         elif self.artifact == Artifact.EVT_USB.value:
             event_usb = sorted(
                 (
@@ -115,12 +110,7 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record.ts,
                 reverse=descending,
             )
-            self.records.append(
-                Record(
-                    schema=EventUSBRecord,
-                    record=event_usb,  # record is a generator
-                )
-            )
+            self.records.append(event_usb)
         elif self.artifact == Artifact.EVT_WLAN.value:
             event_wlan = sorted(
                 (
@@ -130,12 +120,7 @@ class ForensicEvent(ForensicArtifact):
                 key=lambda record: record.ts,
                 reverse=descending,
             )
-            self.records.append(
-                Record(
-                    schema=EventWLANRecord,
-                    record=event_wlan,  # record is a generator
-                )
-            )
+            self.records.append(event_wlan)
 
     def event_logon(self) -> Generator[dict, None, None]:
         event_logon = {

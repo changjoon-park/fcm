@@ -4,13 +4,16 @@ from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
+from collections import namedtuple
 from icecream import ic
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
+from settings.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
+from settings.config import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -18,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 class ArtifactRecord(BaseModel):
     evidence_id: str
-    record_name: str
 
 
 @dataclass

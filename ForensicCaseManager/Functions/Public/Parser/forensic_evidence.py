@@ -111,7 +111,7 @@ class ForensicEvidence(CaseConfig):
         for forensic_artifact in self.forensic_artifacts:
             for record in forensic_artifact.records:
                 # create artifact table
-                self.db_manager.create_artifact_table(record)
+                self.db_manager.create_artifact_table_from_pydantic_model(record)
 
                 # insert artifact data
                 self.db_manager.insert_artifact_data(

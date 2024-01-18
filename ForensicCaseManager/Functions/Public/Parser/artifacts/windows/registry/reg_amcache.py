@@ -32,6 +32,9 @@ class ApplicationAppcompatRecord(ArtifactRecord):
     registry_key_path: str
     source: str
 
+    class Config:
+        record_name: str = "reg_amcache_application"
+
 
 class ApplicationFileAppcompatRecord(ArtifactRecord):
     """InventoryApplicationFile registry record."""
@@ -54,6 +57,9 @@ class ApplicationFileAppcompatRecord(ArtifactRecord):
     is_pefile: str
     is_oscomponent: Optional[str]
 
+    class Config:
+        record_name: str = "reg_amcache_application_file"
+
 
 class FileAppcompatRecord(ArtifactRecord):
     """File registry record."""
@@ -74,6 +80,9 @@ class FileAppcompatRecord(ArtifactRecord):
     company_name: str
     file_size: int
 
+    class Config:
+        record_name: str = "reg_amcache_file"
+
 
 class ProgramsAppcompatRecord(ArtifactRecord):
     """Programs registry record."""
@@ -91,6 +100,9 @@ class ProgramsAppcompatRecord(ArtifactRecord):
     package_code: str
     msi_package_code: str
     msi_package_code2: str
+
+    class Config:
+        record_name: str = "reg_amcache_programs"
 
 
 class BinaryAppcompatRecord(ArtifactRecord):
@@ -111,6 +123,9 @@ class BinaryAppcompatRecord(ArtifactRecord):
     last_write_time: datetime
     driver_timestamp: datetime
     image_size: str
+
+    class Config:
+        record_name: str = "reg_amcache_binary"
 
 
 class ContainerAppcompatRecord(ArtifactRecord):
@@ -134,6 +149,7 @@ class ContainerAppcompatRecord(ArtifactRecord):
     state: str
 
     class Config:
+        record_name: str = "reg_amcache_container"
         protected_namespaces = ()
 
 
@@ -142,6 +158,9 @@ class ShortcutAppcompatRecord(ArtifactRecord):
 
     mtime_regf: datetime
     path: str
+
+    class Config:
+        record_name: str = "reg_amcache_shortcut"
 
 
 AMCACHE_FILE_KEYS = {
@@ -524,7 +543,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 "registry_key_path": entry_data.get("RegistryKeyPath"),
                 "source": entry_data.get("Source"),
                 "evidence_id": self.evidence_id,
-                "record_name": self.get_record_name(entry_name="InventoryApplication"),
+                "record_name": self.name,
             }
 
             try:
@@ -604,9 +623,6 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 "is_pefile": entry_data.get("BinaryType"),
                 "is_oscomponent": None,
                 "evidence_id": self.evidence_id,
-                "record_name": self.get_record_name(
-                    entry_name="InventoryApplicationFile"
-                ),
             }
 
             try:

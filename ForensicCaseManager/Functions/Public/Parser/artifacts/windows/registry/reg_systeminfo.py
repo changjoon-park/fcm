@@ -29,6 +29,9 @@ class SystemInfoRecord(ArtifactRecord):
     timezone: str
     codepage: str
 
+    class Config:
+        record_name: str = "reg_systeminfo"
+
 
 class SystemInfo(ForensicArtifact):
     def __init__(self, src: Source, schema: ArtifactSchema):
@@ -198,7 +201,6 @@ class SystemInfo(ForensicArtifact):
             "timezone": str(self.timezone),
             "codepage": self.codepage,
             "evidence_id": self.evidence_id,
-            "record_name": self.get_record_name(),
         }
 
         try:

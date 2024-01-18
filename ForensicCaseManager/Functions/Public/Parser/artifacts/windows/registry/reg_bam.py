@@ -23,6 +23,9 @@ class BamRecord(ArtifactRecord):
     ts: datetime
     path: str
 
+    class Config:
+        record_name: str = "reg_bam"
+
 
 class BAM(ForensicArtifact):
     """Plugin for bam/dam registry keys."""
@@ -71,7 +74,6 @@ class BAM(ForensicArtifact):
                             "ts": ts,
                             "path": str(uri.from_windows(entry.name)),
                             "evidence_id": self.evidence_id,
-                            "record_name": self.get_record_name(),
                         }
 
                         try:
