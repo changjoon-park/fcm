@@ -80,7 +80,6 @@ class SystemInfo(ForensicArtifact):
             "EM64T": 64,
             "AMD64": 64,
         }
-
         for reg_path in self.iter_entry(entry_name="Environment"):
             try:
                 arch = (
@@ -199,7 +198,7 @@ class SystemInfo(ForensicArtifact):
             "timezone": str(self.timezone),
             "codepage": self.codepage,
             "evidence_id": self.evidence_id,
-            "record_name": self.name,
+            "record_name": self.get_record_name(),
         }
 
         try:

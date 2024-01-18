@@ -67,6 +67,7 @@ RegistrySchema:
     owner: registry
     entries:
       ShimCache:
+        record_name: reg_shimcache
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
@@ -76,6 +77,7 @@ RegistrySchema:
     owner: registry
     entries:
       UserAssist:
+        record_name: reg_userassist
         directories: null
         nodes:
           - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
@@ -103,22 +105,27 @@ RegistrySchema:
     owner: registry
     entries:
       USB:
+        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\USB
       USBSTOR:
+        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR
       DeviceContainers:
+        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\DeviceContainers
       HID:
+        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\HID
       SCSI:
+        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\SCSI
@@ -154,6 +161,8 @@ RegistrySchema:
     root: system
     owner: registry
     entries:
+      SystemInfo:
+        record_name: reg_systeminfo
       ComputerName:
         directories: null
         nodes:

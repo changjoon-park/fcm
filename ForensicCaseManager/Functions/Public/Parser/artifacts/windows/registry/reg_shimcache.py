@@ -390,7 +390,7 @@ class ShimCache(ForensicArtifact):
                 "entry_index": index,
                 "path": path,
                 "evidence_id": self.evidence_id,
-                "record_name": self.name,
+                "record_name": self.get_record_name(),
             }
 
             try:

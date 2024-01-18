@@ -149,7 +149,7 @@ class UserAssist(ForensicArtifact):
                                 "application_focus_count": application_focus_count,
                                 "application_focus_duration": application_focus_duration,
                                 "evidence_id": self.evidence_id,
-                                "record_name": self.name,
+                                "record_name": self.get_record_name(),
                             }
 
                             try:

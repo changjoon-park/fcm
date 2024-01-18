@@ -135,7 +135,9 @@ class USB(ForensicArtifact):
             info_origin (string): Location of info present in output
         """
 
-        for reg_path in self.check_empty_entry(self.iter_entry(entry_name="USBSTOR")):
+        entry_name = "USBSTOR"
+
+        for reg_path in self.check_empty_entry(self.iter_entry(entry_name=entry_name)):
             for key in self.src.source.registry.keys(reg_path):
                 info_origin = "\\".join((key.path, key.name))
                 usb_stor = key.subkeys()
@@ -195,7 +197,7 @@ class USB(ForensicArtifact):
                             "last_removal": last_removal,
                             "info_origin": info_origin,
                             "evidence_id": self.evidence_id,
-                            "record_name": self.name,
+                            "record_name": self.get_record_name(entry_name=entry_name),
                         }
 
                         try:
