@@ -15,9 +15,6 @@ class AutoRunRecord(ArtifactRecord):
     path: str
     key: str
 
-    class Config:
-        record_name: str = "reg_autorun"
-
 
 class AutoRun(ForensicArtifact):
     """Plugin that iterates various Runkey locations."""
@@ -73,6 +70,7 @@ class AutoRun(ForensicArtifact):
                         "path": path,
                         "key": str(reg_path),
                         "evidence_id": self.evidence_id,
+                        "record_name": self.name,
                     }
 
                     try:

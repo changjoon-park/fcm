@@ -19,9 +19,6 @@ class NetworkInterfaceRecord(ArtifactRecord):
     lease_terminates_time: datetime
     dhcp_server: Optional[str]
 
-    class Config:
-        record_name: str = "reg_network_interface"
-
 
 class NetworkHistoryRecord(ArtifactRecord):
     """Network history registry record."""
@@ -35,9 +32,6 @@ class NetworkHistoryRecord(ArtifactRecord):
     first_network: str
     default_gateway_mac: str
     signature: str
-
-    class Config:
-        record_name: str = "reg_network_history"
 
 
 class NetworkInfo(ForensicArtifact):
@@ -132,6 +126,7 @@ class NetworkInfo(ForensicArtifact):
                         "lease_terminates_time": lease_terminates_time,
                         "dhcp_server": dhcp_server,
                         "evidence_id": self.evidence_id,
+                        "record_name": self.name,
                     }
 
                     try:
@@ -183,6 +178,7 @@ class NetworkInfo(ForensicArtifact):
                             ).value.hex(),
                             "signature": sig.name,
                             "evidence_id": self.evidence_id,
+                            "record_name": self.name,
                         }
 
                         try:

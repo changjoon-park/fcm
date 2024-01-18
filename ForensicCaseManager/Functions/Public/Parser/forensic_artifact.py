@@ -4,16 +4,13 @@ from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
-from collections import namedtuple
 from icecream import ic
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
-from settings.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
-from settings.config import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -21,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ArtifactRecord(BaseModel):
     evidence_id: str
+    record_name: str
 
 
 @dataclass
@@ -60,6 +58,15 @@ class ForensicArtifact:
     @evidence_id.setter
     def evidence_id(self, value: str) -> None:
         self._evidence_id = value
+
+    def get_record_name(self, entry_name: str = "") -> str:
+        if not entry_name:
+            entry_name = self.__class__.__name__
+        record_name = self.entries.get(entry_name, {}).get("record_name")
+        if not record_name:
+            logger.error(f"Unable to find {entry_name} in {self.evidence_id}")
+            return ""
+        return record_name
 
     @property
     def ts(self) -> Timestamp:

@@ -1,11 +1,12 @@
 import logging
-from typing import Generator
+from typing import Generator, Optional
 from datetime import datetime
 from hashlib import md5, sha256
 from struct import pack
 from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
-from pydantic import ValidationError
+from pydantic import ValidationError, Field
+from icecream import ic
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
@@ -31,20 +32,14 @@ class SamRecord(ArtifactRecord):
     lm: str
     nt: str
 
-    class Config:
-        record_name: str = "reg_sam"
-
 
 class ProfileListRecord(ArtifactRecord):
     """Profile list registry record."""
 
     rid: int
     username: str
-    sid: str
+    sid: Optional[str] = Field(default=str)
     home: str
-
-    class Config:
-        record_name: str = "reg_profilelist"
 
 
 c_sam_def = """
@@ -418,7 +413,9 @@ class UserAccount(ForensicArtifact):
         almpassword = b"LMPASSWORD\0"
         antpassword = b"NTPASSWORD\0"
 
-        for reg_path in self.iter_entry(entry_name="Users"):
+        entry_name = "Users"
+
+        for reg_path in self.iter_entry(entry_name=entry_name):
             for users_key in self.src.source.registry.keys(reg_path):
                 for user_key in users_key.subkeys():
                     if user_key.name == "Names":
@@ -470,6 +467,7 @@ class UserAccount(ForensicArtifact):
                         "lm": lm_hash,
                         "nt": nt_hash,
                         "evidence_id": self.evidence_id,
+                        "record_name": self.get_record_name(entry_name=entry_name),
                     }
 
                     try:
@@ -479,7 +477,9 @@ class UserAccount(ForensicArtifact):
                         continue
 
     def profilelist(self) -> Generator[dict, None, None]:
-        for reg_path in self.iter_entry(entry_name="ProfileList"):
+        entry_name = "ProfileList"
+
+        for reg_path in self.iter_entry(entry_name=entry_name):
             sids = set()
             for k in self.src.source.registry.keys(reg_path):
                 for subkey in k.subkeys():
@@ -508,6 +508,7 @@ class UserAccount(ForensicArtifact):
                         "sid": sid,
                         "home": home,
                         "evidence_id": self.evidence_id,
+                        "record_name": self.get_record_name(entry_name=entry_name),
                     }
 
                     try:

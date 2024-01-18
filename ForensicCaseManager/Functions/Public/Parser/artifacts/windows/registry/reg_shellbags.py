@@ -277,9 +277,6 @@ class ShellBagRecord(ArtifactRecord):
     user: str
     key: str
 
-    class Config:
-        record_name: str = "reg_shellbags"
-
 
 class ShellBags(ForensicArtifact):
     """Windows Shellbags plugin.
@@ -369,6 +366,7 @@ class ShellBags(ForensicArtifact):
                     "user": str(user),
                     "key": str(key),
                     "evidence_id": self.evidence_id,
+                    "record_name": self.name,
                 }
 
                 try:

@@ -4,6 +4,7 @@ RegistrySchema:
     owner: windows
     entries: 
       Amcache:
+        record_name: reg_amcache
         directories:
           - Windows/appcompat/Programs
         nodes:
@@ -13,10 +14,12 @@ RegistrySchema:
     owner: registry
     entries:
       Users:
+        record_name: reg_useraccount_user
         directories: null
         nodes:
           - HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users
       ProfileList:
+        record_name: reg_useraccount_profile
         directories: null
         nodes:
           - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
@@ -25,6 +28,7 @@ RegistrySchema:
     owner: registry
     entries:
       BAM:
+        record_name: reg_bam
         directories: null
         nodes:
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings

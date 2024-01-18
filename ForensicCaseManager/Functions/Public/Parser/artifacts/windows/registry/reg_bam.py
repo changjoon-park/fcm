@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pydantic import ValidationError
 
@@ -7,6 +8,7 @@ from dissect.cstruct import cstruct
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
+logger = logging.getLogger(__name__)
 
 c_bamdef = """
     struct entry {
@@ -22,9 +24,6 @@ class BamRecord(ArtifactRecord):
 
     ts: datetime
     path: str
-
-    class Config:
-        record_name: str = "reg_bam"
 
 
 class BAM(ForensicArtifact):
@@ -74,6 +73,7 @@ class BAM(ForensicArtifact):
                             "ts": ts,
                             "path": str(uri.from_windows(entry.name)),
                             "evidence_id": self.evidence_id,
+                            "record_name": self.get_record_name(),
                         }
 
                         try:

@@ -24,9 +24,6 @@ class UserAssistRecord(ArtifactRecord):
     application_focus_count: Optional[int]
     application_focus_duration: Optional[int]
 
-    class Config:
-        record_name: str = "reg_userassist"
-
 
 userassist_def = """
 struct VERSION5_ENTRY {
@@ -152,6 +149,7 @@ class UserAssist(ForensicArtifact):
                                 "application_focus_count": application_focus_count,
                                 "application_focus_duration": application_focus_duration,
                                 "evidence_id": self.evidence_id,
+                                "record_name": self.name,
                             }
 
                             try:
