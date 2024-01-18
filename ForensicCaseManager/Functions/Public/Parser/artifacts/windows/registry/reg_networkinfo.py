@@ -64,7 +64,8 @@ class NetworkInfo(ForensicArtifact):
         self.records.append(network_interface)
 
     def network_interface(self):
-        for reg_path in self.iter_entry(entry_name="Interfaces"):
+        entry_name = "Interfaces"
+        for reg_path in self.iter_entry(entry_name=entry_name):
             for key in self.src.source.registry.keys(reg_path):
                 for s in key.subkeys():
                     # try:
@@ -126,7 +127,7 @@ class NetworkInfo(ForensicArtifact):
                         "lease_terminates_time": lease_terminates_time,
                         "dhcp_server": dhcp_server,
                         "evidence_id": self.evidence_id,
-                        "record_name": self.name,
+                        "record_name": self.get_record_name(entry_name=entry_name),
                     }
 
                     try:
@@ -145,7 +146,8 @@ class NetworkInfo(ForensicArtifact):
         Sources:
             - https://www.weaklink.org/2016/11/windows-network-profile-registry-keys/
         """
-        for reg_path in self.iter_entry(entry_name="Signatures"):
+        entry_name = "Signatures"
+        for reg_path in self.iter_entry(entry_name=entry_name):
             for key in self.src.source.registry.keys(reg_path):
                 for kind in key.subkeys():
                     for sig in kind.subkeys():
@@ -178,7 +180,7 @@ class NetworkInfo(ForensicArtifact):
                             ).value.hex(),
                             "signature": sig.name,
                             "evidence_id": self.evidence_id,
-                            "record_name": self.name,
+                            "record_name": self.get_record_name(entry_name=entry_name),
                         }
 
                         try:
@@ -188,7 +190,8 @@ class NetworkInfo(ForensicArtifact):
                             continue
 
     def find_profile(self, guid):
-        for reg_path in self.iter_entry(entry_name="Profiles"):
+        entry_name = "Profiles"
+        for reg_path in self.iter_entry(entry_name=entry_name):
             for key in self.src.source.registry.keys(reg_path):
                 try:
                     return key.subkey(guid)  # Just return the first one...

@@ -84,14 +84,17 @@ RegistrySchema:
     owner: registry
     entries:
       Signatures:
+        record_name: reg_network_history
         directories: null
         nodes:
           - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
       Profiles:
+        record_name: reg_network_profiles
         directories: null
         nodes:
           - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Profiles
       Interfaces:
+        record_name: reg_network_interface
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
@@ -124,6 +127,7 @@ RegistrySchema:
     owner: registry
     entries:
       Autorun:
+        record_name: reg_autorun
         directories: null
         nodes:
           - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run

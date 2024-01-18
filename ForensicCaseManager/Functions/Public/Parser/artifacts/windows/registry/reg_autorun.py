@@ -70,7 +70,7 @@ class AutoRun(ForensicArtifact):
                         "path": path,
                         "key": str(reg_path),
                         "evidence_id": self.evidence_id,
-                        "record_name": self.name,
+                        "record_name": self.get_record_name(),
                     }
 
                     try:
