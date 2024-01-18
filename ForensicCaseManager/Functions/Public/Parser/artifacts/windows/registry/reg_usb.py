@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 
@@ -47,7 +47,6 @@ class UsbstorRecord(ArtifactRecord):
     last_insert: datetime
     last_removal: Optional[datetime]
     info_origin: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_usb_usbstor"
@@ -73,12 +72,7 @@ class USB(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=UsbstorRecord,
-                record=usbstor,  # record is a generator
-            )
-        )
+        self.records.append(usbstor)
 
     @internal
     def unpack_timestamps(self, usb_reg_properties) -> dict:

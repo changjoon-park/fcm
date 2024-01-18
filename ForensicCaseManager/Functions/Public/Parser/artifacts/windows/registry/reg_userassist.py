@@ -9,7 +9,7 @@ from dissect import cstruct
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,6 @@ class UserAssistRecord(ArtifactRecord):
     number_of_executions: Optional[int]
     application_focus_count: Optional[int]
     application_focus_duration: Optional[int]
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_userassist"
@@ -68,12 +67,7 @@ class UserAssist(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=UserAssistRecord,
-                record=userassist,  # record is a generator
-            )
-        )
+        self.records.append(userassist)
 
     def userassist(self):
         """Return the UserAssist information for each user.

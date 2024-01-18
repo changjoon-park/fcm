@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from dissect.target.exceptions import RegistryError
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,6 @@ class SystemInfoRecord(ArtifactRecord):
     architecture: str
     timezone: str
     codepage: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_systeminfo"
@@ -40,20 +39,15 @@ class SystemInfo(ForensicArtifact):
 
     def parse(self, descending: bool = False):
         try:
-            system_info = (
+            system_info = [
                 self.validate_record(index=index, record=record)
                 for index, record in enumerate(self.system_info())
-            )
+            ]
         except Exception as e:
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=SystemInfoRecord,
-                record=system_info,  # record is a generator
-            )
-        )
+        self.records.append(system_info)
 
     @property
     def timezone(self):

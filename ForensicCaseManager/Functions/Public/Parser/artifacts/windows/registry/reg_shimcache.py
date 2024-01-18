@@ -11,7 +11,7 @@ from dissect.cstruct import Structure, cstruct
 from dissect.util.ts import wintimestamp
 from dissect.target.exceptions import Error, RegistryError
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,6 @@ class ShimCacheRecord(ArtifactRecord):
     name: str
     entry_index: int
     path: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_shimcache"
@@ -325,12 +324,7 @@ class ShimCache(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=ShimCacheRecord,
-                record=shimcache,  # record is a generator
-            )
-        )
+        self.records.append(shimcache)
 
     def shimcache(self) -> Generator[dict, None, None]:
         """Return the shimcache.

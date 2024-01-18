@@ -7,7 +7,7 @@ from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
 from pydantic import ValidationError
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,6 @@ class SamRecord(ArtifactRecord):
     failedlogins: int
     lm: str
     nt: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_sam"
@@ -43,7 +42,6 @@ class ProfileListRecord(ArtifactRecord):
     username: str
     sid: str
     home: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_profilelist"
@@ -325,18 +323,8 @@ class UserAccount(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=SamRecord,
-                record=sam,  # record is a generator
-            )
-        )
-        self.records.append(
-            Record(
-                schema=ProfileListRecord,
-                record=profilelist,  # record is a generator
-            )
-        )
+        self.records.append(sam)
+        self.records.append(profilelist)
 
         """
         References:

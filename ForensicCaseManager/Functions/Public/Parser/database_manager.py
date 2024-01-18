@@ -160,6 +160,10 @@ class DatabaseManager:
                 )
 
     def create_artifact_table_from_pydantic_model(self, record: list[ArtifactRecord]):
+        if not isinstance(record, list):
+            logger.error(f"Error: record must be a list, not {type(record)}")
+            return
+
         model = record[0]
         full_annotations = self._get_full_annotations(model)
         table_name = model.Config.record_name

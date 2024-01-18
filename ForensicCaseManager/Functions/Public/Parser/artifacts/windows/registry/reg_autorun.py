@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 
@@ -14,7 +14,6 @@ class AutoRunRecord(ArtifactRecord):
     name: str
     path: str
     key: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_autorun"
@@ -40,12 +39,7 @@ class AutoRun(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=AutoRunRecord,
-                record=runkeys,  # record is a generator
-            )
-        )
+        self.records.append(runkeys)
 
     def runkeys(self):
         """Iterate various run key locations. See source for all locations.

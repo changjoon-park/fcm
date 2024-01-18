@@ -18,8 +18,6 @@ from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
-Record = namedtuple("Record", ["schema", "record"])
-
 
 class ArtifactRecord(BaseModel):
     evidence_id: str

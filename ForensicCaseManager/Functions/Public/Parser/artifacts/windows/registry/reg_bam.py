@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from flow.record.fieldtypes import uri
 from dissect.cstruct import cstruct
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 
@@ -22,7 +22,6 @@ class BamRecord(ArtifactRecord):
 
     ts: datetime
     path: str
-    # evidence_id: str
 
     class Config:
         record_name: str = "reg_bam"
@@ -48,7 +47,7 @@ class BAM(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(bam)  # record is a list of BamRecords
+        self.records.append(bam)
 
     def bam(self):
         """Parse bam and dam registry keys.

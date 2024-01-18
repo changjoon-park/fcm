@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 
@@ -18,7 +18,6 @@ class NetworkInterfaceRecord(ArtifactRecord):
     lease_obtained_time: datetime
     lease_terminates_time: datetime
     dhcp_server: Optional[str]
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_network_interface"
@@ -36,7 +35,6 @@ class NetworkHistoryRecord(ArtifactRecord):
     first_network: str
     default_gateway_mac: str
     signature: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_network_history"
@@ -68,18 +66,8 @@ class NetworkInfo(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=NetworkHistoryRecord,
-                record=network_history,  # record is a generator
-            )
-        )
-        self.records.append(
-            Record(
-                schema=NetworkInterfaceRecord,
-                record=network_interface,  # record is a generator
-            )
-        )
+        self.records.append(network_history)
+        self.records.append(network_interface)
 
     def network_interface(self):
         for reg_path in self.iter_entry(entry_name="Interfaces"):

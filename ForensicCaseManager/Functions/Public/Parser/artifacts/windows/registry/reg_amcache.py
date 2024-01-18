@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 
@@ -31,7 +31,6 @@ class ApplicationAppcompatRecord(ArtifactRecord):
     manifest_path: str
     registry_key_path: str
     source: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_amcache_application"
@@ -57,7 +56,6 @@ class ApplicationFileAppcompatRecord(ArtifactRecord):
     language: int
     is_pefile: str
     is_oscomponent: Optional[str]
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_amcache_application_file"
@@ -406,27 +404,20 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 reverse=descending,
             )
 
-            application_files = (
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.application_files())
+            application_files = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.application_files())
+                ),
+                key=lambda record: record.mtime_regf,
+                reverse=descending,
             )
         except Exception as e:
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=ApplicationAppcompatRecord,
-                record=applications,  # record is a generator
-            )
-        )
-
-        self.records.append(
-            Record(
-                schema=ApplicationFileAppcompatRecord,
-                record=application_files,  # record is a generator
-            )
-        )
+        self.records.append(applications)
+        self.records.append(application_files)
 
         # TODO: bug fix on timestamp
         # application_files = sorted(

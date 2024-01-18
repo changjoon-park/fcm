@@ -31,7 +31,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
     EXTENSION_BLOCK_BEEF0005,
 )
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact, Record
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)
@@ -276,7 +276,6 @@ class ShellBagRecord(ArtifactRecord):
     regf_modification_time: datetime
     user: str
     key: str
-    evidence_id: str
 
     class Config:
         record_name: str = "reg_shellbags"
@@ -306,12 +305,7 @@ class ShellBags(ForensicArtifact):
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=ShellBagRecord,
-                record=shellbags,  # record is a generator
-            )
-        )
+        self.records.append(shellbags)
 
     def shellbags(self):
         """Return Windows Shellbags.
