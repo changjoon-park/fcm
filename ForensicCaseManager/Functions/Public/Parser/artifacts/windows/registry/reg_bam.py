@@ -22,7 +22,7 @@ class BamRecord(ArtifactRecord):
 
     ts: datetime
     path: str
-    evidence_id: str
+    # evidence_id: str
 
     class Config:
         record_name: str = "reg_bam"
@@ -42,17 +42,13 @@ class BAM(ForensicArtifact):
                     for index, record in enumerate(self.bam())
                 ),
                 key=lambda record: record.ts,
+                reverse=descending,
             )
         except Exception as e:
             self.log_error(e)
             return
 
-        self.records.append(
-            Record(
-                schema=BamRecord,
-                record=bam,  # record is a generator
-            )
-        )
+        self.records.append(bam)  # record is a list of BamRecords
 
     def bam(self):
         """Parse bam and dam registry keys.

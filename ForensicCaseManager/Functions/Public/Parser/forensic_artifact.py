@@ -45,7 +45,7 @@ class ForensicArtifact:
     root: str = field(init=False)
     owner: str = field(init=False)
     entries: dict = field(init=False)
-    records: list[Record] = field(default_factory=list)
+    records: list[ArtifactRecord] = field(default_factory=list)
     _evidence_id: str = field(init=False)
 
     def __post_init__(self):

@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import logging
-from typing import Generator
+from typing import Generator, get_type_hints
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -159,12 +159,14 @@ class DatabaseManager:
                     ),
                 )
 
-    def create_artifact_table_from_pydantic_model(self, model: ArtifactRecord):
+    def create_artifact_table_from_pydantic_model(self, record: list[ArtifactRecord]):
+        model = record[0]
+        full_annotations = self._get_full_annotations(model)
         table_name = model.Config.record_name
         try:
             # Extracting table name and column definitions from the Pydantic model
             columns = []
-            for field_name, field_type in model.__annotations__.items():
+            for field_name, field_type in full_annotations.items():
                 column_type = "TEXT"  # Default type, adjust as needed
                 if field_type == int:
                     column_type = "INTEGER"
@@ -192,6 +194,14 @@ class DatabaseManager:
             logger.exception(
                 f"Failed to create table {table_name} from Pydantic model: {e}"
             )
+
+    def _get_full_annotations(self, model):
+        annotations = {}
+        for cls in reversed(model.__class__.mro()):
+            if cls is object:
+                continue
+            annotations.update(get_type_hints(cls))
+        return annotations
 
     def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
         try:

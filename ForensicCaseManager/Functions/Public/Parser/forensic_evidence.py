@@ -109,9 +109,9 @@ class ForensicEvidence(CaseConfig):
 
     def export_evidence(self) -> None:
         for forensic_artifact in self.forensic_artifacts:
-            for schema, record in forensic_artifact.records:
+            for record in forensic_artifact.records:
                 # create artifact table
-                self.db_manager.create_artifact_table_from_pydantic_model(schema)
+                self.db_manager.create_artifact_table_from_pydantic_model(record)
 
                 # insert artifact data
                 self.db_manager.insert_artifact_data(
