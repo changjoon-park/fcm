@@ -52,6 +52,7 @@ RegistrySchema:
     owner: registry
     entries:
       Shellbags:
+        record_name: reg_shellbags
         directories: null
         nodes:
           - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell

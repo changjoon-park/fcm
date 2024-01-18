@@ -142,7 +142,7 @@ WINDOWS_PLUGINS = {
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
     ART_REGISTRY_SHELLBAGS: Plugin(
-        ForensicArtifact=reg_shellbags.ShellBags,
+        ForensicArtifact=reg_shellbags.Shellbags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
     Artifact.REG_USB.value: Plugin(

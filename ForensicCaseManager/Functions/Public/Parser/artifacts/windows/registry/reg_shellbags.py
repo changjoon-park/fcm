@@ -278,7 +278,7 @@ class ShellBagRecord(ArtifactRecord):
     key: str
 
 
-class ShellBags(ForensicArtifact):
+class Shellbags(ForensicArtifact):
     """Windows Shellbags plugin.
 
     Resources:
@@ -366,7 +366,7 @@ class ShellBags(ForensicArtifact):
                     "user": str(user),
                     "key": str(key),
                     "evidence_id": self.evidence_id,
-                    "record_name": self.name,
+                    "record_name": self.get_record_name(),
                 }
 
                 try:

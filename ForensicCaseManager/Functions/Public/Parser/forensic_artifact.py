@@ -59,15 +59,6 @@ class ForensicArtifact:
     def evidence_id(self, value: str) -> None:
         self._evidence_id = value
 
-    def get_record_name(self, entry_name: str = "") -> str:
-        if not entry_name:
-            entry_name = self.__class__.__name__
-        record_name = self.entries.get(entry_name, {}).get("record_name")
-        if not record_name:
-            logger.error(f"Unable to find {entry_name} in {self.evidence_id}")
-            return ""
-        return record_name
-
     @property
     def ts(self) -> Timestamp:
         try:
@@ -79,6 +70,18 @@ class ForensicArtifact:
     @property
     def fe(self) -> FileExtractor:
         return FileExtractor()
+
+    def get_record_name(self, entry_name: str = "") -> str:
+        entry_name = entry_name or self.__class__.__name__
+        # Create a case-insensitive mapping of the entries
+        case_insensitive_entries = {k.lower(): v for k, v in self.entries.items()}
+
+        # Use the lowercase version of entry_name to get the record
+        record = case_insensitive_entries.get(entry_name.lower(), {}).get("record_name")
+        if not record:
+            logger.error(f"Unable to find {entry_name} in {self.evidence_id}")
+            return ""
+        return record
 
     def iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
@@ -121,15 +124,6 @@ class ForensicArtifact:
                     if node_name and node_name != node:
                         continue
                     yield node
-
-    def iter_key(self, name: str = None) -> Generator:
-        if self.artifact_directory == "registry":
-            if name == None:
-                yield from self.artifact_entry
-            else:
-                yield from self.artifact_entry.get(name)
-        else:
-            logger.error(f"iter_key() is not supported for {self.schema.name} artifact")
 
     def parse(self, descending: bool = False) -> Generator[ArtifactRecord, None, None]:
         """parse artifact.
