@@ -29,3 +29,22 @@ class Artifact(Enum):
     REG_AUTORUN = "reg_autorun"
     REG_SYSTEMINFO = "reg_systeminfo"
     REG_MRU = "reg_mru"
+
+
+class Tables(Enum):
+    REG_AMCACHE_APPLICATION = "reg_amcache_application"
+    REG_AMCACHE_APPLICATION_FILE = "reg_amcache_application_file"
+    REG_AMCACHE_FILE = "reg_amcache_file"
+    REG_AMCACHE_PROGRAMS = "reg_amcache_programs"
+    REG_AMCACHE_BINARY = "reg_amcache_binary"
+    REG_AMCACHE_CONTAINER = "reg_amcache_container"
+    REG_AMCACHE_SHORTCUT = "reg_amcache_shortcut"
+    REG_AUTORUN = "reg_autorun"
+    REG_BAM = "reg_bam"
+    REG_NETWORKINFO = "reg_networkinfo"
+    REG_SHELLBAGS = "reg_shellbags"
+    REG_SHIMCACHE = "reg_shimcache"
+    REG_SYSTEMINFO = "reg_systeminfo"
+    REG_USB = "reg_usb"
+    REG_USERACCOUNT = "reg_useraccount"
+    REG_USERASSIST = "reg_userassist"

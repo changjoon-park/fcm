@@ -7,6 +7,7 @@ from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 
 class ApplicationAppcompatRecord(ArtifactRecord):
@@ -33,7 +34,7 @@ class ApplicationAppcompatRecord(ArtifactRecord):
     source: str
 
     class Config:
-        record_name: str = "reg_amcache_application"
+        table_name: str = Tables.REG_AMCACHE_APPLICATION.value
 
 
 class ApplicationFileAppcompatRecord(ArtifactRecord):
@@ -58,7 +59,7 @@ class ApplicationFileAppcompatRecord(ArtifactRecord):
     is_oscomponent: Optional[str]
 
     class Config:
-        record_name: str = "reg_amcache_application_file"
+        table_name: str = Tables.REG_AMCACHE_APPLICATION_FILE.value
 
 
 class FileAppcompatRecord(ArtifactRecord):
@@ -81,7 +82,7 @@ class FileAppcompatRecord(ArtifactRecord):
     file_size: int
 
     class Config:
-        record_name: str = "reg_amcache_file"
+        table_name: str = Tables.REG_AMCACHE_FILE.value
 
 
 class ProgramsAppcompatRecord(ArtifactRecord):
@@ -102,7 +103,7 @@ class ProgramsAppcompatRecord(ArtifactRecord):
     msi_package_code2: str
 
     class Config:
-        record_name: str = "reg_amcache_programs"
+        table_name: str = Tables.REG_AMCACHE_PROGRAMS.value
 
 
 class BinaryAppcompatRecord(ArtifactRecord):
@@ -125,7 +126,7 @@ class BinaryAppcompatRecord(ArtifactRecord):
     image_size: str
 
     class Config:
-        record_name: str = "reg_amcache_binary"
+        table_name: str = Tables.REG_AMCACHE_BINARY.value
 
 
 class ContainerAppcompatRecord(ArtifactRecord):
@@ -149,7 +150,7 @@ class ContainerAppcompatRecord(ArtifactRecord):
     state: str
 
     class Config:
-        record_name: str = "reg_amcache_container"
+        table_name: str = Tables.REG_AMCACHE_CONTAINER.value
         protected_namespaces = ()
 
 
@@ -160,7 +161,7 @@ class ShortcutAppcompatRecord(ArtifactRecord):
     path: str
 
     class Config:
-        record_name: str = "reg_amcache_shortcut"
+        table_name: str = Tables.REG_AMCACHE_SHORTCUT.value
 
 
 AMCACHE_FILE_KEYS = {
