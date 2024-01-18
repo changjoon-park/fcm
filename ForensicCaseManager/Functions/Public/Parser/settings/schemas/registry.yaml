@@ -9,6 +9,18 @@ RegistrySchema:
           - Windows/appcompat/Programs
         nodes:
           - Amcache.hve
+      InventoryApplication:
+        record_name: reg_amcache_application
+        directories:
+          - Windows/appcompat/Programs
+        nodes:
+          - Amcache.hve
+      InventoryApplicationFile:
+        record_name: reg_amcache_applicationfile
+        directories:
+          - Windows/appcompat/Programs
+        nodes:
+          - Amcache.hve
   reg_useraccount:
     root: system
     owner: registry

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from pydantic import ValidationError
 
@@ -8,7 +7,6 @@ from dissect.cstruct import cstruct
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
 
-logger = logging.getLogger(__name__)
 
 c_bamdef = """
     struct entry {

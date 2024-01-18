@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import ValidationError
+from pydantic import ValidationError, Field
 
 from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
@@ -38,7 +38,7 @@ class ApplicationFileAppcompatRecord(ArtifactRecord):
 
     mtime_regf: datetime
     name: str
-    size: int
+    size: Optional[int]
     publisher: str
     product_name: str
     bin_file_version: str
@@ -524,7 +524,7 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 "registry_key_path": entry_data.get("RegistryKeyPath"),
                 "source": entry_data.get("Source"),
                 "evidence_id": self.evidence_id,
-                "record_name": self.name,
+                "record_name": self.get_record_name(entry_name="InventoryApplication"),
             }
 
             try:
@@ -604,7 +604,9 @@ class Amcache(AmcachePluginOldMixin, ForensicArtifact):
                 "is_pefile": entry_data.get("BinaryType"),
                 "is_oscomponent": None,
                 "evidence_id": self.evidence_id,
-                "record_name": self.name,
+                "record_name": self.get_record_name(
+                    entry_name="InventoryApplicationFile"
+                ),
             }
 
             try:
