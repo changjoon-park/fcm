@@ -99,7 +99,7 @@ class ForensicArtifact:
                         for directory in directories
                         if root.joinpath(directory).exists()
                     )
-        elif self.root == "user":
+        elif self.root == "users":
             for user_details in self.src.source.user_details.all_with_home():
                 yield from (
                     user_details.home_path.joinpath(directory)

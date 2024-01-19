@@ -8,18 +8,6 @@ RegistrySchema:
           - Windows/appcompat/Programs
         nodes:
           - Amcache.hve
-      InventoryApplication:
-        record_name: reg_amcache_application
-        directories:
-          - Windows/appcompat/Programs
-        nodes:
-          - Amcache.hve
-      InventoryApplicationFile:
-        record_name: reg_amcache_applicationfile
-        directories:
-          - Windows/appcompat/Programs
-        nodes:
-          - Amcache.hve
   reg_useraccount:
     root: system
     owner: registry
@@ -48,7 +36,6 @@ RegistrySchema:
     owner: registry
     entries:
       Shellbags:
-        record_name: reg_shellbags
         directories: null
         nodes:
           - HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell
@@ -63,7 +50,6 @@ RegistrySchema:
     owner: registry
     entries:
       ShimCache:
-        record_name: reg_shimcache
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
@@ -73,7 +59,6 @@ RegistrySchema:
     owner: registry
     entries:
       UserAssist:
-        record_name: reg_userassist
         directories: null
         nodes:
           - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
@@ -82,17 +67,14 @@ RegistrySchema:
     owner: registry
     entries:
       Signatures:
-        record_name: reg_network_history
         directories: null
         nodes:
           - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Signatures
       Profiles:
-        record_name: reg_network_profiles
         directories: null
         nodes:
           - HKLM\Software\Microsoft\Windows NT\CurrentVersion\Networklist\Profiles
       Interfaces:
-        record_name: reg_network_interface
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
@@ -101,27 +83,22 @@ RegistrySchema:
     owner: registry
     entries:
       USB:
-        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\USB
       USBSTOR:
-        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR
       DeviceContainers:
-        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\DeviceContainers
       HID:
-        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\HID
       SCSI:
-        record_name: reg_usb
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\SCSI
@@ -130,7 +107,6 @@ RegistrySchema:
     owner: registry
     entries:
       Autorun:
-        record_name: reg_autorun
         directories: null
         nodes:
           - HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run
@@ -157,8 +133,6 @@ RegistrySchema:
     root: system
     owner: registry
     entries:
-      SystemInfo:
-        record_name: reg_systeminfo
       ComputerName:
         directories: null
         nodes:

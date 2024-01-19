@@ -1,0 +1,91 @@
+WindowsSchema:
+  win_recyclebin:
+    root: system
+    owner: windows
+    entries:
+      RecycleBin:
+        directories:
+          - $recycle.bin
+        nodes:
+          - "$I*"
+  win_prefetch:
+    root: system
+    owner: windows
+    entries:
+      Prefetch:
+        directories:
+          - windows/prefetch
+        nodes:
+          - "*.pf"
+  win_windowstimeline:
+    root: system
+    owner: windows
+    entries:
+      WindowsTimeline:
+        directories:
+          - AppData/Local/ConnectedDevicesPlatform
+        nodes:
+          - ActivitiesCache.db 
+  win_lnk:
+    root: users
+    owner: windows
+    entries:
+      LNK:
+        directories:
+          - AppData/Roaming/Microsoft/Windows/Recent
+          - AppData/Roaming/Microsoft/Office/Recent
+        nodes:
+          - "*.lnk"
+  win_jumplists:
+    root: users
+    owner: windows
+    entries:
+      JumpLists:
+        directories:
+          - AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations
+          - AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations
+        nodes:
+          - "*.automaticDestinations-ms"
+          - "*.customDestinations-ms"
+  win_sru:
+    root: system
+    owner: windows
+    entries:
+      SRU:
+        directories:
+          - Windows/System32/sru
+        nodes:
+          - edb* 
+  win_thumbcache:
+    root: users
+    owner: windows
+    entries:
+      ThumbCache:
+        directories:
+          - AppData/Local/Microsoft/Windows/Explorer
+        nodes:
+          - thumbcache_*.db
+  win_filehistory:
+    root: users
+    owner: windows
+    entries:
+      FileHistory:
+        directories:
+          - AppData/Local/Microsoft/Edge/User Data/Default
+          - Library/Application Support/Microsoft Edge/Default
+          - AppData/Local/Microsoft/Windows/WebCache
+        nodes:
+          - Configuration/Config1.xml
+          - Configuration/Config2.xml
+          - Data/BackupSet*.dat
+          - Data/GlobalCatalog.wbcat
+          - Data/Restore/Backup*.zip
+  win_eventlogs:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "*.evtx"
