@@ -10,10 +10,8 @@ from icecream import ic
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem
 
-from settings.artifact_paths import ARTIFACT_PATH
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
-from settings.config import ARTIFACT_OWNER_SYSTEM, ARTIFACT_OWNER_USER
 from settings.artifact_paths import ArtifactSchema
 
 logger = logging.getLogger(__name__)

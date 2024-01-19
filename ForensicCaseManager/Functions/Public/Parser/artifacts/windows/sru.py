@@ -5,10 +5,7 @@ from dissect.esedb.tools.sru import SRU as SRUParser
 from dissect.target.plugins.os.windows.sru import FIELD_MAPPINGS, TRANSFORMS
 
 from forensic_artifact import Source, ForensicArtifact
-from settings.config import (
-    ART_SRU_NETWORK,
-    ART_SRU_APPLICATION,
-)
+from settings.artifacts import Artifact
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +15,7 @@ class SRU(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        if self.artifact == ART_SRU_NETWORK:
+        if self.artifact == Artifact.WIN_SRU_NETWORK:
             network_data = sorted(
                 [
                     self.validate_record(index=index, record=record)
@@ -35,7 +32,7 @@ class SRU(ForensicArtifact):
                 key=lambda record: record["ts"],  # Sorting based on the 'ts' field
                 reverse=descending,
             )
-        elif self.artifact == ART_SRU_APPLICATION:
+        elif self.artifact == Artifact.WIN_SRU_APPLICATION:
             application = sorted(
                 [
                     self.validate_record(index=index, record=record)

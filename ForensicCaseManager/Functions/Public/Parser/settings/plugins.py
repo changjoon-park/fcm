@@ -1,8 +1,7 @@
 from collections import namedtuple
 
-from settings.config import *  # artifacts,
 from settings.artifacts import Artifact
-
+from settings.config import *
 from artifacts.filesystem import usnjrnl
 
 from artifacts.windows import (
@@ -51,21 +50,21 @@ ARTIFACT_CATEGORIES = [
 
 WINDOWS_PLUGINS = {
     # ? Browser
-    ART_CHROME: Plugin(
+    Artifact.APP_CHROME.value: Plugin(
         ForensicArtifact=chrome.Chrome,
         category=CAT_BROWSER_ACTIVITY,
     ),
-    ART_EDGE: Plugin(
+    Artifact.APP_EDGE.value: Plugin(
         ForensicArtifact=edge.Edge,
         category=CAT_BROWSER_ACTIVITY,
     ),
-    ART_IEXPLORER: Plugin(
+    Artifact.APP_IEXPLORER.value: Plugin(
         ForensicArtifact=iexplore.InternetExplorer,
         category=CAT_BROWSER_ACTIVITY,
     ),
     # ? FileSystem
     # "MFT": Plugin(artifact=mft.MFT, category="todo"),  # FileSystem
-    ART_USNJRNL: Plugin(
+    Artifact.FS_USNJRNL.value: Plugin(
         ForensicArtifact=usnjrnl.UsnJrnl,
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),
@@ -74,45 +73,45 @@ WINDOWS_PLUGINS = {
         ForensicArtifact=recyclebin.RecycleBin,
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),
-    ART_PREFETCH: Plugin(
+    Artifact.WIN_PREFETCH.value: Plugin(
         ForensicArtifact=prefetch.Prefetch,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_FILE_HISTORY: Plugin(
+    Artifact.WIN_FILE_HISTORY.value: Plugin(
         ForensicArtifact=file_history.FileHistory,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    ART_SRU_NETWORK: Plugin(
+    Artifact.WIN_SRU_NETWORK.value: Plugin(
         ForensicArtifact=sru.SRU,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
-    ART_SRU_APPLICATION: Plugin(
+    Artifact.WIN_SRU_APPLICATION.value: Plugin(
         ForensicArtifact=sru.SRU,
         category=CAT_APPLICATION_EXECUTION,
     ),
     # "Lnk": Plugin(ForensicArtifact=LinkFile, category=CAT_FILE_FOLDER_OPENING),
-    ART_JUMPLIST: Plugin(
+    Artifact.WIN_JUMPLIST.value: Plugin(
         ForensicArtifact=jumplist.JumpList,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    ART_THUMBCACHE: Plugin(
+    Artifact.WIN_THUMBCACHE.value: Plugin(
         ForensicArtifact=thumbcache.Thumbcache,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    ART_WINDOWS_TIMELINE: Plugin(
+    Artifact.WIN_WINDOWSTIMELINE.value: Plugin(
         ForensicArtifact=windows_timeline.WindowsTimeline,
         category=CAT_APPLICATION_EXECUTION,
     ),
     # ? Event Log
-    ART_EVENT_LOGON: Plugin(
+    Artifact.WIN_EVENT_LOGON.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_ACCOUNT_USAGE,
     ),
-    ART_EVENT_USB: Plugin(
+    Artifact.WIN_EVENT_USB.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    ART_EVENT_WLAN: Plugin(
+    Artifact.WIN_EVENT_WLAN.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
@@ -121,27 +120,27 @@ WINDOWS_PLUGINS = {
         ForensicArtifact=reg_amcache.Amcache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_USERACCOUNT: Plugin(
+    Artifact.REG_USERACCOUNT.value: Plugin(
         ForensicArtifact=reg_useraccount.UserAccount,
         category=CAT_ACCOUNT_USAGE,
     ),
-    ART_REGISTRY_USERASSIST: Plugin(
+    Artifact.REG_USERASSIST.value: Plugin(
         ForensicArtifact=reg_userassist.UserAssist,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_SHIMCACHE: Plugin(
+    Artifact.REG_SHIMCACHE.value: Plugin(
         ForensicArtifact=reg_shimcache.ShimCache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_BAM: Plugin(
+    Artifact.REG_BAM.value: Plugin(
         ForensicArtifact=reg_bam.BAM,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    ART_REGISTRY_NETWORKINFO: Plugin(
+    Artifact.REG_NETWORKINFO.value: Plugin(
         ForensicArtifact=reg_networkinfo.NetworkInfo,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
-    ART_REGISTRY_SHELLBAGS: Plugin(
+    Artifact.REG_SHELLBAGS.value: Plugin(
         ForensicArtifact=reg_shellbags.Shellbags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
@@ -149,11 +148,11 @@ WINDOWS_PLUGINS = {
         ForensicArtifact=reg_usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    ART_REGISTRY_AUTORUN: Plugin(
+    Artifact.REG_AUTORUN.value: Plugin(
         ForensicArtifact=reg_autorun.AutoRun,
         category=CAT_SYSTEM_INFORMATION,
     ),
-    ART_REGISTRY_SYSTEMINFO: Plugin(
+    Artifact.REG_SYSTEMINFO.value: Plugin(
         ForensicArtifact=reg_systeminfo.SystemInfo,
         category=CAT_SYSTEM_INFORMATION,
     ),

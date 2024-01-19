@@ -9,8 +9,8 @@ from pydantic import ValidationError
 from dissect import cstruct
 from flow.record.fieldtypes import uri
 
-from forensic_artifact import Source, ForensicArtifact
-from settings.artifact_paths import ArtifactRecord
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifact_paths import ArtifactSchema
 from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
@@ -242,8 +242,8 @@ class PrefetchParser:
 
 
 class Prefetch(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False) -> Path:
         """Return the content of all prefetch files.
@@ -270,7 +270,7 @@ class Prefetch(ForensicArtifact):
                     self.validate_record(index=index, record=record)
                     for index, record in enumerate(self.prefetch())
                 ),
-                key=lambda record: record["ts"],
+                key=lambda record: record.ts,
                 reverse=descending,
             )
         except Exception as e:
