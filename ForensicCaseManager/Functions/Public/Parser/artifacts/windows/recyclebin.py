@@ -122,23 +122,27 @@ class RecycleBin(ForensicArtifact):
 
     def recyclebin(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry(recurse=True)):
-            recyclebin = RecycleBinParser(path=entry)
-            ts = self.ts.wintimestamp(recyclebin.timestamp)
-            path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
-            filename = os.path.split(path)[1]
-
-            parsed_data = {
-                "ts": ts,
-                "path": path,
-                "filename": filename,
-                "filesize": recyclebin.file_size,
-                "deleted_path": uri.from_windows(recyclebin.deleted_path),
-                "source": uri.from_windows(recyclebin.source_path),
-                "evidence_id": self.evidence_id,
-            }
-
             try:
-                yield RecyclebinRecord(**parsed_data)
-            except ValidationError as e:
+                recyclebin = RecycleBinParser(path=entry)
+                ts = self.ts.wintimestamp(recyclebin.timestamp)
+                path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
+                filename = os.path.split(path)[1]
+
+                parsed_data = {
+                    "ts": ts,
+                    "path": path,
+                    "filename": filename,
+                    "filesize": recyclebin.file_size,
+                    "deleted_path": uri.from_windows(recyclebin.deleted_path),
+                    "source": uri.from_windows(recyclebin.source_path),
+                    "evidence_id": self.evidence_id,
+                }
+
+                try:
+                    yield RecyclebinRecord(**parsed_data)
+                except ValidationError as e:
+                    self.log_error(e)
+                    continue
+            except Exception as e:
                 self.log_error(e)
                 continue

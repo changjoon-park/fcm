@@ -1,13 +1,17 @@
 import os
 import logging
-from typing import Generator, BinaryIO
+from datetime import datetime
+from typing import Generator, BinaryIO, Optional
 from pathlib import Path
 from io import BytesIO
 
+from pydantic import ValidationError
 from dissect import cstruct
 from flow.record.fieldtypes import uri
 
 from forensic_artifact import Source, ForensicArtifact
+from settings.artifact_paths import ArtifactRecord
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +150,20 @@ prefetch_version_structs = {
 }
 
 
+class PrefetchRecord(ArtifactRecord):
+    """Prefetch record."""
+
+    ts: datetime
+    filename: str
+    prefetch: str
+    linkedfiles: list[str]
+    runcount: int
+    previousruns: Optional[list[datetime]]
+
+    class Config:
+        table_name: str = Tables.WIN_PREFETCH.value
+
+
 class PrefetchParser:
     def __init__(self, fh: BinaryIO):
         header_detect = prefetch.PREFETCH_HEADER_DETECT(fh.read(8))
@@ -246,14 +264,20 @@ class Prefetch(ForensicArtifact):
             runcount: The run count.
             previousruns: Previous run non zero timestamps
         """
-        prefetch = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.prefetch())
-            ],
-            key=lambda record: record["ts"],
-            reverse=descending,
-        )
+        try:
+            prefetch = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.prefetch())
+                ),
+                key=lambda record: record["ts"],
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
+
+        self.records.append(prefetch)
 
     def prefetch(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry()):
@@ -267,7 +291,7 @@ class Prefetch(ForensicArtifact):
                     self.ts.wintimestamp(ts) for ts in prefetch.previous_timestamps
                 ]
 
-                yield {
+                parsed_data = {
                     "ts": ts,
                     "filename": filename,
                     "prefetch": entry.name,
@@ -276,5 +300,12 @@ class Prefetch(ForensicArtifact):
                     "previousruns": previousruns,
                     "evidence_id": self.evidence_id,
                 }
-            except:
-                logger.exception(f"Error: Unable to parse {entry}")
+
+                try:
+                    yield PrefetchRecord(**parsed_data)
+                except ValidationError as e:
+                    self.log_error(e)
+                    continue
+            except Exception as e:
+                self.log_error(e)
+                continue

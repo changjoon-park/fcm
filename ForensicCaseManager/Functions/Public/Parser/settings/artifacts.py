@@ -33,6 +33,7 @@ class Artifact(Enum):
 
 class Tables(Enum):
     WIN_RECYCLEBIN = "win_recyclebin"
+    WIN_PREFETCH = "win_prefetch"
     REG_AMCACHE_APPLICATION = "reg_amcache_application"
     REG_AMCACHE_APPLICATION_FILE = "reg_amcache_application_file"
     REG_AMCACHE_FILE = "reg_amcache_file"
