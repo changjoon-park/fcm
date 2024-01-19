@@ -8,20 +8,36 @@ from icecream import ic
 from settings.config import *
 from settings.artifacts import Artifact
 
+ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
+
 current_directory = Path(__file__).parent.absolute()
 
 logger = logging.getLogger(__name__)
 
-# schema file path
-schema_registry = current_directory / "schemas" / "registry.yaml"
-schema_windows = current_directory / "schemas" / "windows.yaml"
+from dataclasses import dataclass, field
+import yaml
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-with open(schema_registry, "r") as file:
-    registry_schema = yaml.safe_load(file).get("RegistrySchema")
+# Function to load schema data from multiple files
+def load_schemas(schema_paths):
+    schema_data = {}
+    for name, path in schema_paths.items():
+        with open(path, "r") as file:
+            schema_data[name] = yaml.safe_load(file).get("Artifacts", {})
+    return schema_data
 
 
-ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
+# Assuming current_directory is defined elsewhere
+schemas = {
+    "registry": current_directory / "schemas" / "registry.yaml",
+    "windows": current_directory / "schemas" / "windows.yaml",
+}
+
+schema_data = load_schemas(schemas)
 
 
 @dataclass
@@ -31,17 +47,24 @@ class ArtifactSchema:
     root: str = field(default_factory=str)
     owner: str = field(default_factory=str)
     entries: dict[str] = field(default_factory=dict)
-    _schema: dict = field(init=False)
+    _schema: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
-        if registry_schema.get(self.name):
-            self._schema = registry_schema.get(self.name)
-        else:
-            logger.error(f"ArtifactSchema not found: {self.name}")
+        self._load_schema()
 
-        self.root = self._schema.get("root")
-        self.owner = self._schema.get("owner")
-        self.entries = self._schema.get("entries")
+    def _load_schema(self):
+        for schema_type, schema in schema_data.items():
+            if self.name in schema:
+                self._schema = schema[self.name]
+                self.root = self._schema.get("root", self.root)
+                self.owner = self._schema.get("owner", self.owner)
+                self.entries = self._schema.get("entries", self.entries)
+                return
+        logger.error(f"ArtifactSchema not found for {self.name} in any schema type")
+
+
+# Example usage
+# artifact_schema = ArtifactSchema(name="some_artifact_name", category="some_category")
 
 
 ## BROWSER

@@ -1,4 +1,4 @@
-RegistrySchema:
+Artifacts:
   reg_amcache:
     root: system
     owner: windows
