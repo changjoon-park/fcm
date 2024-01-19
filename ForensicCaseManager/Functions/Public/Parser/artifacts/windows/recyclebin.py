@@ -3,12 +3,15 @@ import logging
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Generator
+from pydantic import ValidationError
 
 from dissect import cstruct
 from flow.record.fieldtypes import uri
 from dissect.target.helpers.fsutil import TargetPath
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,20 @@ struct header_v2 {
 
 recyclebin_parser = cstruct.cstruct()
 recyclebin_parser.load(c_recyclebin_i)
+
+
+class RecyclebinRecord(ArtifactRecord):
+    """Recyclebin record."""
+
+    ts: int
+    path: str
+    filename: str
+    filesize: int
+    deleted_path: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.WIN_RECYCLEBIN.value
 
 
 @dataclass(kw_only=True)
@@ -69,8 +86,8 @@ class RecycleBinParser:
 
 
 class RecycleBin(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False) -> None:
         """
@@ -87,14 +104,20 @@ class RecycleBin(ForensicArtifact):
           deleted_path (uri): Location of the deleted file after deletion $R file
           source (uri): Location of $I meta file on disk
         """
-        recyclebin = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.recyclebin())
-            ],
-            key=lambda record: record["ts"],
-            reverse=descending,
-        )
+        try:
+            recyclebin = sorted(
+                [
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.recyclebin())
+                ],
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
+
+        self.records.append(recyclebin)
 
     def recyclebin(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry(recurse=True)):
@@ -104,7 +127,7 @@ class RecycleBin(ForensicArtifact):
                 path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
                 filename = os.path.split(path)[1]
 
-                yield {
+                parsed_data = {
                     "ts": ts,
                     "path": path,
                     "filename": filename,
@@ -113,6 +136,12 @@ class RecycleBin(ForensicArtifact):
                     "source": uri.from_windows(recyclebin.source_path),
                     "evidence_id": self.evidence_id,
                 }
+
+                try:
+                    yield RecyclebinRecord(**parsed_data)
+                except ValidationError as e:
+                    self.log_error(e)
+                    continue
             except:
                 logger.error(f"Error: Unable to parse {entry}")
                 continue
