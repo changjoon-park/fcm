@@ -6,7 +6,7 @@ from dissect.cstruct import cstruct
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
-
+from settings.artifacts import Tables
 
 c_bamdef = """
     struct entry {
@@ -24,7 +24,7 @@ class BamRecord(ArtifactRecord):
     path: str
 
     class Config:
-        record_name: str = "reg_bam"
+        table_name: str = Tables.REG_BAM.value
 
 
 class BAM(ForensicArtifact):

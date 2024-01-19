@@ -8,6 +8,7 @@ from dissect.target.plugin import internal
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 
 USB_DEVICE_PROPERTY_KEYS = {
@@ -49,7 +50,7 @@ class UsbstorRecord(ArtifactRecord):
     info_origin: str
 
     class Config:
-        record_name: str = "reg_usb_usbstor"
+        table_name: str = Tables.REG_USB.value
 
 
 class USB(ForensicArtifact):

@@ -13,20 +13,9 @@ from dissect.target.exceptions import Error, RegistryError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
-
-
-class ShimCacheRecord(ArtifactRecord):
-    """Shimcache registry record."""
-
-    last_modified: datetime
-    name: str
-    entry_index: int
-    path: str
-
-    class Config:
-        record_name: str = "reg_shimcache"
 
 
 c_shimdef = """
@@ -114,6 +103,18 @@ MAGIC_NT61 = 0xBADC0FEE
 MAGIC_NT52 = 0xBADC0FFE
 MAGIC_WIN81 = 0x73743031
 MAGIC_WIN10 = 0x73743031
+
+
+class ShimCacheRecord(ArtifactRecord):
+    """Shimcache registry record."""
+
+    last_modified: datetime
+    name: str
+    entry_index: int
+    path: str
+
+    class Config:
+        table_name: str = Tables.REG_SHIMCACHE.value
 
 
 class SHIMCACHE_WIN_TYPE(IntEnum):

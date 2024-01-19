@@ -11,21 +11,9 @@ from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
-
-
-class UserAssistRecord(ArtifactRecord):
-    """UserAssist registry record."""
-
-    ts: datetime
-    path: str
-    number_of_executions: Optional[int]
-    application_focus_count: Optional[int]
-    application_focus_duration: Optional[int]
-
-    class Config:
-        record_name: str = "reg_userassist"
 
 
 userassist_def = """
@@ -47,6 +35,19 @@ struct VERSION3_ENTRY {
 """
 c_userassist = cstruct.cstruct()
 c_userassist.load(userassist_def)
+
+
+class UserAssistRecord(ArtifactRecord):
+    """UserAssist registry record."""
+
+    ts: datetime
+    path: str
+    number_of_executions: Optional[int]
+    application_focus_count: Optional[int]
+    application_focus_duration: Optional[int]
+
+    class Config:
+        table_name: str = Tables.REG_USERASSIST.value
 
 
 class UserAssist(ForensicArtifact):

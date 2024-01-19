@@ -5,6 +5,7 @@ from flow.record.fieldtypes import uri
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 
 class AutoRunRecord(ArtifactRecord):
@@ -16,7 +17,7 @@ class AutoRunRecord(ArtifactRecord):
     key: str
 
     class Config:
-        record_name: str = "reg_autorun"
+        table_name: str = Tables.REG_AUTORUN.value
 
 
 class AutoRun(ForensicArtifact):

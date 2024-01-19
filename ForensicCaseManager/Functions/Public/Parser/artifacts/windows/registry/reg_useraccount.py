@@ -9,42 +9,9 @@ from pydantic import ValidationError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
-
-
-class SamRecord(ArtifactRecord):
-    """User account registry (SAM) record."""
-
-    rid: int
-    fullname: str
-    username: str
-    admincomment: str
-    usercomment: str
-    lastlogin: datetime
-    lastpasswordset: datetime
-    lastincorrectlogin: datetime
-    flags: int
-    countrycode: int
-    logins: int
-    failedlogins: int
-    lm: str
-    nt: str
-
-    class Config:
-        record_name: str = "reg_sam"
-
-
-class ProfileListRecord(ArtifactRecord):
-    """Profile list registry record."""
-
-    rid: int
-    username: str
-    sid: str
-    home: str
-
-    class Config:
-        record_name: str = "reg_profilelist"
 
 
 c_sam_def = """
@@ -240,6 +207,40 @@ struct SAM_HASH_AES {  /* size: >=24 */
 
 c_sam = cstruct.cstruct()
 c_sam.load(c_sam_def)
+
+
+class SamRecord(ArtifactRecord):
+    """User account registry (SAM) record."""
+
+    rid: int
+    fullname: str
+    username: str
+    admincomment: str
+    usercomment: str
+    lastlogin: datetime
+    lastpasswordset: datetime
+    lastincorrectlogin: datetime
+    flags: int
+    countrycode: int
+    logins: int
+    failedlogins: int
+    lm: str
+    nt: str
+
+    class Config:
+        table_name: str = Tables.REG_USERACCOUNT_SAM.value
+
+
+class ProfileListRecord(ArtifactRecord):
+    """Profile list registry record."""
+
+    rid: int
+    username: str
+    sid: str
+    home: str
+
+    class Config:
+        table_name: str = Tables.REG_USERACCOUNT_PROFILELIST.value
 
 
 def expand_des_key(key: bytes) -> bytes:

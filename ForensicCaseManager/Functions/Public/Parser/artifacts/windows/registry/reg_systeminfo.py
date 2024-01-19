@@ -7,6 +7,7 @@ from dissect.target.exceptions import RegistryError
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class SystemInfoRecord(ArtifactRecord):
     codepage: str
 
     class Config:
-        record_name: str = "reg_systeminfo"
+        table_name: str = Tables.REG_SYSTEM_INFO.value
 
 
 class SystemInfo(ForensicArtifact):

@@ -8,6 +8,7 @@ from util.converter import convertfrom_extended_ascii
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 
 class NetworkInterfaceRecord(ArtifactRecord):
@@ -20,7 +21,7 @@ class NetworkInterfaceRecord(ArtifactRecord):
     dhcp_server: Optional[str]
 
     class Config:
-        record_name: str = "reg_network_interface"
+        table_name: str = Tables.REG_NETWORK_INTERFACE.value
 
 
 class NetworkHistoryRecord(ArtifactRecord):
@@ -37,7 +38,7 @@ class NetworkHistoryRecord(ArtifactRecord):
     signature: str
 
     class Config:
-        record_name: str = "reg_network_history"
+        table_name: str = Tables.REG_NETWORK_HISTORY.value
 
 
 class NetworkInfo(ForensicArtifact):

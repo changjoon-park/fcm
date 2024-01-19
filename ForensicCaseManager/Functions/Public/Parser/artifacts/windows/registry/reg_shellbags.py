@@ -33,6 +33,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
 
@@ -278,7 +279,7 @@ class ShellBagRecord(ArtifactRecord):
     key: str
 
     class Config:
-        record_name: str = "reg_shellbags"
+        table_name: str = Tables.REG_SHELLBAGS.value
 
 
 class Shellbags(ForensicArtifact):
