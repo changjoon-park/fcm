@@ -1,7 +1,7 @@
 import struct
 from typing import Optional
 from datetime import datetime
-from pydantic import ValidationError
+from pydantic import ValidationError, Field
 
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
@@ -38,12 +38,12 @@ class UsbstorRecord(ArtifactRecord):
     product: str
     version: str
     vendor: str
-    friendlyname: str
+    friendlyname: Optional[str]
     serial: str
     vid: Optional[str]
     pid: Optional[str]
     device_type: str
-    containerid: str
+    containerid: Optional[str]
     first_insert: datetime
     last_insert: datetime
     last_removal: Optional[datetime]

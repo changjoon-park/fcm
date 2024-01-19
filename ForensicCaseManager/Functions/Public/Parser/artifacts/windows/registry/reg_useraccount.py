@@ -1,5 +1,5 @@
 import logging
-from typing import Generator
+from typing import Generator, Optional
 from datetime import datetime
 from hashlib import md5, sha256
 from struct import pack
@@ -217,9 +217,9 @@ class SamRecord(ArtifactRecord):
     username: str
     admincomment: str
     usercomment: str
-    lastlogin: datetime
-    lastpasswordset: datetime
-    lastincorrectlogin: datetime
+    lastlogin: Optional[datetime]
+    lastpasswordset: Optional[datetime]
+    lastincorrectlogin: Optional[datetime]
     flags: int
     countrycode: int
     logins: int

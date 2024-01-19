@@ -1,5 +1,3 @@
 dissect
-impacket
-carbon-black-cloud-sdk
 pydantic
 icecream

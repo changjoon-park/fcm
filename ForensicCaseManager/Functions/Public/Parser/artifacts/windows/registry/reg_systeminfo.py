@@ -31,7 +31,7 @@ class SystemInfoRecord(ArtifactRecord):
     codepage: str
 
     class Config:
-        table_name: str = Tables.REG_SYSTEM_INFO.value
+        table_name: str = Tables.REG_SYSTEMINFO.value
 
 
 class SystemInfo(ForensicArtifact):
