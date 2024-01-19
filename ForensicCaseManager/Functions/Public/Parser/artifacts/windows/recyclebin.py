@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Generator
@@ -38,7 +39,7 @@ recyclebin_parser.load(c_recyclebin_i)
 class RecyclebinRecord(ArtifactRecord):
     """Recyclebin record."""
 
-    ts: int
+    ts: datetime
     path: str
     filename: str
     filesize: int
@@ -106,10 +107,10 @@ class RecycleBin(ForensicArtifact):
         """
         try:
             recyclebin = sorted(
-                [
+                (
                     self.validate_record(index=index, record=record)
                     for index, record in enumerate(self.recyclebin())
-                ],
+                ),
                 key=lambda record: record.ts,
                 reverse=descending,
             )
@@ -121,27 +122,23 @@ class RecycleBin(ForensicArtifact):
 
     def recyclebin(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry(recurse=True)):
+            recyclebin = RecycleBinParser(path=entry)
+            ts = self.ts.wintimestamp(recyclebin.timestamp)
+            path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
+            filename = os.path.split(path)[1]
+
+            parsed_data = {
+                "ts": ts,
+                "path": path,
+                "filename": filename,
+                "filesize": recyclebin.file_size,
+                "deleted_path": uri.from_windows(recyclebin.deleted_path),
+                "source": uri.from_windows(recyclebin.source_path),
+                "evidence_id": self.evidence_id,
+            }
+
             try:
-                recyclebin = RecycleBinParser(path=entry)
-                ts = self.ts.wintimestamp(recyclebin.timestamp)
-                path = uri.from_windows(recyclebin.filename.rstrip("\x00"))
-                filename = os.path.split(path)[1]
-
-                parsed_data = {
-                    "ts": ts,
-                    "path": path,
-                    "filename": filename,
-                    "filesize": recyclebin.file_size,
-                    "deleted_path": uri.from_windows(recyclebin.deleted_path),
-                    "source": uri.from_windows(recyclebin.source_path),
-                    "evidence_id": self.evidence_id,
-                }
-
-                try:
-                    yield RecyclebinRecord(**parsed_data)
-                except ValidationError as e:
-                    self.log_error(e)
-                    continue
-            except:
-                logger.error(f"Error: Unable to parse {entry}")
+                yield RecyclebinRecord(**parsed_data)
+            except ValidationError as e:
+                self.log_error(e)
                 continue

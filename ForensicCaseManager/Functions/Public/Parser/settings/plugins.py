@@ -70,7 +70,7 @@ WINDOWS_PLUGINS = {
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),
     # ? Windows
-    ART_RECYCLEBIN: Plugin(
+    Artifact.WIN_RECYCLEBIN.value: Plugin(
         ForensicArtifact=recyclebin.RecycleBin,
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),

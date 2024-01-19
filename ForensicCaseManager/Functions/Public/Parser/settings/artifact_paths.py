@@ -374,44 +374,4 @@ ARTIFACT_PATH = {
         directory=ARTIFACT_DIRECTORY_EVENTLOG,
         entry=None,
     ),
-    Artifact.REG_AMCACHE.value: ArtifactPath(
-        directory=registry_schema.get("Amcache"),
-        entry="Amcache.hve",
-    ),  # ! Registry
-    Artifact.REG_USERASSIST.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("UserAssist"),
-    ),
-    Artifact.REG_SHIMCACHE.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("ShimCache"),
-    ),
-    Artifact.REG_BAM.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("BAM"),
-    ),
-    Artifact.REG_USERACCOUNT.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("UserAccount"),
-    ),
-    Artifact.REG_NETWORKINFO.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("NetworkInfo"),
-    ),
-    Artifact.REG_SHELLBAGS.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("ShellBags"),
-    ),
-    Artifact.REG_USB.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("USB"),
-    ),
-    Artifact.REG_AUTORUN.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("Autorun"),
-    ),
-    Artifact.REG_SYSTEMINFO.value: ArtifactPath(
-        directory="registry",
-        entry=registry_schema.get("SystemInfo"),
-    ),
 }
