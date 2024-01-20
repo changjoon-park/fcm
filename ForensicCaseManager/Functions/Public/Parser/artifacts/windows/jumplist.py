@@ -1,9 +1,11 @@
 import os
 import logging
-from typing import Generator, BinaryIO
+from datetime import datetime
+from typing import Generator, BinaryIO, Optional
 from collections import namedtuple
 from dataclasses import dataclass, field
 
+from pydantic import ValidationError
 from ctypes import c_char, c_uint16, c_uint32, c_uint64, c_ubyte, LittleEndianStructure
 
 from lib.olefile import olefile
@@ -12,7 +14,9 @@ from lib.lnk.const import *
 from lib.lnk.lnk import TLNKFileParser
 from util.delphi import ExtractFileName, ExtractFilePath, ExtractFileExt, StrToIntDef
 from lib.jumplist.app_id_list import app_id_list
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +43,31 @@ LinkFileEntry = namedtuple(
         "mac_address",
     ],
 )
+
+
+class JumpListRecord(ArtifactRecord):
+    """JumpList record."""
+
+    last_opened: datetime
+    file_name: str
+    file_ext: str
+    path: str
+    size: Optional[str]
+    # target_created: str
+    # target_modified: str
+    # target_accessed: str
+    volume_label: Optional[str]
+    volume_serial_number: Optional[str]
+    drive_type: str
+    app_id: str
+    app_name: str
+    access_count: str
+    entry_id: str
+    machine_id: str
+    mac_address: str
+
+    class Config:
+        table_name: str = Tables.WIN_JUMPLIST.value
 
 
 # DestListEntry : https://bonggang.tistory.com/120
@@ -217,20 +246,24 @@ class JumpListParser:
 
 
 class JumpList(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False) -> None:
-        jumplist = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.jumplist())
-            ],
-            key=lambda record: record[
-                "last_opened"
-            ],  # Sorting based on the 'last_opened' field
-            reverse=descending,
-        )
+        try:
+            jumplist = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.jumplist())
+                ),
+                key=lambda record: record.last_opened,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            return
+
+        self.records.append(jumplist)
 
     def parse_jumplist_entry(self, entry):
         # Initialize the JumpList parser with the file handle
@@ -253,29 +286,41 @@ class JumpList(ForensicArtifact):
                 yield self.format_record(result, app_id, application_name)
 
     def format_record(self, result, app_id, application_name):
-        record_time = self.ts.wintimestamp(result[1]) if result[1] is not None else ""
-        path = result[6] + result[5]
+        try:
+            record_time = (
+                self.ts.wintimestamp(result[1]) if result[1] is not None else ""
+            )
+            path = result[6] + result[5]
 
-        return {
-            "last_opened": self.ts.to_localtime(record_time),
-            "file_name": str(self.fe.extract_filename(path=path)),
-            "file_ext": str(self.fe.extract_file_extention(path=path)),
-            "path": str(path),
-            "size": str(result[12]),
-            # "target_created": target_created,
-            # "target_modified": target_modified,
-            # "target_accessed": target_accessed,
-            "volume_label": str(result[14]),
-            "volume_serial_number": str(result[15]),
-            "drive_type": str(result[13]),
-            "app_id": str(app_id),
-            "app_name": str(application_name),
-            "access_count": str(result[2]),
-            "entry_id": str(result[3]),
-            "machine_id": str(result[16]),
-            "mac_address": str(result[17]),
-            "evidence_id": self.evidence_id,
-        }
+            parsed_data = {
+                "last_opened": self.ts.to_localtime(record_time),
+                "file_name": str(self.fe.extract_filename(path=path)),
+                "file_ext": str(self.fe.extract_file_extention(path=path)),
+                "path": str(path),
+                "size": str(result[12]),
+                # "target_created": target_created,
+                # "target_modified": target_modified,
+                # "target_accessed": target_accessed,
+                "volume_label": str(result[14]),
+                "volume_serial_number": str(result[15]),
+                "drive_type": str(result[13]),
+                "app_id": str(app_id),
+                "app_name": str(application_name),
+                "access_count": str(result[2]),
+                "entry_id": str(result[3]),
+                "machine_id": str(result[16]),
+                "mac_address": str(result[17]),
+                "evidence_id": self.evidence_id,
+            }
+
+            try:
+                return JumpListRecord(**parsed_data)
+            except ValidationError as e:
+                self.log_error(e)
+                return
+        except Exception as e:
+            self.log_error(e)
+            return
 
     def jumplist(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry()):
