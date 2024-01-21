@@ -1,15 +1,35 @@
 import logging
 import urllib
-from typing import BinaryIO, Generator
+from datetime import datetime
+from typing import BinaryIO, Generator, Optional
 from dataclasses import dataclass
 
+from pydantic import ValidationError
 from dissect.sql.sqlite3 import SQLite3
 from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
-from forensic_artifact import Source, ForensicArtifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Tables
 
 logger = logging.getLogger(__name__)
+
+
+class FileHistoryRecord(ArtifactRecord):
+    """File history record."""
+
+    ts: datetime
+    file_name: str
+    file_ext: str
+    path: str
+    entry_id: int
+    visit_count: int
+    browser: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.WIN_FILE_HISTORY.value
 
 
 @dataclass(kw_only=True)
@@ -47,22 +67,42 @@ class WebCache:
 
 
 class FileHistory(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        file_history = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.file_history())
-            ],
-            key=lambda record: record["ts"],  # Sorting based on the 'ts' field
-            reverse=descending,
-        )
+        try:
+            file_history = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.file_history())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            file_history = []
+        finally:
+            self.records.append(file_history)
 
     def file_history(self) -> Generator[dict, None, None]:
-        # Edge History
-        for db_file in self.check_empty_entry(self.iter_entry(name="History")):
+        for data in self._combined_file_history():
+            try:
+                yield FileHistoryRecord(**data)
+            except ValidationError as e:
+                self.log_error(e)
+                continue
+
+    def _combined_file_history(self) -> Generator[dict, None, None]:
+        """
+        Combine Edge and IE history.
+        """
+        yield from self._edge_history()
+        yield from self._ie_history()
+
+    def _edge_history(self) -> Generator[dict, None, None]:
+        for db_file in self.check_empty_entry(self.iter_entry(entry_name="Edge")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -96,8 +136,8 @@ class FileHistory(ForensicArtifact):
                     f"Error opening Edge history file: {db_file} / exc_info={e}"
                 )
 
-        # IE History
-        for db_file in self.check_empty_entry(self.iter_entry(name="WebCacheV01.dat")):
+    def _ie_history(self) -> Generator[dict, None, None]:
+        for db_file in self.check_empty_entry(self.iter_entry(entry_name="iExplorer")):
             try:
                 db = WebCache(fh=db_file.open("rb"))
                 try:

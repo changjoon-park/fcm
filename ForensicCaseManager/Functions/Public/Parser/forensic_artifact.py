@@ -71,18 +71,6 @@ class ForensicArtifact:
     def fe(self) -> FileExtractor:
         return FileExtractor()
 
-    def get_record_name(self, entry_name: str = "") -> str:
-        entry_name = entry_name or self.__class__.__name__
-        # Create a case-insensitive mapping of the entries
-        case_insensitive_entries = {k.lower(): v for k, v in self.entries.items()}
-
-        # Use the lowercase version of entry_name to get the record
-        record = case_insensitive_entries.get(entry_name.lower(), {}).get("record_name")
-        if not record:
-            logger.error(f"Unable to find {entry_name} in {self.evidence_id}")
-            return ""
-        return record
-
     def iter_filesystem(self, type: str = "ntfs") -> Generator[Filesystem, None, None]:
         yield from (fs for fs in self.src.source.filesystems if fs.__fstype__ == type)
 

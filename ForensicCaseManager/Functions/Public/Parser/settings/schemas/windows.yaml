@@ -74,21 +74,21 @@ Artifacts:
           - AppData/Local/Microsoft/Windows/Explorer
         nodes:
           - thumbcache_*.db
-  win_filehistory:
+  win_file_history:
     root: users
     owner: windows
     entries:
-      FileHistory:
+      iExplorer:
+        directories:
+          - AppData/Local/Microsoft/Windows/FileHistory
+        nodes:
+          - WebCacheV01.dat
+      Edge:
         directories:
           - AppData/Local/Microsoft/Edge/User Data/Default
           - Library/Application Support/Microsoft Edge/Default
-          - AppData/Local/Microsoft/Windows/WebCache
         nodes:
-          - Configuration/Config1.xml
-          - Configuration/Config2.xml
-          - Data/BackupSet*.dat
-          - Data/GlobalCatalog.wbcat
-          - Data/Restore/Backup*.zip
+          - History
   win_eventlogs:
     root: system
     owner: windows

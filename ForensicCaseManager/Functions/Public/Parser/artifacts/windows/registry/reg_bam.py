@@ -1,6 +1,6 @@
 from datetime import datetime
-from pydantic import ValidationError
 
+from pydantic import ValidationError
 from flow.record.fieldtypes import uri
 from dissect.cstruct import cstruct
 
