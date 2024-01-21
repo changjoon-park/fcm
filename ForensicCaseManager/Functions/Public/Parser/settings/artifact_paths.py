@@ -6,7 +6,6 @@ from collections import namedtuple
 
 from icecream import ic
 from settings.config import *
-from settings.artifacts import Artifact
 
 ArtifactPath = namedtuple("ArtifactPath", ["directory", "entry"])
 

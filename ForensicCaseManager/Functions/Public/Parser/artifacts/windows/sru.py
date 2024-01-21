@@ -9,7 +9,7 @@ from dissect.target.plugins.os.windows.sru import FIELD_MAPPINGS, TRANSFORMS
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Artifact, Tables
+from settings.artifacts import Artifacts, Tables
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class SRU(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == Artifact.WIN_SRU_NETWORK.value:
+        if self.name == Artifacts.WIN_SRU_NETWORK.value:
             try:
                 # network_data = sorted(
                 #     (
@@ -101,7 +101,7 @@ class SRU(ForensicArtifact):
                 # self.records.append(network_connectivity)
                 self.records.append(network)
 
-        elif self.name == Artifact.WIN_SRU_APPLICATION.value:
+        elif self.name == Artifacts.WIN_SRU_APPLICATION.value:
             try:
                 application = sorted(
                     (

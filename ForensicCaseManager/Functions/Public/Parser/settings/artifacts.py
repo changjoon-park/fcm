@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Artifact(Enum):
+class Artifacts(Enum):
     APP_CHROME = "app_chrome"
     APP_EDGE = "app_edge"
     APP_IEXPLORER = "app_iexplorer"

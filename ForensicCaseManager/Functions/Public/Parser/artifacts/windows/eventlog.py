@@ -5,7 +5,7 @@ from datetime import datetime
 from dissect.eventlog.evtx import Evtx
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Artifact
+from settings.artifacts import Artifacts
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class ForensicEvent(ForensicArtifact):
         super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self, descending: bool = False):
-        if self.artifact == Artifact.EVT_LOGON.value:
+        if self.artifact == Artifacts.EVT_LOGON.value:
             event_logon = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -101,7 +101,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_logon)
-        elif self.artifact == Artifact.EVT_USB.value:
+        elif self.artifact == Artifacts.EVT_USB.value:
             event_usb = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -111,7 +111,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_usb)
-        elif self.artifact == Artifact.EVT_WLAN.value:
+        elif self.artifact == Artifacts.EVT_WLAN.value:
             event_wlan = sorted(
                 (
                     self.validate_record(index=index, record=record)
