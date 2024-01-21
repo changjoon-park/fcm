@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import ValidationError
 from dissect.eventlog.evtx import Evtx
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Artifacts, Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)

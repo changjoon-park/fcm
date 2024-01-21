@@ -31,7 +31,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
     EXTENSION_BLOCK_BEEF0005,
 )
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
 

@@ -1,10 +1,11 @@
-import uuid
+import logging
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
 
-from database_manager import DatabaseManager
+from core.database_manager import DatabaseManager
 from settings.config import DATABASE_NAME
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)

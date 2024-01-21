@@ -7,7 +7,7 @@ from dissect.ntfs.c_ntfs import segment_reference
 from flow.record.fieldtypes import uri
 from dissect.target.plugins.filesystem.ntfs.utils import get_drive_letter
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
 
 logger = logging.getLogger(__name__)
 

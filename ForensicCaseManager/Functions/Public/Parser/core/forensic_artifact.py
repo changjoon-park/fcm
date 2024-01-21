@@ -4,7 +4,6 @@ from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
-from icecream import ic
 
 from dissect.target import Target
 from dissect.target.filesystem import Filesystem

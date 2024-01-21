@@ -9,7 +9,7 @@ from dissect import cstruct
 from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.helpers.shell_folder_ids import DESCRIPTIONS
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)

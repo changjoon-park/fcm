@@ -7,7 +7,7 @@ from typing import Generator
 from dissect.sql.sqlite3 import SQLite3
 from dissect.sql.exceptions import Error as SQLError
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
 
 logger = logging.getLogger(__name__)
 

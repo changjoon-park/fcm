@@ -3,9 +3,8 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from settings.plugins import ARTIFACT_CATEGORIES
-
-from case_config import CaseConfig
-from forensic_evidence import ForensicEvidence
+from core.forensic_evidence import ForensicEvidence
+from core.case_config import CaseConfig
 
 logger = logging.getLogger(__name__)
 

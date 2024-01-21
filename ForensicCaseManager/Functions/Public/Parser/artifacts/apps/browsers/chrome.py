@@ -1,4 +1,4 @@
-from forensic_artifact import Source
+from core.forensic_artifact import Source
 from artifacts.apps.browsers.browser import ChromiumBrowser
 
 

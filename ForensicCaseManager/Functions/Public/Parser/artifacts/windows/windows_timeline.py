@@ -5,7 +5,7 @@ from typing import Generator
 from dissect.sql import sqlite3
 from dissect.util.ts import from_unix
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
 
 logger = logging.getLogger(__name__)
 

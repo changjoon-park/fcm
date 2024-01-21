@@ -20,7 +20,8 @@ from dissect.target.plugins.os.windows.regf.mru import (
     MSOfficeMRURecord,
 )
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
+
 
 class MRU(ForensicArtifact):
     """Return MRU data stored at various registry keys.
@@ -32,11 +33,7 @@ class MRU(ForensicArtifact):
     """
 
     def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(
-            src=src,
-            artifact=artifact,
-            category=category
-        )
+        super().__init__(src=src, artifact=artifact, category=category)
 
     def parse(self):
         run = [
@@ -47,12 +44,12 @@ class MRU(ForensicArtifact):
             json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
             for record in self.recentdocs()
         ]
-                    
+
         self.result = {
             "run": run,
             "recentdocs": recentdocs,
         }
-        
+
     def run(self):
         """Return the RunMRU data.
 
@@ -240,7 +237,9 @@ class MRU(ForensicArtifact):
                         continue
 
                     try:
-                        yield from parse_office_mru(self.src.source, subkey, MSOfficeMRURecord)
+                        yield from parse_office_mru(
+                            self.src.source, subkey, MSOfficeMRURecord
+                        )
                     except RegistryError:
                         pass
 
@@ -286,7 +285,9 @@ def parse_mru_ex_key(target, key, record):
         path, bag = value.value[: split_idx + 1], value.value[split_idx + 3 :]
         parsed_bag = list(parse_shell_item_list(bag))
         if len(parsed_bag) != 1 or not isinstance(parsed_bag, FILE_ENTRY):
-            target.log.debug("Unexpected shell bag entry in MRUListEx entry: %s:%s", key, value)
+            target.log.debug(
+                "Unexpected shell bag entry in MRUListEx entry: %s:%s", key, value
+            )
 
         yield record(
             regf_mtime=key.ts,

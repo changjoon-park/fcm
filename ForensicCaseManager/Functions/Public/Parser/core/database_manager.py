@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 
-from forensic_artifact import ArtifactRecord, ArtifactRecord
+from core.forensic_artifact import ArtifactRecord, ArtifactRecord
 from settings.plugins import ARTIFACT_CATEGORIES
 from settings.config import (
     TABLE_NAME_FORENSIC_CASE,

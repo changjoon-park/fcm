@@ -2,12 +2,11 @@ import logging
 from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field
-from icecream import ic
 
 from util.converter import convertfrom_extended_ascii
 from pathlib import Path
-from forensic_artifact import Source, ForensicArtifact
-from case_config import CaseConfig
+from core.forensic_artifact import Source, ForensicArtifact
+from core.case_config import CaseConfig
 from settings.plugins import WINDOWS_PLUGINS
 from settings.artifacts import ArtifactSchema
 

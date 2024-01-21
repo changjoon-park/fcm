@@ -7,7 +7,7 @@ from lib.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
 from lib.thumbcache.exceptions import Error
 from lib.thumbcache.tools.extract_with_index import dump_entry_data_through_index
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
 
 logger = logging.getLogger(__name__)
 

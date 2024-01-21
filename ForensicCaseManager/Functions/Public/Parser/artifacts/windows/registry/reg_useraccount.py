@@ -7,7 +7,7 @@ from Crypto.Cipher import AES, ARC4, DES
 from dissect import cstruct
 from pydantic import ValidationError
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)

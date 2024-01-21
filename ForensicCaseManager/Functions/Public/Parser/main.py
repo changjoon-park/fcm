@@ -4,8 +4,8 @@ import logging
 import uuid
 from pathlib import Path
 
-from forensic_case import ForensicCase
-from forensic_evidence import ForensicEvidence
+from core.forensic_case import ForensicCase
+from core.forensic_evidence import ForensicEvidence
 from settings.config import LOGFILE_NAME
 
 

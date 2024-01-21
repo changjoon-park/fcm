@@ -9,7 +9,7 @@ from dissect.sql.sqlite3 import SQLite3
 from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
-from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)

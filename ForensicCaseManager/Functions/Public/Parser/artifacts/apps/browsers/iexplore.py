@@ -5,7 +5,7 @@ from typing import BinaryIO, Generator
 
 from dissect.esedb import esedb, record, table
 
-from forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ForensicArtifact
 
 logger = logging.getLogger(__name__)
 
