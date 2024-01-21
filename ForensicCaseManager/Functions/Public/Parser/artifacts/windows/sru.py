@@ -1,6 +1,7 @@
 import logging
 from typing import Generator, Optional
 from datetime import datetime
+from icecream import ic
 
 from pydantic import ValidationError
 from dissect.esedb.tools.sru import SRU as SRUParser
@@ -17,15 +18,15 @@ class SruNetworkRecord(ArtifactRecord):
     """SRU Network record."""
 
     ts: datetime
-    app: str
-    user: str
+    app: Optional[str]
+    user: Optional[str]
     interface_luid: int
     l2_profile_id: int
     l2_profile_flags: int
-    bytes_sent: int
-    bytes_recvd: int
-    connected_time: int
-    connect_start_time: datetime
+    bytes_sent: Optional[int]
+    bytes_recvd: Optional[int]
+    connected_time: Optional[int]
+    connect_start_time: Optional[datetime]
     sru_table: str
 
     class Config:
@@ -64,33 +65,43 @@ class SRU(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.artifact == Artifact.WIN_SRU_NETWORK.value:
+        if self.name == Artifact.WIN_SRU_NETWORK.value:
             try:
-                network_data = sorted(
+                # network_data = sorted(
+                #     (
+                #         self.validate_record(index=index, record=record)
+                #         for index, record in enumerate(self.network_data())
+                #     ),
+                #     key=lambda record: record.ts,
+                #     reverse=descending,
+                # )
+                # network_connectivity = sorted(
+                #     (
+                #         self.validate_record(index=index, record=record)
+                #         for index, record in enumerate(self.network_connectivity())
+                #     ),
+                #     key=lambda record: record.ts,
+                #     reverse=descending,
+                # )
+                network = sorted(
                     (
                         self.validate_record(index=index, record=record)
-                        for index, record in enumerate(self.network_data())
-                    ),
-                    key=lambda record: record.ts,
-                    reverse=descending,
-                )
-                network_connectivity = sorted(
-                    (
-                        self.validate_record(index=index, record=record)
-                        for index, record in enumerate(self.network_connectivity())
+                        for index, record in enumerate(self.network())
                     ),
                     key=lambda record: record.ts,
                     reverse=descending,
                 )
             except Exception as e:
                 self.log_error(e)
-                network_data = []
-                network_connectivity = []
+                # network_data = []
+                # network_connectivity = []
+                network = []
             finally:
-                self.records.append(network_data)
-                self.records.append(network_connectivity)
+                # self.records.append(network_data)
+                # self.records.append(network_connectivity)
+                self.records.append(network)
 
-        elif self.artifact == Artifact.WIN_SRU_APPLICATION.value:
+        elif self.name == Artifact.WIN_SRU_APPLICATION.value:
             try:
                 application = sorted(
                     (
@@ -162,97 +173,110 @@ class SRU(ForensicArtifact):
         # }
 
     def _process_records(
-        self, record_type: str, record_class: ArtifactRecord
+        self, record_generator: Generator, record_class: ArtifactRecord
     ) -> Generator:
         """
         Process records based on the specified type and record class.
 
         Args:
-        record_type (str): The type of the record.
+        record_generator (Generator): The generator of the record.
         record_class (ArtifactRecord): The class of the record.
 
         Yields:
         Generator: Yields instances of the specified record class.
         """
-        for record in self.read_records(record_type):
+        for record in record_generator:
             processed_record = {
                 key: record.get(key) for key in record_class.__annotations__.keys()
             }
+            processed_record[
+                "evidence_id"
+            ] = self.evidence_id  # Set evidence_id for each record
+
             try:
                 yield record_class(**processed_record)
             except ValidationError as e:
                 self.log_error(e)
                 continue
 
-    def network_data(self):
+    def _combined_network(self):
         """
-        Return the contents of Windows Network Data Usage Monitor table from the SRUDB.dat file.
-        """
-        return self._process_records("network_data", SruNetworkRecord)
+        Combined generator for raw network data and network connectivity.
 
-    def network_connectivity(self):
+        network data: the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
+        network connectivity: the contents of Windows Network Connectivity Usage Monitor table from the SRUDB.dat file.
+
+        Yields:
+        Generator: Yields raw network data and network connectivity records.
         """
-        Return the contents of Windows Network Connectivity Usage Monitor table from the SRUDB.dat file.
+        yield from self.read_records("network_data")
+        yield from self.read_records("network_connectivity")
+
+    def network(self):
         """
-        return self._process_records("network_connectivity", SruNetworkRecord)
+        Return the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
+        """
+        yield from self._process_records(self._combined_network(), SruNetworkRecord)
 
     def application(self):
         """
         Return the contents of Application Resource Usage table from the SRUDB.dat file.
         """
-        return self._process_records("application", SruApplicationRecord)
+        return self._process_records(
+            self.read_records("application"), SruApplicationRecord
+        )
 
-    def energy_estimator(self):
-        """Return the contents of Energy Estimator table from the SRUDB.dat file."""
-        yield from self.read_records("energy_estimator")
+    # def energy_estimator(self):
+    #     """Return the contents of Energy Estimator table from the SRUDB.dat file."""
+    #     yield from self.read_records("energy_estimator")
 
-    def energy_usage(self):
-        """
-        Return the contents of Energy Usage Provider table from the SRUDB.dat file.
+    # def energy_usage(self):
+    #     """
+    #     Return the contents of Energy Usage Provider table from the SRUDB.dat file.
 
-        Gives insight into the energy usage of the system.
-        """
-        yield from self.read_records("energy_usage")
+    #     Gives insight into the energy usage of the system.
+    #     """
+    #     yield from self.read_records("energy_usage")
 
-    def energy_usage_lt(self):
-        """
-        Return the contents of Energy Usage Provider Long Term table from the SRUDB.dat file.
+    # def energy_usage_lt(self):
+    #     """
+    #     Return the contents of Energy Usage Provider Long Term table from the SRUDB.dat file.
 
-        Gives insight into the energy usage of the system looking over the long term.
-        """
-        yield from self.read_records("energy_usage_lt")
+    #     Gives insight into the energy usage of the system looking over the long term.
+    #     """
+    #     yield from self.read_records("energy_usage_lt")
 
-    def push_notification(self):
-        """
-        Return the contents of Windows Push Notification Data table from the SRUDB.dat file.
+    # def push_notification(self):
+    #     """
+    #     Return the contents of Windows Push Notification Data table from the SRUDB.dat file.
 
-        Gives insight into the notification usage of the system.
-        """
-        yield from self.read_records("push_notifications")
+    #     Gives insight into the notification usage of the system.
+    #     """
+    #     yield from self.read_records("push_notifications")
 
-    def application_timeline(self):
-        """Return the contents of App Timeline Provider table from the SRUDB.dat file."""
-        yield from self.read_records("application_timeline")
+    # def application_timeline(self):
+    #     """Return the contents of App Timeline Provider table from the SRUDB.dat file."""
+    #     yield from self.read_records("application_timeline")
 
-    def vfu(self):
-        """Return the contents of vfuprov table from the SRUDB.dat file."""
-        yield from self.read_records("vfu")
+    # def vfu(self):
+    #     """Return the contents of vfuprov table from the SRUDB.dat file."""
+    #     yield from self.read_records("vfu")
 
-    def sdp_volume_provider(self):
-        """Return the contents of SDP Volume Provider table from the SRUDB.dat file."""
-        yield from self.read_records("sdp_volume_provider")
+    # def sdp_volume_provider(self):
+    #     """Return the contents of SDP Volume Provider table from the SRUDB.dat file."""
+    #     yield from self.read_records("sdp_volume_provider")
 
-    def sdp_physical_disk_provider(self):
-        """Return the contents of SDP Physical Disk Provider table from the SRUDB.dat file."""
-        yield from self.read_records("sdp_physical_disk_provider")
+    # def sdp_physical_disk_provider(self):
+    #     """Return the contents of SDP Physical Disk Provider table from the SRUDB.dat file."""
+    #     yield from self.read_records("sdp_physical_disk_provider")
 
-    def sdp_cpu_provider(self):
-        """Return the contents of SDP CPU Provider table from the SRUDB.dat file."""
-        yield from self.read_records("sdp_cpu_provider")
+    # def sdp_cpu_provider(self):
+    #     """Return the contents of SDP CPU Provider table from the SRUDB.dat file."""
+    #     yield from self.read_records("sdp_cpu_provider")
 
-    def sdp_network_provider(self):
-        """Return the contents of SDP Network Provider table from the SRUDB.dat file."""
-        yield from self.read_records("sdp_network_provider")
+    # def sdp_network_provider(self):
+    #     """Return the contents of SDP Network Provider table from the SRUDB.dat file."""
+    #     yield from self.read_records("sdp_network_provider")
 
     def read_records(self, table_name: str) -> Generator[dict, None, None]:
         for db_file in self.check_empty_entry(self.iter_entry()):
@@ -281,7 +305,6 @@ class SRU(ForensicArtifact):
                         )
                         new_column = FIELD_MAPPINGS.get(column, column)
                         record_values[new_column] = new_value
-                        record_values["evidence_id"] = self.evidence_id
                         record_values["sru_table"] = table_name
 
                     yield record_values

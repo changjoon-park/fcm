@@ -47,7 +47,7 @@ Artifacts:
         nodes:
           - "*.automaticDestinations-ms"
           - "*.customDestinations-ms"
-  win_sru:
+  win_sru_network:
     root: system
     owner: windows
     entries:
@@ -55,7 +55,16 @@ Artifacts:
         directories:
           - Windows/System32/sru
         nodes:
-          - edb* 
+          - SRUDB.dat
+  win_sru_application:
+    root: system
+    owner: windows
+    entries:
+      SRU:
+        directories:
+          - Windows/System32/sru
+        nodes:
+          - SRUDB.dat
   win_thumbcache:
     root: users
     owner: windows
