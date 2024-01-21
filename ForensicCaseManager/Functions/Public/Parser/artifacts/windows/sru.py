@@ -1,50 +1,115 @@
 import logging
-from typing import Generator
+from typing import Generator, Optional
+from datetime import datetime
 
+from pydantic import ValidationError
 from dissect.esedb.tools.sru import SRU as SRUParser
 from dissect.target.plugins.os.windows.sru import FIELD_MAPPINGS, TRANSFORMS
 
-from forensic_artifact import Source, ForensicArtifact
-from settings.artifacts import Artifact
+from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Artifact, Tables
 
 logger = logging.getLogger(__name__)
 
 
+class SruNetworkRecord(ArtifactRecord):
+    """SRU Network record."""
+
+    ts: datetime
+    app: str
+    user: str
+    interface_luid: int
+    l2_profile_id: int
+    l2_profile_flags: int
+    bytes_sent: int
+    bytes_recvd: int
+    connected_time: int
+    connect_start_time: datetime
+    sru_table: str
+
+    class Config:
+        table_name: str = Tables.WIN_SRU_NETWORK.value
+
+
+class SruApplicationRecord(ArtifactRecord):
+    """SRU Application record."""
+
+    ts: datetime
+    app: str
+    user: str
+    foreground_cycle_time: int
+    background_cycle_time: int
+    face_time: int
+    foreground_context_switches: int
+    background_context_switches: int
+    foreground_bytes_read: int
+    foreground_bytes_written: int
+    foreground_num_read_operations: int
+    foreground_num_write_operations: int
+    foreground_number_of_flushes: int
+    background_bytes_read: int
+    background_bytes_written: int
+    background_num_read_operations: int
+    background_num_write_operations: int
+    background_number_of_flushes: int
+    sru_table: str
+
+    class Config:
+        table_name: str = Tables.WIN_SRU_APPLICATION.value
+
+
 class SRU(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.artifact == Artifact.WIN_SRU_NETWORK:
-            network_data = sorted(
-                [
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.network_data())
-                ],
-                key=lambda record: record["ts"],  # Sorting based on the 'ts' field
-                reverse=descending,
-            )
-            network_connectivity = sorted(
-                [
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.network_connectivity())
-                ],
-                key=lambda record: record["ts"],  # Sorting based on the 'ts' field
-                reverse=descending,
-            )
-        elif self.artifact == Artifact.WIN_SRU_APPLICATION:
-            application = sorted(
-                [
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.application())
-                ],
-                key=lambda record: record["ts"],  # Sorting based on the 'ts' field
-                reverse=descending,
-            )
-            # application_timeline = [
-            #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-            #     for record in self.application_timeline()
-            # ]
+        if self.artifact == Artifact.WIN_SRU_NETWORK.value:
+            try:
+                network_data = sorted(
+                    (
+                        self.validate_record(index=index, record=record)
+                        for index, record in enumerate(self.network_data())
+                    ),
+                    key=lambda record: record.ts,
+                    reverse=descending,
+                )
+                network_connectivity = sorted(
+                    (
+                        self.validate_record(index=index, record=record)
+                        for index, record in enumerate(self.network_connectivity())
+                    ),
+                    key=lambda record: record.ts,
+                    reverse=descending,
+                )
+            except Exception as e:
+                self.log_error(e)
+                network_data = []
+                network_connectivity = []
+            finally:
+                self.records.append(network_data)
+                self.records.append(network_connectivity)
+
+        elif self.artifact == Artifact.WIN_SRU_APPLICATION.value:
+            try:
+                application = sorted(
+                    (
+                        self.validate_record(index=index, record=record)
+                        for index, record in enumerate(self.application())
+                    ),
+                    key=lambda record: record.ts,  # Sorting based on the 'ts' field
+                    reverse=descending,
+                )
+            except Exception as e:
+                self.log_error(e)
+                application = []
+            finally:
+                self.records.append(application)
+
+        # application_timeline = [
+        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
+        #     for record in self.application_timeline()
+        # ]
 
         # energy_estimator = [
         #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
@@ -96,42 +161,46 @@ class SRU(ForensicArtifact):
         #     "sdp_network_provider": sdp_network_provider,
         # }
 
+    def _process_records(
+        self, record_type: str, record_class: ArtifactRecord
+    ) -> Generator:
+        """
+        Process records based on the specified type and record class.
+
+        Args:
+        record_type (str): The type of the record.
+        record_class (ArtifactRecord): The class of the record.
+
+        Yields:
+        Generator: Yields instances of the specified record class.
+        """
+        for record in self.read_records(record_type):
+            processed_record = {
+                key: record.get(key) for key in record_class.__annotations__.keys()
+            }
+            try:
+                yield record_class(**processed_record)
+            except ValidationError as e:
+                self.log_error(e)
+                continue
+
     def network_data(self):
         """
         Return the contents of Windows Network Data Usage Monitor table from the SRUDB.dat file.
-
-        Gives insight into the network usage of the system.
-
-        output data type mapping:
-        ("datetime", "ts"),
-        ("path", "app"),
-        ("string", "user"),
-        ("varint", "interface_luid"),
-        ("varint", "l2_profile_id"),
-        ("varint", "l2_profile_flags"),
-        ("varint", "bytes_sent"),
-        ("varint", "bytes_recvd"),
-
         """
-        yield from self.read_records("network_data")
+        return self._process_records("network_data", SruNetworkRecord)
 
     def network_connectivity(self):
         """
         Return the contents of Windows Network Connectivity Usage Monitor table from the SRUDB.dat file.
-
-        Gives insight into the network connectivity usage of the system.
-
-        output data type mapping:
-        ("datetime", "ts"),
-        ("path", "app"),
-        ("string", "user"),
-        ("varint", "interface_luid"),
-        ("varint", "l2_profile_id"),
-        ("varint", "connected_time"),
-        ("datetime", "connect_start_time"),
-        ("varint", "l2_profile_flags"),
         """
-        yield from self.read_records("network_connectivity")
+        return self._process_records("network_connectivity", SruNetworkRecord)
+
+    def application(self):
+        """
+        Return the contents of Application Resource Usage table from the SRUDB.dat file.
+        """
+        return self._process_records("application", SruApplicationRecord)
 
     def energy_estimator(self):
         """Return the contents of Energy Estimator table from the SRUDB.dat file."""
@@ -152,34 +221,6 @@ class SRU(ForensicArtifact):
         Gives insight into the energy usage of the system looking over the long term.
         """
         yield from self.read_records("energy_usage_lt")
-
-    def application(self):
-        """
-        Return the contents of Application Resource Usage table from the SRUDB.dat file.
-
-        Gives insights into the resource usage of applications on the system.
-
-        output data type mapping:
-        ("datetime", "ts"),
-        ("path", "app"),
-        ("string", "user"),
-        ("varint", "foreground_cycle_time"),
-        ("varint", "background_cycle_time"),
-        ("varint", "face_time"),
-        ("varint", "foreground_context_switches"),
-        ("varint", "background_context_switches"),
-        ("varint", "foreground_bytes_read"),
-        ("varint", "foreground_bytes_written"),
-        ("varint", "foreground_num_read_operations"),
-        ("varint", "foreground_num_write_operations"),
-        ("varint", "foreground_number_of_flushes"),
-        ("varint", "background_bytes_read"),
-        ("varint", "background_bytes_written"),
-        ("varint", "background_num_read_operations"),
-        ("varint", "background_num_write_operations"),
-        ("varint", "background_number_of_flushes"),
-        """
-        yield from self.read_records("application")
 
     def push_notification(self):
         """
@@ -241,7 +282,9 @@ class SRU(ForensicArtifact):
                         new_column = FIELD_MAPPINGS.get(column, column)
                         record_values[new_column] = new_value
                         record_values["evidence_id"] = self.evidence_id
+                        record_values["sru_table"] = table_name
 
                     yield record_values
-            except:
-                logger.exception(f"Error: Unable to parse {table_name} from {db_file}")
+            except Exception as e:
+                self.log_error(e)
+                continue
