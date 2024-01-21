@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Generator, Optional
 from dataclasses import dataclass, field
 
 from util.converter import convertfrom_extended_ascii
@@ -108,11 +108,22 @@ class ForensicEvidence(CaseConfig):
 
     def export_evidence(self) -> None:
         for forensic_artifact in self.forensic_artifacts:
-            for record in forensic_artifact.records:
-                # create artifact table
-                self.db_manager.create_artifact_table(record)
+            self._export_artifact(forensic_artifact)
 
-                # insert artifact data
-                self.db_manager.insert_artifact_data(
-                    record=record
-                )  # ! record is a generator[Pydantic Model]
+    def _export_artifact(self, artifact: ForensicArtifact) -> None:
+        """Export a single forensic artifact."""
+        for record in artifact.records:
+            if record:
+                self._create_and_insert_table(record)
+
+    def _create_and_insert_table(self, record: Generator) -> None:
+        """Create a table for the artifact and insert data."""
+        # Create artifact table
+        self.db_manager.create_artifact_table(
+            record=record, evidence_id=self.evidence_id
+        )
+
+        # Insert artifact data
+        self.db_manager.insert_artifact_data(
+            record=record, evidence_id=self.evidence_id
+        )

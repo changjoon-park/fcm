@@ -159,7 +159,7 @@ class DatabaseManager:
                     ),
                 )
 
-    def create_artifact_table(self, record: list[ArtifactRecord]):
+    def create_artifact_table(self, record: list[ArtifactRecord], evidence_id: str):
         if not isinstance(record, list):
             logger.error(f"Error: record must be a list, not {type(record)}")
             return
@@ -196,7 +196,7 @@ class DatabaseManager:
 
         except Exception as e:
             logger.exception(
-                f"Failed to create table {table_name} from Pydantic model: {e}"
+                f"Failed to create table {table_name} to {evidence_id}: {e}"
             )
 
     def _get_full_annotations(self, model):
@@ -207,7 +207,9 @@ class DatabaseManager:
             annotations.update(get_type_hints(cls))
         return annotations
 
-    def insert_artifact_data(self, record: Generator[ArtifactRecord, None, None]):
+    def insert_artifact_data(
+        self, record: Generator[ArtifactRecord, None, None], evidence_id: str
+    ):
         try:
             all_records = []
             table_name = None
@@ -224,7 +226,7 @@ class DatabaseManager:
                 with open_db(self.database) as cursor:
                     cursor.executemany(statement, all_records)
                     logger.info(
-                        f"Inserted {len(all_records)} entries into {table_name} table"
+                        f"Inserted {len(all_records)} entries into {table_name} table in {evidence_id}"
                     )
 
         except Exception as e:
