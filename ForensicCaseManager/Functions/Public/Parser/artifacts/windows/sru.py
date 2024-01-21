@@ -8,8 +8,7 @@ from dissect.esedb.tools.sru import SRU as SRUParser
 from dissect.target.plugins.os.windows.sru import FIELD_MAPPINGS, TRANSFORMS
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Artifacts, Tables
+from settings.artifacts import Artifacts, Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

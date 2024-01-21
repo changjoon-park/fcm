@@ -9,7 +9,7 @@ from pathlib import Path
 from forensic_artifact import Source, ForensicArtifact
 from case_config import CaseConfig
 from settings.plugins import WINDOWS_PLUGINS
-from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

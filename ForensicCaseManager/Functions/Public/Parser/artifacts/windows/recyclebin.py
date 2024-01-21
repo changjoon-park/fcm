@@ -11,8 +11,7 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers.fsutil import TargetPath
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Tables
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,12 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import ValidationError, Field
+from pydantic import ValidationError
 
 from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Tables
+from settings.artifacts import Tables, ArtifactSchema
 
 
 class ApplicationAppcompatRecord(ArtifactRecord):

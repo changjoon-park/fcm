@@ -4,7 +4,6 @@ from datetime import timedelta, timezone
 from typing import Generator
 from dataclasses import dataclass, field
 from pydantic import BaseModel
-from collections import namedtuple
 from icecream import ic
 
 from dissect.target import Target
@@ -12,7 +11,7 @@ from dissect.target.filesystem import Filesystem
 
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
-from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

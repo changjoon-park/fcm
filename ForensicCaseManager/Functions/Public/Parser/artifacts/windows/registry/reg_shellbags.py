@@ -32,8 +32,7 @@ from dissect.target.plugins.os.windows.regf.shellbags import (
 )
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Tables
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

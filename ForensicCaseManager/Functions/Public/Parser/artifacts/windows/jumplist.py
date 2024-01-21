@@ -15,8 +15,7 @@ from lib.lnk.lnk import TLNKFileParser
 from util.delphi import ExtractFileName, ExtractFilePath, ExtractFileExt, StrToIntDef
 from lib.jumplist.app_id_list import app_id_list
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifact_paths import ArtifactSchema
-from settings.artifacts import Tables
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
