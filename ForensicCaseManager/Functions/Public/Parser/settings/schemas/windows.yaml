@@ -89,7 +89,7 @@ Artifacts:
           - Library/Application Support/Microsoft Edge/Default
         nodes:
           - History
-  win_eventlogs:
+  win_event_logon:
     root: system
     owner: windows
     entries:
@@ -97,4 +97,22 @@ Artifacts:
         directories:
           - Windows/System32/winevt/Logs
         nodes:
-          - "*.evtx"
+          - "Security.evtx"
+  win_event_usb:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "Microsoft-Windows-Partition%4Diagnostic.evtx"
+  win_event_wlan:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"

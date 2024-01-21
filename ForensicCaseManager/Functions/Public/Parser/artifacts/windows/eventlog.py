@@ -1,11 +1,13 @@
 import logging
-from typing import Generator
+from typing import Generator, Optional
 from datetime import datetime
 
+from pydantic import ValidationError
 from dissect.eventlog.evtx import Evtx
 
 from forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Artifacts
+from settings.artifact_paths import ArtifactSchema
+from settings.artifacts import Artifacts, Tables
 
 logger = logging.getLogger(__name__)
 
@@ -17,26 +19,26 @@ class EventLogonRecord(ArtifactRecord):
     task: str
     event_id: int
     event_record_id: int
-    subject_user_sid: str
-    subject_user_name: str
-    subject_domain_name: str
-    subject_logon_id: str
-    target_user_sid: str
-    target_user_name: str
-    target_domain_name: str
-    target_server_name: str
-    target_info: str
-    target_logon_id: str
-    logon_type: str
-    workstation_name: str
-    ip_address: str
-    ip_port: str
+    subject_user_sid: Optional[str]
+    subject_user_name: Optional[str]
+    subject_domain_name: Optional[str]
+    subject_logon_id: Optional[str]
+    target_user_sid: Optional[str]
+    target_user_name: Optional[str]
+    target_domain_name: Optional[str]
+    target_server_name: Optional[str]
+    target_info: Optional[str]
+    target_logon_id: Optional[str]
+    logon_type: Optional[str]
+    workstation_name: Optional[str]
+    ip_address: Optional[str]
+    ip_port: Optional[str]
     channel: str
     provider: str
     evidence_id: str
 
     class Config:
-        record_name: str = "evt_logon"
+        table_name: str = Tables.WIN_EVENT_LOGON.value
 
 
 class EventUSBRecord(ArtifactRecord):
@@ -47,17 +49,17 @@ class EventUSBRecord(ArtifactRecord):
     event_id: int
     event_record_id: int
     capacity_gb: float
-    manufacturer: str
-    model: str
-    revision: str
-    serialnumber: str
-    mbr: str
-    parent_id: str
+    manufacturer: Optional[str]
+    model: Optional[str]
+    revision: Optional[str]
+    serialnumber: Optional[str]
+    mbr: Optional[str]
+    parent_id: Optional[str]
     channel: str
     provider: str
 
     class Config:
-        record_name: str = "evt_usb"
+        table_name: str = Tables.WIN_EVENT_USB.value
 
 
 class EventWLANRecord(ArtifactRecord):
@@ -71,8 +73,8 @@ class EventWLANRecord(ArtifactRecord):
     interface_description: str
     connection_mode: str
     profile_name: str
-    failure_reason: str
-    reason_code: str
+    failure_reason: Optional[str]
+    reason_code: Optional[str]
     ssid: str
     bsstype: str
     phytype: str
@@ -83,15 +85,15 @@ class EventWLANRecord(ArtifactRecord):
     provider: str
 
     class Config:
-        record_name: str = "evt_wlan"
+        table_name: str = Tables.WIN_EVENT_WLAN.value
 
 
 class ForensicEvent(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.artifact == Artifacts.EVT_LOGON.value:
+        if self.name == Artifacts.WIN_EVENT_LOGON.value:
             event_logon = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -101,7 +103,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_logon)
-        elif self.artifact == Artifacts.EVT_USB.value:
+        elif self.name == Artifacts.WIN_EVENT_USB.value:
             event_usb = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -111,7 +113,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_usb)
-        elif self.artifact == Artifacts.EVT_WLAN.value:
+        elif self.name == Artifacts.WIN_EVENT_WLAN.value:
             event_wlan = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -151,7 +153,7 @@ class ForensicEvent(ForensicArtifact):
             "NT Service",
         ]
 
-        for entry in self.check_empty_entry(self.iter_entry(name="Security.evtx")):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
@@ -169,40 +171,44 @@ class ForensicEvent(ForensicArtifact):
                     logon_type = event.get("LogonType")
                     logon_type = logon_type_dsecription.get(logon_type)
 
-                    yield EventLogonRecord(
-                        ts=self.ts.to_localtime(
+                    processed_data = {
+                        "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
-                        task=task,
-                        event_id=event_id,
-                        event_record_id=event.get("EventRecordID"),
-                        subject_user_sid=event.get("SubjectUserSid"),
-                        subject_user_name=event.get("SubjectUserName"),
-                        subject_domain_name=event.get("SubjectDomainName"),
-                        subject_logon_id=event.get("SubjectLogonId"),
-                        target_user_sid=event.get("TargetUserSid"),
-                        target_user_name=event.get("TargetUserName"),
-                        target_domain_name=target_domain_name,
-                        target_server_name=event.get("TargetServerName"),
-                        target_info=event.get("TargetInfo"),
-                        target_logon_id=event.get("TargetLogonId"),
-                        logon_type=logon_type,
-                        workstation_name=event.get("WorkstationName"),
-                        ip_address=event.get("IpAddress"),
-                        ip_port=event.get("IpPort"),
-                        channel=event.get("Channel"),
-                        provider=str(event.get("Provider_Name")),
-                        evidence_id=self.evidence_id,
-                    )
+                        "task": task,
+                        "event_id": event_id,
+                        "event_record_id": event.get("EventRecordID"),
+                        "subject_user_sid": event.get("SubjectUserSid"),
+                        "subject_user_name": event.get("SubjectUserName"),
+                        "subject_domain_name": event.get("SubjectDomainName"),
+                        "subject_logon_id": event.get("SubjectLogonId"),
+                        "target_user_sid": event.get("TargetUserSid"),
+                        "target_user_name": event.get("TargetUserName"),
+                        "target_domain_name": target_domain_name,
+                        "target_server_name": event.get("TargetServerName"),
+                        "target_info": event.get("TargetInfo"),
+                        "target_logon_id": event.get("TargetLogonId"),
+                        "logon_type": logon_type,
+                        "workstation_name": event.get("WorkstationName"),
+                        "ip_address": event.get("IpAddress"),
+                        "ip_port": event.get("IpPort"),
+                        "channel": event.get("Channel"),
+                        "provider": str(event.get("Provider_Name")),
+                        "evidence_id": self.evidence_id,
+                    }
+
+                    try:
+                        yield EventLogonRecord(**processed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
     def event_usb(self) -> Generator[dict, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
 
-        for entry in self.check_empty_entry(
-            self.iter_entry(name="Microsoft-Windows-Partition%4Diagnostic.evtx")
-        ):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
@@ -217,30 +223,35 @@ class ForensicEvent(ForensicArtifact):
                     else:
                         task = "USB Disconnected"
 
-                    yield EventUSBRecord(
-                        ts=self.ts.to_localtime(
+                    processed_data = {
+                        "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
-                        task=task,
-                        event_id=event_id,
-                        event_record_id=event.get("EventRecordID"),
-                        capacity_gb=capacity_gb,
-                        manufacturer=event.get("Manufacturer"),
-                        model=event.get("Model"),
-                        revision=event.get("Revision"),
-                        serialnumber=event.get("SerialNumber"),
-                        mbr=event.get("Mbr"),
-                        parent_id=event.get("ParentId"),
-                        channel=event.get("Channel"),
-                        provider=str(event.get("Provider_Name")),
-                    )
+                        "task": task,
+                        "event_id": event_id,
+                        "event_record_id": event.get("EventRecordID"),
+                        "capacity_gb": capacity_gb,
+                        "manufacturer": event.get("Manufacturer"),
+                        "model": event.get("Model"),
+                        "revision": event.get("Revision"),
+                        "serialnumber": event.get("SerialNumber"),
+                        "mbr": event.get("Mbr"),
+                        "parent_id": event.get("ParentId"),
+                        "channel": event.get("Channel"),
+                        "provider": str(event.get("Provider_Name")),
+                        "evidence_id": self.evidence_id,
+                    }
+
+                    try:
+                        yield EventUSBRecord(**processed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
     def event_wlan(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(
-            self.iter_entry(name="Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx")
-        ):
+        for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
             except:
@@ -257,23 +268,32 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     continue
 
-                yield EventWLANRecord(
-                    ts=self.ts.to_localtime(event.get("TimeCreated_SystemTime").value),
-                    task=task,
-                    event_id=event_id,
-                    event_record_id=event.get("EventRecordID"),
-                    interface_guid=event.get("InterfaceGuid"),
-                    interface_description=event.get("InterfaceDescription"),
-                    connection_mode=event.get("ConnectionMode"),
-                    profile_name=event.get("ProfileName"),
-                    failure_reason=event.get("FailureReason"),
-                    reason_code=event.get("ReasonCode"),
-                    ssid=event.get("SSID"),
-                    bsstype=event.get("BSSType"),
-                    phytype=event.get("PHYType"),
-                    authentication_algorithm=event.get("AuthenticationAlgorithm"),
-                    cipher_algorithm=event.get("CipherAlgorithm"),
-                    connection_id=event.get("ConnectionId"),
-                    channel=event.get("Channel"),
-                    provider=str(event.get("Provider_Name")),
-                )
+                processed_data = {
+                    "ts": self.ts.to_localtime(
+                        event.get("TimeCreated_SystemTime").value
+                    ),
+                    "task": task,
+                    "event_id": event_id,
+                    "event_record_id": event.get("EventRecordID"),
+                    "interface_guid": event.get("InterfaceGuid"),
+                    "interface_description": event.get("InterfaceDescription"),
+                    "connection_mode": event.get("ConnectionMode"),
+                    "profile_name": event.get("ProfileName"),
+                    "failure_reason": event.get("FailureReason"),
+                    "reason_code": event.get("ReasonCode"),
+                    "ssid": event.get("SSID"),
+                    "bsstype": event.get("BSSType"),
+                    "phytype": event.get("PHYType"),
+                    "authentication_algorithm": event.get("AuthenticationAlgorithm"),
+                    "cipher_algorithm": event.get("CipherAlgorithm"),
+                    "connection_id": event.get("ConnectionId"),
+                    "channel": event.get("Channel"),
+                    "provider": str(event.get("Provider_Name")),
+                    "evidence_id": self.evidence_id,
+                }
+
+                try:
+                    yield EventWLANRecord(**processed_data)
+                except ValidationError as e:
+                    self.log_error(e)
+                    continue
