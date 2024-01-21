@@ -68,18 +68,18 @@ class EventWLANRecord(ArtifactRecord):
     task: str
     event_id: int
     event_record_id: int
-    interface_guid: str
-    interface_description: str
-    connection_mode: str
-    profile_name: str
+    interface_guid: Optional[str]
+    interface_description: Optional[str]
+    connection_mode: Optional[str]
+    profile_name: Optional[str]
     failure_reason: Optional[str]
-    reason_code: Optional[str]
-    ssid: str
-    bsstype: str
-    phytype: str
-    authentication_algorithm: str
-    cipher_algorithm: str
-    connection_id: str
+    reason_code: Optional[int]
+    ssid: Optional[str]
+    bsstype: Optional[str]
+    phytype: Optional[str]
+    authentication_algorithm: Optional[str]
+    cipher_algorithm: Optional[str]
+    connection_id: Optional[str]
     channel: str
     provider: str
 
