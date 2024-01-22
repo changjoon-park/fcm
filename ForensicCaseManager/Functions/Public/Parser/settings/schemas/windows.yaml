@@ -18,7 +18,7 @@ Artifacts:
         nodes:
           - "*.pf"
   win_windowstimeline:
-    root: system
+    root: users
     owner: windows
     entries:
       WindowsTimeline:

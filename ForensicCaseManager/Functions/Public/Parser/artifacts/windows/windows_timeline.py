@@ -1,18 +1,54 @@
 import logging
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Optional
+from datetime import datetime
 
+from pydantic import ValidationError
 from dissect.sql import sqlite3
 from dissect.util.ts import from_unix
 
-from core.forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
 
+class WindowsTimelineRecord(ArtifactRecord):
+    """WindowsTimeline record."""
+
+    start_time: datetime
+    end_time: Optional[datetime]
+    last_modified_time: Optional[datetime]
+    last_modified_on_client: Optional[datetime]
+    original_last_modified_on_client: Optional[datetime]
+    expiration_time: Optional[datetime]
+    app_id: Optional[str]
+    enterprise_id: Optional[str]
+    app_activity_id: Optional[str]
+    group_app_activity_id: Optional[str]
+    # group: Optional[str]  # TODO: Error with this field
+    activity_type: Optional[int]
+    activity_status: Optional[int]
+    priority: Optional[int]
+    match_id: Optional[int]
+    etag: Optional[int]
+    tag: Optional[str]
+    is_local_only: Optional[bool]
+    created_in_cloud: Optional[datetime]
+    platform_device_id: Optional[str]
+    package_id_hash: Optional[str]
+    id: Optional[bytes]
+    payload: Optional[str]
+    original_payload: Optional[str]
+    clipboard_payload: Optional[str]
+
+    class Config:
+        table_name: str = Tables.WIN_WINDOWSTIMELINE.value
+
+
 class WindowsTimeline(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False) -> Path:
         """Return ActivitiesCache.db database content.
@@ -58,50 +94,64 @@ class WindowsTimeline(ForensicArtifact):
             clipboard_payload (string): ClipboardPayload field.
         """
 
-        windows_timeline = sorted(
-            [record for record in self.windows_timeline()],
-            key=lambda record: record["start_time"],  # Sorting based on the 'ts' field
-            reverse=descending,
-        )
+        try:
+            windows_timeline = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.windows_timeline())
+                ),
+                key=lambda record: record.start_time,
+            )
+        except Exception as e:
+            self.log_error(e)
+            windows_timeline = []
+        finally:
+            self.records.append(windows_timeline)
 
     def windows_timeline(self) -> Generator[dict, None, None]:
-        for entry in self.check_empty_entry(self.iter_entry()):
+        for entry in self.check_empty_entry(self.iter_entry(recurse=True)):
             try:
                 fh = entry.open("rb")
                 db = sqlite3.SQLite3(fh)
                 for r in db.table("Activity").rows():
-                    yield {
+                    processed_data = {
                         "start_time": mkts(r["[StartTime]"]),
                         "end_time": mkts(r["[EndTime]"]),
-                        # "last_modified_time": mkts(r["[LastModifiedTime]"]),
-                        # "last_modified_on_client": mkts(r["[LastModifiedOnClient]"]),
-                        # "original_last_modified_on_client": mkts(
-                        #     r["[OriginalLastModifiedOnClient]"]
-                        # ),
-                        # "expiration_time": mkts(r["[ExpirationTime]"]),
-                        # "app_id": r["[AppId]"],
-                        # "enterprise_id": r["[EnterpriseId]"],
-                        # "app_activity_id": r["[AppActivityId]"],
-                        # "group_app_activity_id": r["[GroupAppActivityId]"],
-                        # "group": r["[Group]"],
-                        # "activity_type": r["[ActivityType]"],
-                        # "activity_status": r["[ActivityStatus]"],
-                        # "priority": r["[Priority]"],
-                        # "match_id": r["[MatchId]"],
-                        # "etag": r["[ETag]"],
-                        # "tag": r["[Tag]"],
-                        # "is_local_only": r["[IsLocalOnly]"],
-                        # "created_in_cloud": r["[CreatedInCloud]"],
-                        # "platform_device_id": r["[PlatformDeviceId]"],
-                        # "package_id_hash": r["[PackageIdHash]"],
-                        # "id": r["[Id]"],
-                        # "payload": r["[Payload]"],
-                        # "original_payload": r["[OriginalPayload]"],
-                        # "clipboard_payload": r["[ClipboardPayload]"],
+                        "last_modified_time": mkts(r["[LastModifiedTime]"]),
+                        "last_modified_on_client": mkts(r["[LastModifiedOnClient]"]),
+                        "original_last_modified_on_client": mkts(
+                            r["[OriginalLastModifiedOnClient]"]
+                        ),
+                        "expiration_time": mkts(r["[ExpirationTime]"]),
+                        "app_id": r["[AppId]"],
+                        "enterprise_id": r["[EnterpriseId]"],
+                        "app_activity_id": r["[AppActivityId]"],
+                        "group_app_activity_id": r["[GroupAppActivityId]"],
+                        # "group": r["[Group]"],  # TODO: Error with this field
+                        "activity_type": r["[ActivityType]"],
+                        "activity_status": r["[ActivityStatus]"],
+                        "priority": r["[Priority]"],
+                        "match_id": r["[MatchId]"],
+                        "etag": r["[ETag]"],
+                        "tag": r["[Tag]"],
+                        "is_local_only": r["[IsLocalOnly]"],
+                        "created_in_cloud": r["[CreatedInCloud]"],
+                        "platform_device_id": r["[PlatformDeviceId]"],
+                        "package_id_hash": r["[PackageIdHash]"],
+                        "id": r["[Id]"],
+                        "payload": r["[Payload]"],
+                        "original_payload": r["[OriginalPayload]"],
+                        "clipboard_payload": r["[ClipboardPayload]"],
                         "evidence_id": self.evidence_id,
                     }
+
+                    try:
+                        yield WindowsTimelineRecord(**processed_data)
+                    except ValidationError as e:
+                        self.log_error(e)
+                        continue
             except:
-                logger.error(f"Error: Unable to parse {entry}")
+                self.log_error(e)
                 continue
 
 
