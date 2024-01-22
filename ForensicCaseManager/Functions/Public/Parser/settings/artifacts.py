@@ -56,6 +56,7 @@ class Artifacts(Enum):
 
 
 class Tables(Enum):
+    FS_USNJRNL = "fs_usnjrnl"
     WIN_RECYCLEBIN = "win_recyclebin"
     WIN_PREFETCH = "win_prefetch"
     WIN_SRU_NETWORK = "win_sru_network"

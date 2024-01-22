@@ -1,0 +1,10 @@
+Artifacts:
+  fs_usnjrnl:
+    root: system
+    owner: windows
+    entries: 
+      Amcache:
+        directories:
+          - $Extend
+        nodes:
+          - $J
