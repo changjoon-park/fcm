@@ -10,6 +10,8 @@ current_directory = Path(__file__).parent.absolute()
 schemas = {
     "registry": current_directory / "schemas" / "registry.yaml",
     "windows": current_directory / "schemas" / "windows.yaml",
+    "filesystem": current_directory / "schemas" / "filesystem.yaml",
+    "apps": current_directory / "schemas" / "apps.yaml",
 }
 
 
@@ -26,8 +28,7 @@ schema_data = load_schemas(schemas)
 
 
 class Artifacts(Enum):
-    APP_CHROME = "app_chrome"
-    APP_EDGE = "app_edge"
+    APP_CHROMIUM = "app_chromium"
     APP_IEXPLORER = "app_iexplorer"
     FS_MFT = "fs_mft"
     FS_USNJRNL = "fs_usnjrnl"
@@ -56,6 +57,14 @@ class Artifacts(Enum):
 
 
 class Tables(Enum):
+    APP_CHROMIUM_HISTORY = "app_chromium_history"
+    APP_CHROMIUM_DOWNLOADS = "app_chromium_downloads"
+    APP_CHROMIUM_KEYWORDSEARCHTERMS = "app_chromium_keywordsearchterms"
+    APP_CHROMIUM_AUTOFILL = "app_chromium_autofill"
+    APP_CHROMIUM_LOGINDATA = "app_chromium_logindata"
+    APP_CHROMIUM_BOOKMARKS = "app_chromium_bookmarks"
+    APP_IEXPLORE_HISTORY = "app_iexplore_history"
+    APP_IEXPLORE_DOWNLOADS = "app_iexplore_downloads"
     FS_USNJRNL = "fs_usnjrnl"
     WIN_RECYCLEBIN = "win_recyclebin"
     WIN_PREFETCH = "win_prefetch"

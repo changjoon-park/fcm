@@ -50,12 +50,8 @@ ARTIFACT_CATEGORIES = [
 
 WINDOWS_PLUGINS = {
     # ? Browser
-    Artifacts.APP_CHROME.value: Plugin(
+    Artifacts.APP_CHROMIUM.value: Plugin(
         ForensicArtifact=chrome.Chrome,
-        category=CAT_BROWSER_ACTIVITY,
-    ),
-    Artifacts.APP_EDGE.value: Plugin(
-        ForensicArtifact=edge.Edge,
         category=CAT_BROWSER_ACTIVITY,
     ),
     Artifacts.APP_IEXPLORER.value: Plugin(

@@ -1,20 +1,134 @@
 import logging
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from collections import defaultdict
-from typing import Generator
+from typing import Generator, Optional
 
+from pydantic import ValidationError
 from dissect.sql.sqlite3 import SQLite3
 from dissect.sql.exceptions import Error as SQLError
 
-from core.forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
 
+class ChromiumHistoryRecord(ArtifactRecord):
+    """Chromium history record."""
+
+    ts: datetime
+    record_id: int
+    url: str
+    title: str
+    visit_type: Optional[int]
+    visit_count: Optional[int]
+    hidden: Optional[int]
+    from_visit: Optional[int]
+    from_url: Optional[str]
+    source: str
+    browser_type: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_HISTORY.value
+
+
+class ChromiumDownloadRecord(ArtifactRecord):
+    """Chromium download record."""
+
+    ts_start: datetime
+    ts_end: Optional[datetime]
+    file_name: str
+    file_extension: str
+    received_bytes: Optional[int]
+    download_path: str
+    download_url: Optional[str]
+    download_chain_url: Optional[str]
+    reference_url: Optional[str]
+    record_id: int
+    mime_type: Optional[str]
+    state: Optional[str]
+    source: str
+    browser_type: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_DOWNLOADS.value
+
+
+class ChromiumKeywordSearchTermsRecord(ArtifactRecord):
+    """Chromium keyword search terms record."""
+
+    ts: datetime
+    term: str
+    title: str
+    search_engine: str
+    url: str
+    record_id: int
+    visit_count: Optional[int]
+    hidden: Optional[int]
+    source: str
+    browser_type: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_KEYWORDSEARCHTERMS.value
+
+
+class ChromiumAutofillRecord(ArtifactRecord):
+    """Chromium autofill record."""
+
+    ts_created: datetime
+    value: str
+    count: Optional[int]
+    name: str
+    ts_last_used: Optional[datetime]
+    browser_type: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_AUTOFILL.value
+
+
+class ChromiumLoginDataRecord(ArtifactRecord):
+    """Chromium login data record."""
+
+    ts_created: datetime
+    username_element: str
+    username_value: str
+    password_element: str
+    password_value: bytes
+    origin_url: str
+    action_url: str
+    signon_realm: str
+    ts_last_used: Optional[datetime]
+    ts_password_modified: Optional[datetime]
+    browser_type: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_LOGINDATA.value
+
+
+class ChromiumBookmarksRecord(ArtifactRecord):
+    """Chromium bookmarks record."""
+
+    ts_added: datetime
+    guid: str
+    record_id: int
+    name: str
+    bookmark_type: str
+    url: str
+    path: str
+    ts_last_visited: Optional[datetime]
+    browser_type: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.APP_CHROMIUM_BOOKMARKS.value
+
+
 class ChromiumBrowser(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     @property
     def browser_type(self) -> str:
@@ -24,7 +138,7 @@ class ChromiumBrowser(ForensicArtifact):
         raise NotImplementedError
 
     def history(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="History")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -45,7 +159,7 @@ class ChromiumBrowser(ForensicArtifact):
                             from_visit, from_url = None, None
 
                         if (url := url_record.url).startswith("http"):
-                            yield {
+                            processed_data = {
                                 "ts": ts,
                                 "record_id": row.id,
                                 "url": url,
@@ -59,6 +173,12 @@ class ChromiumBrowser(ForensicArtifact):
                                 "browser_type": self.browser_type,
                                 "evidence_id": self.evidence_id,
                             }
+
+                            try:
+                                yield ChromiumHistoryRecord(**processed_data)
+                            except ValidationError as e:
+                                self.log_error(e)
+                                continue
                 except SQLError as e:
                     logger.error(
                         f"Error processing history file: {db_file} / exc_info={e}"
@@ -72,7 +192,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def downloads(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="History")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -105,7 +225,7 @@ class ChromiumBrowser(ForensicArtifact):
                         else:
                             state = "Complete"
 
-                        yield {
+                        processed_data = {
                             "ts_start": ts_start,
                             "ts_end": ts_end,
                             "file_name": self.fe.extract_filename(download_path),
@@ -124,6 +244,12 @@ class ChromiumBrowser(ForensicArtifact):
                             "source": str(db_file),
                             "evidence_id": self.evidence_id,
                         }
+
+                        try:
+                            yield ChromiumDownloadRecord(**processed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue
                 except SQLError as e:
                     logger.error(
                         f"Error processing history file: {db_file} / exc_info={e}"
@@ -137,7 +263,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def keyword_search_terms(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="History")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="History")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -179,7 +305,7 @@ class ChromiumBrowser(ForensicArtifact):
                             if site_url in url:
                                 search_engine = engine_name
 
-                        yield {
+                        processed_data = {
                             "ts": last_visit_time,
                             "term": term,
                             "title": title,
@@ -192,6 +318,12 @@ class ChromiumBrowser(ForensicArtifact):
                             "source": str(db_file),
                             "evidence_id": self.evidence_id,
                         }
+
+                        try:
+                            yield ChromiumKeywordSearchTermsRecord(**processed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue
                 except SQLError as e:
                     logger.error(
                         f"Error processing history file: {db_file} / exc_info={e}"
@@ -205,7 +337,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def autofill(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="Web Data")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="Web Data")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -222,7 +354,7 @@ class ChromiumBrowser(ForensicArtifact):
                         if not date_created:
                             date_created = self.ts.base_datetime_browser
 
-                        yield {
+                        processed_data = {
                             "ts_created": date_created,
                             "value": value,
                             "count": count,
@@ -232,6 +364,12 @@ class ChromiumBrowser(ForensicArtifact):
                             "source": str(db_file),
                             "evidence_id": self.evidence_id,
                         }
+
+                        try:
+                            yield ChromiumAutofillRecord(**processed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue
                 except SQLError as e:
                     logger.error(
                         f"Error processing history file: {db_file} / exc_info={e}"
@@ -245,7 +383,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def login_data(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="Login Data")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="Login Data")):
             try:
                 db = SQLite3(db_file.open("rb"))
                 try:
@@ -267,7 +405,7 @@ class ChromiumBrowser(ForensicArtifact):
                         if not date_created:
                             date_created = self.ts.base_datetime_browser
 
-                        yield {
+                        processed_data = {
                             "ts_created": date_created,
                             "username_element": username_element,
                             "username_value": username_value,
@@ -284,6 +422,12 @@ class ChromiumBrowser(ForensicArtifact):
                             "source": str(db_file),
                             "evidence_id": self.evidence_id,
                         }
+
+                        try:
+                            yield ChromiumLoginDataRecord(**processed_data)
+                        except ValidationError as e:
+                            self.log_error(e)
+                            continue
                 except SQLError as e:
                     logger.error(
                         f"Error processing history file: {db_file} / exc_info={e}"
@@ -297,7 +441,7 @@ class ChromiumBrowser(ForensicArtifact):
                 continue
 
     def bookmarks(self) -> Generator[dict, None, None]:
-        for db_file in self.check_empty_entry(self.iter_entry(name="Bookmarks")):
+        for db_file in self.check_empty_entry(self.iter_entry(node_name="Bookmarks")):
             json_data = json.load(db_file.open("r", encoding="UTF-8"))
 
             bookmark_result = []
@@ -315,7 +459,7 @@ class ChromiumBrowser(ForensicArtifact):
                             if not (ts_added := record[0]):
                                 ts_added = self.ts.base_datetime_browser
 
-                            yield {
+                            processed_data = {
                                 "ts_added": ts_added,
                                 "guid": record[1],
                                 "record_id": record[2],
@@ -328,6 +472,12 @@ class ChromiumBrowser(ForensicArtifact):
                                 "source": str(db_file),
                                 "evidence_id": self.evidence_id,
                             }
+
+                            try:
+                                yield ChromiumBookmarksRecord(**processed_data)
+                            except ValidationError as e:
+                                self.log_error(e)
+                                continue
 
     def _bookmark_dir_tree(self, row, path, bookmark_result):
         if row["type"] == "folder":

@@ -1,0 +1,35 @@
+Artifacts:
+  app_chromium:
+    root: users
+    owner: browser
+    entries:
+      Chrome:
+        directories:
+          - AppData/Local/Google/Chrome/User Data/Default
+          - AppData/Local/Google/Chrome/continuousUpdates/User Data/Default
+          - Local Settings/Application Data/Google/Chrome/User Data/Default
+          - AppData/local/Google/Chromium/User Data/Default
+          - snap/chromium/common/chromium/Default
+        nodes:
+          - History
+          - Web Data
+          - Login Data
+          - Bookmarks
+      Edge:
+        directories:
+          - AppData/Local/Microsoft/Edge/User Data/Default
+          - Library/Application Support/Microsoft Edge/Default
+        nodes:
+          - History
+          - Web Data
+          - Login Data
+          - Bookmarks
+  app_iexplorer:
+    root: users
+    owner: browser
+    entries:
+      iExplorer:
+        directories:
+          - AppData/Local/Microsoft/Windows/WebCache
+        nodes:
+          - WebCacheV01.dat
