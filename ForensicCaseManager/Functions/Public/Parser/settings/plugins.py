@@ -50,105 +50,104 @@ ARTIFACT_CATEGORIES = [
 
 WINDOWS_PLUGINS = {
     # ? Browser
-    Artifacts.APP_CHROMIUM.value: Plugin(
+    Artifacts.CHROMIUM.value: Plugin(
         ForensicArtifact=chrome.Chrome,
         category=CAT_BROWSER_ACTIVITY,
     ),
-    Artifacts.APP_IEXPLORER.value: Plugin(
+    Artifacts.IEXPLORER.value: Plugin(
         ForensicArtifact=iexplore.InternetExplorer,
         category=CAT_BROWSER_ACTIVITY,
     ),
     # ? FileSystem
     # "MFT": Plugin(artifact=mft.MFT, category="todo"),  # FileSystem
-    Artifacts.FS_USNJRNL.value: Plugin(
+    Artifacts.USNJRNL.value: Plugin(
         ForensicArtifact=usnjrnl.UsnJrnl,
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),
     # ? Windows
-    Artifacts.WIN_RECYCLEBIN.value: Plugin(
+    Artifacts.RECYCLEBIN.value: Plugin(
         ForensicArtifact=recyclebin.RecycleBin,
         category=CAT_DELETED_ITEMS_FILE_EXISTENCE,
     ),
-    Artifacts.WIN_PREFETCH.value: Plugin(
+    Artifacts.PREFETCH.value: Plugin(
         ForensicArtifact=prefetch.Prefetch,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    Artifacts.WIN_FILE_HISTORY.value: Plugin(
+    Artifacts.FILEHISTORY.value: Plugin(
         ForensicArtifact=file_history.FileHistory,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    Artifacts.WIN_SRU_NETWORK.value: Plugin(
+    Artifacts.SRU_NETWORK.value: Plugin(
         ForensicArtifact=sru.SRU,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
-    Artifacts.WIN_SRU_APPLICATION.value: Plugin(
+    Artifacts.SRU_APPLICATION.value: Plugin(
         ForensicArtifact=sru.SRU,
         category=CAT_APPLICATION_EXECUTION,
     ),
     # "Lnk": Plugin(ForensicArtifact=LinkFile, category=CAT_FILE_FOLDER_OPENING),
-    Artifacts.WIN_JUMPLIST.value: Plugin(
+    Artifacts.JUMPLIST.value: Plugin(
         ForensicArtifact=jumplist.JumpList,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    Artifacts.WIN_THUMBCACHE.value: Plugin(
+    Artifacts.THUMBCACHE.value: Plugin(
         ForensicArtifact=thumbcache.Thumbcache,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    Artifacts.WIN_WINDOWSTIMELINE.value: Plugin(
+    Artifacts.WINDOWSTIMELINE.value: Plugin(
         ForensicArtifact=windows_timeline.WindowsTimeline,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    # ? Event Log
-    Artifacts.WIN_EVENT_LOGON.value: Plugin(
+    Artifacts.EVENT_LOGON.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_ACCOUNT_USAGE,
     ),
-    Artifacts.WIN_EVENT_USB.value: Plugin(
+    Artifacts.EVENT_USB.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    Artifacts.WIN_EVENT_WLAN.value: Plugin(
+    Artifacts.EVENT_WLAN.value: Plugin(
         ForensicArtifact=eventlog.ForensicEvent,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
     # ? Windows Registry
-    Artifacts.REG_AMCACHE.value: Plugin(
+    Artifacts.AMCACHE.value: Plugin(
         ForensicArtifact=reg_amcache.Amcache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    Artifacts.REG_USERACCOUNT.value: Plugin(
+    Artifacts.USERACCOUNT.value: Plugin(
         ForensicArtifact=reg_useraccount.UserAccount,
         category=CAT_ACCOUNT_USAGE,
     ),
-    Artifacts.REG_USERASSIST.value: Plugin(
+    Artifacts.USERASSIST.value: Plugin(
         ForensicArtifact=reg_userassist.UserAssist,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    Artifacts.REG_SHIMCACHE.value: Plugin(
+    Artifacts.SHIMCACHE.value: Plugin(
         ForensicArtifact=reg_shimcache.ShimCache,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    Artifacts.REG_BAM.value: Plugin(
+    Artifacts.BAM.value: Plugin(
         ForensicArtifact=reg_bam.BAM,
         category=CAT_APPLICATION_EXECUTION,
     ),
-    Artifacts.REG_NETWORKINFO.value: Plugin(
+    Artifacts.NETWORKINFO.value: Plugin(
         ForensicArtifact=reg_networkinfo.NetworkInfo,
         category=CAT_NETWORK_ACTIVITY_PHYSICAL_LOCATION,
     ),
-    Artifacts.REG_SHELLBAGS.value: Plugin(
+    Artifacts.SHELLBAGS.value: Plugin(
         ForensicArtifact=reg_shellbags.Shellbags,
         category=CAT_FILE_FOLDER_OPENING,
     ),
-    Artifacts.REG_USB.value: Plugin(
+    Artifacts.USB.value: Plugin(
         ForensicArtifact=reg_usb.USB,
         category=CAT_EXTERNAL_DEVICE_USB_USAGE,
     ),
-    Artifacts.REG_AUTORUN.value: Plugin(
+    Artifacts.AUTORUN.value: Plugin(
         ForensicArtifact=reg_autorun.AutoRun,
         category=CAT_SYSTEM_INFORMATION,
     ),
-    Artifacts.REG_SYSTEMINFO.value: Plugin(
+    Artifacts.SYSTEMINFO.value: Plugin(
         ForensicArtifact=reg_systeminfo.SystemInfo,
         category=CAT_SYSTEM_INFORMATION,
     ),

@@ -92,7 +92,7 @@ class ForensicEvent(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == Artifacts.WIN_EVENT_LOGON.value:
+        if self.name == Artifacts.EVENT_LOGON.value:
             event_logon = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -102,7 +102,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_logon)
-        elif self.name == Artifacts.WIN_EVENT_USB.value:
+        elif self.name == Artifacts.EVENT_USB.value:
             event_usb = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -112,7 +112,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_usb)
-        elif self.name == Artifacts.WIN_EVENT_WLAN.value:
+        elif self.name == Artifacts.EVENT_WLAN.value:
             event_wlan = sorted(
                 (
                     self.validate_record(index=index, record=record)

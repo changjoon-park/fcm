@@ -1,5 +1,5 @@
 Artifacts:
-  reg_amcache:
+  amcache:
     root: system
     owner: windows
     entries: 
@@ -8,7 +8,7 @@ Artifacts:
           - Windows/appcompat/Programs
         nodes:
           - Amcache.hve
-  reg_useraccount:
+  useraccount:
     root: system
     owner: registry
     entries:
@@ -20,7 +20,7 @@ Artifacts:
         directories: null
         nodes:
           - HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
-  reg_bam:
+  bam:
     root: system
     owner: registry
     entries:
@@ -31,7 +31,7 @@ Artifacts:
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\UserSettings
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings
           - HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings
-  reg_shellbags:
+  shellbags:
     root: system
     owner: registry
     entries:
@@ -45,7 +45,7 @@ Artifacts:
           - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\Shell
           - HKEY_CURRENT_USER\Software\Classes\Wow6432Node\Local Settings\Software\Microsoft\Windows\ShellNoRoam
           - HKEY_CURRENT_USER\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
-  reg_shimcache:
+  shimcache:
     root: system
     owner: registry
     entries:
@@ -54,7 +54,7 @@ Artifacts:
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache
           - HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatibility
-  reg_userassist:
+  userassist:
     root: system
     owner: registry
     entries:
@@ -62,7 +62,7 @@ Artifacts:
         directories: null
         nodes:
           - HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
-  reg_networkinfo:
+  networkinfo:
     root: system
     owner: registry
     entries:
@@ -78,7 +78,7 @@ Artifacts:
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
-  reg_usb:
+  usb:
     root: system
     owner: registry
     entries:
@@ -102,7 +102,7 @@ Artifacts:
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Enum\SCSI
-  reg_autorun:
+  autorun:
     root: system
     owner: registry
     entries:
@@ -129,7 +129,7 @@ Artifacts:
           - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
           - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce\Setup
           - HKEY_CURRENT_USER\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx
-  reg_systeminfo:
+  systeminfo:
     root: system
     owner: registry
     entries:

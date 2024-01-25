@@ -28,35 +28,43 @@ schema_data = load_schemas(schemas)
 
 
 class Artifacts(Enum):
-    APP_CHROMIUM = "app_chromium"
-    APP_IEXPLORER = "app_iexplorer"
-    FS_MFT = "fs_mft"
-    FS_USNJRNL = "fs_usnjrnl"
-    WIN_RECYCLEBIN = "win_recyclebin"
-    WIN_PREFETCH = "win_prefetch"
-    WIN_SRU_NETWORK = "win_sru_network"
-    WIN_SRU_APPLICATION = "win_sru_application"
-    WIN_FILE_HISTORY = "win_file_history"
-    WIN_THUMBCACHE = "win_thumbcache"
-    WIN_JUMPLIST = "win_jumplist"
-    WIN_WINDOWSTIMELINE = "win_windowstimeline"
-    WIN_EVENT_LOGON = "win_event_logon"
-    WIN_EVENT_USB = "win_event_usb"
-    WIN_EVENT_WLAN = "win_event_wlan"
-    REG_AMCACHE = "reg_amcache"
-    REG_USERACCOUNT = "reg_useraccount"
-    REG_USERASSIST = "reg_userassist"
-    REG_SHIMCACHE = "reg_shimcache"
-    REG_BAM = "reg_bam"
-    REG_NETWORKINFO = "reg_networkinfo"
-    REG_SHELLBAGS = "reg_shellbags"
-    REG_USB = "reg_usb"
-    REG_AUTORUN = "reg_autorun"
-    REG_SYSTEMINFO = "reg_systeminfo"
-    REG_MRU = "reg_mru"
+    ## Applications
+    CHROMIUM = "chromium"
+    IEXPLORER = "iexplorer"
+
+    ## Filesystem
+    MFT = "mft"
+    USNJRNL = "usnjrnl"
+
+    ## Windows
+    RECYCLEBIN = "recyclebin"
+    PREFETCH = "prefetch"
+    SRU_NETWORK = "sru_network"
+    SRU_APPLICATION = "sru_application"
+    FILEHISTORY = "filehistory"
+    THUMBCACHE = "thumbcache"
+    JUMPLIST = "jumplist"
+    WINDOWSTIMELINE = "windowstimeline"
+    EVENT_LOGON = "event_logon"
+    EVENT_USB = "event_usb"
+    EVENT_WLAN = "event_wlan"
+
+    ## Registry
+    AMCACHE = "amcache"
+    USERACCOUNT = "useraccount"
+    USERASSIST = "userassist"
+    SHIMCACHE = "shimcache"
+    BAM = "bam"
+    NETWORKINFO = "networkinfo"
+    SHELLBAGS = "shellbags"
+    USB = "reg_usb"
+    AUTORUN = "autorun"
+    SYSTEMINFO = "systeminfo"
+    MRU = "mru"
 
 
 class Tables(Enum):
+    ## Applications
     APP_CHROMIUM_HISTORY = "app_chromium_history"
     APP_CHROMIUM_DOWNLOADS = "app_chromium_downloads"
     APP_CHROMIUM_KEYWORDSEARCHTERMS = "app_chromium_keywordsearchterms"
@@ -65,7 +73,11 @@ class Tables(Enum):
     APP_CHROMIUM_BOOKMARKS = "app_chromium_bookmarks"
     APP_IEXPLORE_HISTORY = "app_iexplore_history"
     APP_IEXPLORE_DOWNLOADS = "app_iexplore_downloads"
+
+    ## Filesystem
     FS_USNJRNL = "fs_usnjrnl"
+
+    ## Windows
     WIN_RECYCLEBIN = "win_recyclebin"
     WIN_PREFETCH = "win_prefetch"
     WIN_SRU_NETWORK = "win_sru_network"
@@ -77,6 +89,8 @@ class Tables(Enum):
     WIN_EVENT_LOGON = "win_event_logon"
     WIN_EVENT_USB = "win_event_usb"
     WIN_EVENT_WLAN = "win_event_wlan"
+
+    ## Registry
     REG_AMCACHE_APPLICATION = "reg_amcache_application"
     REG_AMCACHE_APPLICATION_FILE = "reg_amcache_application_file"
     REG_AMCACHE_FILE = "reg_amcache_file"

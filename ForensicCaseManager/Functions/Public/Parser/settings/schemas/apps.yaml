@@ -1,5 +1,5 @@
 Artifacts:
-  app_chromium:
+  chromium:
     root: users
     owner: browser
     entries:
@@ -24,7 +24,7 @@ Artifacts:
           - Web Data
           - Login Data
           - Bookmarks
-  app_iexplorer:
+  iexplorer:
     root: users
     owner: browser
     entries:

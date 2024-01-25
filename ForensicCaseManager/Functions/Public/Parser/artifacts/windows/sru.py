@@ -64,7 +64,7 @@ class SRU(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == Artifacts.WIN_SRU_NETWORK.value:
+        if self.name == Artifacts.SRU_NETWORK.value:
             try:
                 # network_data = sorted(
                 #     (
@@ -100,7 +100,7 @@ class SRU(ForensicArtifact):
                 # self.records.append(network_connectivity)
                 self.records.append(network)
 
-        elif self.name == Artifacts.WIN_SRU_APPLICATION.value:
+        elif self.name == Artifacts.SRU_APPLICATION.value:
             try:
                 application = sorted(
                     (
