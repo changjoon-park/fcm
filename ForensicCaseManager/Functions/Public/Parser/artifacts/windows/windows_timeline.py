@@ -114,7 +114,7 @@ class WindowsTimeline(ForensicArtifact):
                 fh = entry.open("rb")
                 db = sqlite3.SQLite3(fh)
                 for r in db.table("Activity").rows():
-                    processed_data = {
+                    parsed_data = {
                         "start_time": mkts(r["[StartTime]"]),
                         "end_time": mkts(r["[EndTime]"]),
                         "last_modified_time": mkts(r["[LastModifiedTime]"]),
@@ -146,7 +146,7 @@ class WindowsTimeline(ForensicArtifact):
                     }
 
                     try:
-                        yield WindowsTimelineRecord(**processed_data)
+                        yield WindowsTimelineRecord(**parsed_data)
                     except ValidationError as e:
                         self.log_error(e)
                         continue

@@ -87,7 +87,7 @@ class UsnJrnl(ForensicArtifact):
                 path = f"{drive_letter}{record.full_path}"
                 segment = segment_reference(record.record.FileReferenceNumber)
 
-                processed_data = {
+                parsed_data = {
                     "ts": ts,
                     "segment": f"{segment}#{record.record.FileReferenceNumber.SequenceNumber}",
                     "path": uri.from_windows(path),
@@ -104,7 +104,7 @@ class UsnJrnl(ForensicArtifact):
                 }
 
                 try:
-                    yield UsnJrnlRecord(**processed_data)
+                    yield UsnJrnlRecord(**parsed_data)
                 except ValidationError as e:
                     self.log_error(e)
                     continue

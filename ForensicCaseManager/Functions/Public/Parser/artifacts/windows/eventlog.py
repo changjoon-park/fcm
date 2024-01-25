@@ -170,7 +170,7 @@ class ForensicEvent(ForensicArtifact):
                     logon_type = event.get("LogonType")
                     logon_type = logon_type_dsecription.get(logon_type)
 
-                    processed_data = {
+                    parsed_data = {
                         "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
@@ -197,7 +197,7 @@ class ForensicEvent(ForensicArtifact):
                     }
 
                     try:
-                        yield EventLogonRecord(**processed_data)
+                        yield EventLogonRecord(**parsed_data)
                     except ValidationError as e:
                         self.log_error(e)
                         continue
@@ -222,7 +222,7 @@ class ForensicEvent(ForensicArtifact):
                     else:
                         task = "USB Disconnected"
 
-                    processed_data = {
+                    parsed_data = {
                         "ts": self.ts.to_localtime(
                             event.get("TimeCreated_SystemTime").value
                         ),
@@ -242,7 +242,7 @@ class ForensicEvent(ForensicArtifact):
                     }
 
                     try:
-                        yield EventUSBRecord(**processed_data)
+                        yield EventUSBRecord(**parsed_data)
                     except ValidationError as e:
                         self.log_error(e)
                         continue
@@ -267,7 +267,7 @@ class ForensicEvent(ForensicArtifact):
                 else:
                     continue
 
-                processed_data = {
+                parsed_data = {
                     "ts": self.ts.to_localtime(
                         event.get("TimeCreated_SystemTime").value
                     ),
@@ -292,7 +292,7 @@ class ForensicEvent(ForensicArtifact):
                 }
 
                 try:
-                    yield EventWLANRecord(**processed_data)
+                    yield EventWLANRecord(**parsed_data)
                 except ValidationError as e:
                     self.log_error(e)
                     continue

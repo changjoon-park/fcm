@@ -159,7 +159,7 @@ class ChromiumBrowser(ForensicArtifact):
                             from_visit, from_url = None, None
 
                         if (url := url_record.url).startswith("http"):
-                            processed_data = {
+                            parsed_data = {
                                 "ts": ts,
                                 "record_id": row.id,
                                 "url": url,
@@ -175,7 +175,7 @@ class ChromiumBrowser(ForensicArtifact):
                             }
 
                             try:
-                                yield ChromiumHistoryRecord(**processed_data)
+                                yield ChromiumHistoryRecord(**parsed_data)
                             except ValidationError as e:
                                 self.log_error(e)
                                 continue
@@ -225,7 +225,7 @@ class ChromiumBrowser(ForensicArtifact):
                         else:
                             state = "Complete"
 
-                        processed_data = {
+                        parsed_data = {
                             "ts_start": ts_start,
                             "ts_end": ts_end,
                             "file_name": self.fe.extract_filename(download_path),
@@ -246,7 +246,7 @@ class ChromiumBrowser(ForensicArtifact):
                         }
 
                         try:
-                            yield ChromiumDownloadRecord(**processed_data)
+                            yield ChromiumDownloadRecord(**parsed_data)
                         except ValidationError as e:
                             self.log_error(e)
                             continue
@@ -305,7 +305,7 @@ class ChromiumBrowser(ForensicArtifact):
                             if site_url in url:
                                 search_engine = engine_name
 
-                        processed_data = {
+                        parsed_data = {
                             "ts": last_visit_time,
                             "term": term,
                             "title": title,
@@ -320,7 +320,7 @@ class ChromiumBrowser(ForensicArtifact):
                         }
 
                         try:
-                            yield ChromiumKeywordSearchTermsRecord(**processed_data)
+                            yield ChromiumKeywordSearchTermsRecord(**parsed_data)
                         except ValidationError as e:
                             self.log_error(e)
                             continue
@@ -354,7 +354,7 @@ class ChromiumBrowser(ForensicArtifact):
                         if not date_created:
                             date_created = self.ts.base_datetime_browser
 
-                        processed_data = {
+                        parsed_data = {
                             "ts_created": date_created,
                             "value": value,
                             "count": count,
@@ -366,7 +366,7 @@ class ChromiumBrowser(ForensicArtifact):
                         }
 
                         try:
-                            yield ChromiumAutofillRecord(**processed_data)
+                            yield ChromiumAutofillRecord(**parsed_data)
                         except ValidationError as e:
                             self.log_error(e)
                             continue
@@ -405,7 +405,7 @@ class ChromiumBrowser(ForensicArtifact):
                         if not date_created:
                             date_created = self.ts.base_datetime_browser
 
-                        processed_data = {
+                        parsed_data = {
                             "ts_created": date_created,
                             "username_element": username_element,
                             "username_value": username_value,
@@ -424,7 +424,7 @@ class ChromiumBrowser(ForensicArtifact):
                         }
 
                         try:
-                            yield ChromiumLoginDataRecord(**processed_data)
+                            yield ChromiumLoginDataRecord(**parsed_data)
                         except ValidationError as e:
                             self.log_error(e)
                             continue
@@ -459,7 +459,7 @@ class ChromiumBrowser(ForensicArtifact):
                             if not (ts_added := record[0]):
                                 ts_added = self.ts.base_datetime_browser
 
-                            processed_data = {
+                            parsed_data = {
                                 "ts_added": ts_added,
                                 "guid": record[1],
                                 "record_id": record[2],
@@ -474,7 +474,7 @@ class ChromiumBrowser(ForensicArtifact):
                             }
 
                             try:
-                                yield ChromiumBookmarksRecord(**processed_data)
+                                yield ChromiumBookmarksRecord(**parsed_data)
                             except ValidationError as e:
                                 self.log_error(e)
                                 continue
