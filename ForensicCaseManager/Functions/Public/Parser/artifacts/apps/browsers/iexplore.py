@@ -1,13 +1,34 @@
 import logging
 from datetime import datetime, timezone
 from dataclasses import dataclass
-from typing import BinaryIO, Generator
+from typing import BinaryIO, Generator, Optional
 
+from pydantic import ValidationError
 from dissect.esedb import esedb, record, table
 
-from core.forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
+
+
+class IExplorerHistoryRecord(ArtifactRecord):
+    """InterHistory record."""
+
+    ts: datetime
+    entry_id: int
+    url: str
+    title: Optional[str]
+    visit_type: Optional[str]
+    visit_count: int
+    hidden: Optional[int]
+    from_visit: Optional[int]
+    from_url: Optional[str]
+    browser_type: str
+    source: str
+
+    class Config:
+        table_name: str = Tables.APP_IEXPLORE_HISTORY.value
 
 
 @dataclass(kw_only=True)
@@ -32,6 +53,8 @@ class WebCache:
         for container in self.find_containers(name):
             try:
                 yield from container.records()
+            except GeneratorExit:
+                return
             except:
                 logging.exception(f"Error: Unable to parse records from {container}")
 
@@ -45,8 +68,8 @@ class WebCache:
 
 
 class InternetExplorer(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     @property
     def browser_type(self) -> str:
@@ -58,14 +81,20 @@ class InternetExplorer(ForensicArtifact):
         return datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
 
     def parse(self, descending: bool = False) -> None:
-        history = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.history())
-            ],
-            key=lambda record: record["ts"],
-            reverse=descending,
-        )
+        try:
+            history = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.history())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            history = []
+        finally:
+            self.records.append(history)
 
         # sorted_downloads = sorted(
         #     [record._packdict() for record in self.downloads()],
@@ -77,28 +106,9 @@ class InternetExplorer(ForensicArtifact):
         # ]
 
     def history(self) -> Generator[dict, None, None]:
-        """Return browser history records from Chrome.
-
-        Yields ChromeBrowserHistoryRecord with the following fields:
-            hostname: The target hostname.
-            domain: The target domain.
-            ts: Visit timestamp.
-            browser: The browser from which the records are generated from.
-            id: Record ID.
-            url: History URL.
-            title: Page title.
-            description: Page description.
-            rev_host: Reverse hostname.
-            visit_type: Visit type.
-            visit_count: Amount of visits.
-            hidden: Hidden value.
-            typed: Typed value.
-            session: Session value.
-            from_visit: Record ID of the "from" visit.
-            from_url: URL of the "from" visit.
-            source: The source file of the history record.
-        """
-        for db_file in self.check_empty_entry(self.iter_entry(name="WebCacheV01.dat")):
+        for db_file in self.check_empty_entry(
+            self.iter_entry(node_name="WebCacheV01.dat")
+        ):
             try:
                 db = WebCache(fh=db_file.open("rb"))
                 for container_record in db.history():
@@ -117,7 +127,7 @@ class InternetExplorer(ForensicArtifact):
                         ts = self.default_datetime
 
                     if url.startswith("http"):
-                        yield {
+                        parsed_data = {
                             "ts": ts,
                             "entry_id": container_record.get("EntryId"),
                             "url": url,
@@ -127,10 +137,16 @@ class InternetExplorer(ForensicArtifact):
                             "hidden": None,
                             "from_visit": None,
                             "from_url": None,
-                            "browser_type": ART_IEXPLORER,
+                            "browser_type": self.browser_type,
                             "source": str(db_file),
                             "evidence_id": self.evidence_id,
                         }
+
+                    try:
+                        yield IExplorerHistoryRecord(**parsed_data)
+                    except ValidationError as e:
+                        logger.error(e)
+                        return
             except:
                 logger.exception(f"Error: Unable to parse history from {db_file}")
 
@@ -158,7 +174,7 @@ class InternetExplorer(ForensicArtifact):
                         "url": down_url,
                         "size": container_record.FileSize,
                         "state": container_record.FileExtension,
-                        "browser_type": ART_IEXPLORER,
+                        "browser_type": self.browser_type,
                         "source": str(db_file),
                         "evidence_id": self.evidence_id,
                     }

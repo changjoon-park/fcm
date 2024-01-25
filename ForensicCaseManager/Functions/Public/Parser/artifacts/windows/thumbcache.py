@@ -1,13 +1,13 @@
-from icecream import ic
 import logging
 from pathlib import Path
 from typing import Iterator, Optional, Union
+
+from pydantic import ValidationError
 
 from lib.thumbcache.index import IndexEntry, ThumbnailIndex
 from lib.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
 from lib.thumbcache.exceptions import Error
 from lib.thumbcache.tools.extract_with_index import dump_entry_data_through_index
-
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
 from settings.artifacts import Tables, ArtifactSchema
 
@@ -132,7 +132,7 @@ class Thumbcache(ForensicArtifact):
 
             try:
                 yield ThumbcacheRecord(**parsed_data)
-            except Exception as e:
+            except ValidationError as e:
                 logger.error(e)
                 return
 
@@ -153,7 +153,7 @@ class Thumbcache(ForensicArtifact):
 
             try:
                 yield ThumbcacheRecord(**parsed_data)
-            except Exception as e:
+            except ValidationError as e:
                 logger.error(e)
                 return
 
