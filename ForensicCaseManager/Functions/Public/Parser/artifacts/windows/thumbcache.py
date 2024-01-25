@@ -1,3 +1,4 @@
+from icecream import ic
 import logging
 from pathlib import Path
 from typing import Iterator, Optional, Union
@@ -7,9 +8,28 @@ from lib.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
 from lib.thumbcache.exceptions import Error
 from lib.thumbcache.tools.extract_with_index import dump_entry_data_through_index
 
-from core.forensic_artifact import Source, ForensicArtifact
+from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
+from settings.artifacts import Tables, ArtifactSchema
 
 logger = logging.getLogger(__name__)
+
+
+class ThumbcacheRecord(ArtifactRecord):
+    """Thumbcache record."""
+
+    identifier: str
+    in_use: Optional[bool]
+    hash: Optional[str]
+    data_size: Optional[int]
+    extension: Optional[str]
+    flags: Optional[int]
+    header_checksum: Optional[bytes]
+    data_checksum: Optional[bytes]
+    last_modified: Optional[str]
+    path: str
+
+    class Config:
+        table_name: str = Tables.WIN_THUMBCACHE.value
 
 
 class ThumbcacheParser:
@@ -75,34 +95,28 @@ class ThumbcacheParser:
 
 
 class Thumbcache(ForensicArtifact):
-    def __init__(self, src: Source, artifact: str, category: str):
-        super().__init__(src=src, artifact=artifact, category=category)
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False) -> None:
-        thumbcache = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.thumbcache())
-            ],
-            key=lambda record: record[
-                "identifier"
-            ],  # Sorting based on the 'identifier' field
-            reverse=descending,
-        )
-        iconcache = sorted(
-            [
-                self.validate_record(index=index, record=record)
-                for index, record in enumerate(self.iconcache())
-            ],
-            key=lambda record: record[
-                "identifier"
-            ],  # Sorting based on the 'identifier' field
-            reverse=descending,
-        )
+        try:
+            thumbcache = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self._combined_thumbcache())
+                ),
+                key=lambda record: record.identifier,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            thumbcache = []
+        finally:
+            self.records.append(thumbcache)
 
     def _create_entries(self, cache: ThumbcacheParser) -> Iterator[dict]:
         for path, entry in cache.entries():
-            yield {
+            parsed_data = {
                 "identifier": entry.identifier,
                 "in_use": None,
                 "hash": entry.hash,
@@ -113,9 +127,17 @@ class Thumbcache(ForensicArtifact):
                 "data_checksum": entry.data_checksum,
                 "last_modified": None,
                 "path": str(path),
+                "evidence_id": self.evidence_id,
             }
+
+            try:
+                yield ThumbcacheRecord(**parsed_data)
+            except Exception as e:
+                logger.error(e)
+                return
+
         for index_entry in cache.index_entries():
-            yield {
+            parsed_data = {
                 "identifier": index_entry.identifier.hex(),
                 "in_use": index_entry.in_use(),
                 "hash": None,
@@ -126,28 +148,43 @@ class Thumbcache(ForensicArtifact):
                 "data_checksum": None,
                 "last_modified": index_entry.last_modified,
                 "path": str(cache.index_file),
+                "evidence_id": self.evidence_id,
             }
+
+            try:
+                yield ThumbcacheRecord(**parsed_data)
+            except Exception as e:
+                logger.error(e)
+                return
 
     def _parse_thumbcache(
         self, prefix: str, output_dir: Optional[Path]
     ) -> Iterator[Union[dict, dict, dict]]:
-        for cache_path in self.check_empty_entry(self.iter_directory()):
-            try:
-                # If an output directory is specified, dump the data to the output directory.
-                if output_dir:
-                    dump_entry_data_through_index(cache_path, output_dir, prefix)
+        for name, entry in self.entries.items():
+            directories = entry.get("directories")
+            for cache_path in self.check_empty_entry(
+                self.iter_directory(directories=directories)
+            ):
+                try:
+                    # If an output directory is specified, dump the data to the output directory.
+                    if output_dir:
+                        dump_entry_data_through_index(cache_path, output_dir, prefix)
 
-                # Create a ThumbcacheParser object and yield the entries.
-                cache = ThumbcacheParser(cache_path, prefix=prefix)
-                yield from self._create_entries(cache=cache)
+                    # Create a ThumbcacheParser object and yield the entries.
+                    cache = ThumbcacheParser(cache_path, prefix=prefix)
+                    yield from self._create_entries(cache=cache)
 
-            except Error as e:
-                # A specific thumbcache exception occurred, log the error.
-                logger.log.error(e)
-            except Exception as e:
-                # A different exception occurred, log the exception.
-                logger.critical(e, exc_info=True)
-                pass
+                except Error as e:
+                    # A specific thumbcache exception occurred, log the error.
+                    logger.log.error(e)
+                except Exception as e:
+                    # A different exception occurred, log the exception.
+                    logger.critical(e, exc_info=True)
+                    pass
+
+    def _combined_thumbcache(self, output_dir: Optional[Path] = None):
+        yield from self.thumbcache(output_dir=output_dir)
+        yield from self.iconcache(output_dir=output_dir)
 
     def thumbcache(self, output_dir: Optional[Path] = None) -> Iterator[dict]:
         yield from self._parse_thumbcache(prefix="thumbcache", output_dir=output_dir)

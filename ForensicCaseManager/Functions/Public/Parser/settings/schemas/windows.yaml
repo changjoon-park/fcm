@@ -73,7 +73,7 @@ Artifacts:
         directories:
           - AppData/Local/Microsoft/Windows/Explorer
         nodes:
-          - thumbcache_*.db
+          - "*.db"
   win_file_history:
     root: users
     owner: windows
