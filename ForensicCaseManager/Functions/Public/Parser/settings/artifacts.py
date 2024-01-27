@@ -87,12 +87,12 @@ class Artifacts(Enum):
     SRU_NETWORK = Artifact(
         name="sru_network",
         category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
-        ForensicArtifact=sru.SRU,
+        ForensicArtifact=sru.SruNetwork,
     )
     SRU_APPLICATION = Artifact(
         name="sru_application",
         category=Categories.APPLICATION_EXECUTION.value,
-        ForensicArtifact=sru.SRU,
+        ForensicArtifact=sru.SruApplication,
     )
     FILEHISTORY = Artifact(
         name="filehistory",

@@ -1,7 +1,6 @@
 import logging
 from typing import Generator, Optional
 from datetime import datetime
-from icecream import ic
 
 from pydantic import ValidationError
 from dissect.esedb.tools.sru import SRU as SRUParser
@@ -65,112 +64,7 @@ class SRU(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == "sru_network":
-            try:
-                # network_data = sorted(
-                #     (
-                #         self.validate_record(index=index, record=record)
-                #         for index, record in enumerate(self.network_data())
-                #     ),
-                #     key=lambda record: record.ts,
-                #     reverse=descending,
-                # )
-                # network_connectivity = sorted(
-                #     (
-                #         self.validate_record(index=index, record=record)
-                #         for index, record in enumerate(self.network_connectivity())
-                #     ),
-                #     key=lambda record: record.ts,
-                #     reverse=descending,
-                # )
-                network = sorted(
-                    (
-                        self.validate_record(index=index, record=record)
-                        for index, record in enumerate(self.network())
-                    ),
-                    key=lambda record: record.ts,
-                    reverse=descending,
-                )
-            except Exception as e:
-                self.log_error(e)
-                # network_data = []
-                # network_connectivity = []
-                network = []
-            finally:
-                # self.records.append(network_data)
-                # self.records.append(network_connectivity)
-                self.records.append(network)
-
-        elif self.name == "sru_application":
-            try:
-                application = sorted(
-                    (
-                        self.validate_record(index=index, record=record)
-                        for index, record in enumerate(self.application())
-                    ),
-                    key=lambda record: record.ts,  # Sorting based on the 'ts' field
-                    reverse=descending,
-                )
-            except Exception as e:
-                self.log_error(e)
-                application = []
-            finally:
-                self.records.append(application)
-
-        # application_timeline = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.application_timeline()
-        # ]
-
-        # energy_estimator = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.energy_estimator()
-        # ]
-        # energy_usage = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.energy_usage()
-        # ]
-        # energy_usage_lt = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.energy_usage_lt()
-        # ]
-        # push_notification = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.push_notification()
-        # ]
-        # vfu = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.vfu()
-        # ]
-        # sdp_volume_provider = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.sdp_volume_provider()
-        # ]
-        # sdp_physical_disk_provider = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.sdp_physical_disk_provider()
-        # ]
-        # sdp_cpu_provider = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.sdp_cpu_provider()
-        # ]
-        # sdp_network_provider = [
-        #     json.dumps(record._packdict(), indent=2, default=str, ensure_ascii=False)
-        #     for record in self.sdp_network_provider()
-        # ]
-
-        # self.result = {
-        #     "application_timeline": application_timeline,
-        #     "energy_estimator": energy_estimator,
-        #     "energy_usage": energy_usage,
-        #     "energy_usage_lt": energy_usage_lt,
-        #     "push_notification": push_notification,
-        #     "vfu": vfu,
-        #     "sdp_volume_provider": sdp_volume_provider,
-        #     "sdp_physical_disk_provider": sdp_physical_disk_provider,
-        #     "sdp_cpu_provider": sdp_cpu_provider,
-        #     "sdp_network_provider": sdp_network_provider,
-        # }
+        pass
 
     def _process_records(
         self, record_generator: Generator, record_class: ArtifactRecord
@@ -198,33 +92,6 @@ class SRU(ForensicArtifact):
             except ValidationError as e:
                 self.log_error(e)
                 continue
-
-    def _combined_network(self):
-        """
-        Combined generator for raw network data and network connectivity.
-
-        network data: the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
-        network connectivity: the contents of Windows Network Connectivity Usage Monitor table from the SRUDB.dat file.
-
-        Yields:
-        Generator: Yields raw network data and network connectivity records.
-        """
-        yield from self.read_records("network_data")
-        yield from self.read_records("network_connectivity")
-
-    def network(self):
-        """
-        Return the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
-        """
-        yield from self._process_records(self._combined_network(), SruNetworkRecord)
-
-    def application(self):
-        """
-        Return the contents of Application Resource Usage table from the SRUDB.dat file.
-        """
-        return self._process_records(
-            self.read_records("application"), SruApplicationRecord
-        )
 
     # def energy_estimator(self):
     #     """Return the contents of Energy Estimator table from the SRUDB.dat file."""
@@ -311,3 +178,72 @@ class SRU(ForensicArtifact):
             except Exception as e:
                 self.log_error(e)
                 continue
+
+
+class SruNetwork(SRU):
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
+
+    def parse(self, descending: bool = False):
+        try:
+            sru_network = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.sru_network())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            sru_network = []
+        finally:
+            self.records.append(sru_network)
+
+    def _combined_network(self):
+        """
+        Combined generator for raw network data and network connectivity.
+
+        network data: the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
+        network connectivity: the contents of Windows Network Connectivity Usage Monitor table from the SRUDB.dat file.
+
+        Yields:
+        Generator: Yields raw network data and network connectivity records.
+        """
+        yield from self.read_records("network_data")
+        yield from self.read_records("network_connectivity")
+
+    def sru_network(self):
+        """
+        Return the contents of Windows Network Usage Monitor table from the SRUDB.dat file.
+        """
+        yield from self._process_records(self._combined_network(), SruNetworkRecord)
+
+
+class SruApplication(SRU):
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
+
+    def parse(self, descending: bool = False):
+        try:
+            sru_application = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.sru_application())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+        except Exception as e:
+            self.log_error(e)
+            sru_application = []
+        finally:
+            self.records.append(sru_application)
+
+    def sru_application(self):
+        """
+        Return the contents of Application Resource Usage table from the SRUDB.dat file.
+        """
+        return self._process_records(
+            self.read_records("application"), SruApplicationRecord
+        )
