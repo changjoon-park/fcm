@@ -13,16 +13,16 @@ from artifacts.windows import (
     eventlog,
 )
 from artifacts.windows.registry import (
-    reg_amcache,
-    reg_userassist,
-    reg_shimcache,
-    reg_bam,
+    amcache,
+    autorun,
+    bam,
+    networkinfo,
+    shellbags,
+    shimcache,
+    systeminfo,
+    useraccount,
+    userassist,
     reg_usb,
-    reg_autorun,
-    reg_shellbags,
-    reg_systeminfo,
-    reg_networkinfo,
-    reg_useraccount,
     mru,
 )
 from artifacts.apps.browsers import chrome, edge, iexplore
@@ -136,37 +136,37 @@ class Artifacts(Enum):
     AMCACHE = Artifact(
         name="amcache",
         category=Categories.APPLICATION_EXECUTION.value,
-        ForensicArtifact=reg_amcache.Amcache,
+        ForensicArtifact=amcache.Amcache,
     )
     USERACCOUNT = Artifact(
         name="useraccount",
         category=Categories.ACCOUNT_USAGE.value,
-        ForensicArtifact=reg_useraccount.UserAccount,
+        ForensicArtifact=useraccount.UserAccount,
     )
     USERASSIST = Artifact(
         name="userassist",
         category=Categories.APPLICATION_EXECUTION.value,
-        ForensicArtifact=reg_userassist.UserAssist,
+        ForensicArtifact=userassist.UserAssist,
     )
     SHIMCACHE = Artifact(
         name="shimcache",
         category=Categories.APPLICATION_EXECUTION.value,
-        ForensicArtifact=reg_shimcache.ShimCache,
+        ForensicArtifact=shimcache.ShimCache,
     )
     BAM = Artifact(
         name="bam",
         category=Categories.APPLICATION_EXECUTION.value,
-        ForensicArtifact=reg_bam.BAM,
+        ForensicArtifact=bam.BAM,
     )
     NETWORKINFO = Artifact(
         name="networkinfo",
         category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
-        ForensicArtifact=reg_networkinfo.NetworkInfo,
+        ForensicArtifact=networkinfo.NetworkInfo,
     )
     SHELLBAGS = Artifact(
         name="shellbags",
         category=Categories.FILE_FOLDER_OPENING.value,
-        ForensicArtifact=reg_shellbags.Shellbags,
+        ForensicArtifact=shellbags.Shellbags,
     )
     REG_USB = Artifact(
         name="reg_usb",
@@ -176,11 +176,11 @@ class Artifacts(Enum):
     AUTORUN = Artifact(
         name="autorun",
         category=Categories.SYSTEM_INFORMATION.value,
-        ForensicArtifact=reg_autorun.AutoRun,
+        ForensicArtifact=autorun.AutoRun,
     )
     SYSTEMINFO = Artifact(
         name="systeminfo",
         category=Categories.SYSTEM_INFORMATION.value,
-        ForensicArtifact=reg_systeminfo.SystemInfo,
+        ForensicArtifact=systeminfo.SystemInfo,
     )
     # MRU = Artifact(name="mru", category=Categories.FILE_FOLDER_OPENING.value)
