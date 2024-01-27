@@ -1,5 +1,5 @@
-Artifact:
-  event_logon:
+Artifacts:
+  logon_event:
     root: system
     owner: windows
     entries:
@@ -8,7 +8,7 @@ Artifact:
           - Windows/System32/winevt/Logs
         nodes:
           - "Security.evtx"
-  event_usb:
+  usb_event:
     root: system
     owner: windows
     entries:
@@ -17,7 +17,7 @@ Artifact:
           - Windows/System32/winevt/Logs
         nodes:
           - "Microsoft-Windows-Partition%4Diagnostic.evtx"
-  event_wlan:
+  wlan_event:
     root: system
     owner: windows
     entries:

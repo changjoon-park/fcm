@@ -12,7 +12,7 @@ from settings.artifact_schema import ArtifactSchema
 logger = logging.getLogger(__name__)
 
 
-class EventLogonRecord(ArtifactRecord):
+class LogonEventRecord(ArtifactRecord):
     """Event logon record."""
 
     ts: datetime
@@ -41,7 +41,7 @@ class EventLogonRecord(ArtifactRecord):
         table_name: str = Tables.EVENT_LOGON.value
 
 
-class EventUSBRecord(ArtifactRecord):
+class UsbEventRecord(ArtifactRecord):
     """Event USB record."""
 
     ts: datetime
@@ -62,7 +62,7 @@ class EventUSBRecord(ArtifactRecord):
         table_name: str = Tables.EVENT_USB.value
 
 
-class EventWLANRecord(ArtifactRecord):
+class WlanEventRecord(ArtifactRecord):
     """Event WLAN record."""
 
     ts: datetime
@@ -88,44 +88,29 @@ class EventWLANRecord(ArtifactRecord):
         table_name: str = Tables.EVENT_WLAN.value
 
 
-class ForensicEvent(ForensicArtifact):
+class LogonEvent(ForensicArtifact):
     def __init__(self, src: Source, schema: ArtifactSchema):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == "event_logon":
-            event_logon = sorted(
+        try:
+            logon_event = sorted(
                 (
                     self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.event_logon())
+                    for index, record in enumerate(self.logon_event())
                 ),
                 key=lambda record: record.ts,
                 reverse=descending,
             )
-            self.records.append(event_logon)
-        elif self.name == "event_usb":
-            event_usb = sorted(
-                (
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.event_usb())
-                ),
-                key=lambda record: record.ts,
-                reverse=descending,
-            )
-            self.records.append(event_usb)
-        elif self.name == "event_wlan":
-            event_wlan = sorted(
-                (
-                    self.validate_record(index=index, record=record)
-                    for index, record in enumerate(self.event_wlan())
-                ),
-                key=lambda record: record.ts,
-                reverse=descending,
-            )
-            self.records.append(event_wlan)
+            self.records.append(logon_event)
+        except Exception as e:
+            self.log_error(e)
+            logon_event = []
+        finally:
+            return logon_event
 
-    def event_logon(self) -> Generator[dict, None, None]:
-        event_logon = {
+    def logon_event(self) -> Generator[dict, None, None]:
+        logon_event_id = {
             4624: "Account Logon",
             4625: "Account Logon Failed",
             4634: "Account Logoff",
@@ -162,7 +147,7 @@ class ForensicEvent(ForensicArtifact):
             for event in evtx:
                 event_id = event.get("EventID")
 
-                if task := event_logon.get(event_id, None):
+                if task := logon_event_id.get(event_id, None):
                     if (
                         target_domain_name := event.get("TargetDomainName")
                     ) in exclude_list:
@@ -198,14 +183,36 @@ class ForensicEvent(ForensicArtifact):
                     }
 
                     try:
-                        yield EventLogonRecord(**parsed_data)
+                        yield LogonEventRecord(**parsed_data)
                     except ValidationError as e:
                         self.log_error(e)
                         continue
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
-    def event_usb(self) -> Generator[dict, None, None]:
+
+class UsbEvent(ForensicArtifact):
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
+
+    def parse(self, descending: bool = False):
+        try:
+            usb_event = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.usb_event())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+            self.records.append(usb_event)
+        except Exception as e:
+            self.log_error(e)
+            usb_event = []
+        finally:
+            return usb_event
+
+    def usb_event(self) -> Generator[dict, None, None]:
         SIZE_GB = 1024 * 1024 * 1024
 
         for entry in self.check_empty_entry(self.iter_entry()):
@@ -243,14 +250,36 @@ class ForensicEvent(ForensicArtifact):
                     }
 
                     try:
-                        yield EventUSBRecord(**parsed_data)
+                        yield UsbEventRecord(**parsed_data)
                     except ValidationError as e:
                         self.log_error(e)
                         continue
                 else:
                     logger.debug(f"Unable to parse event: {event_id}")
 
-    def event_wlan(self) -> Generator[dict, None, None]:
+
+class WlanEvent(ForensicArtifact):
+    def __init__(self, src: Source, schema: ArtifactSchema):
+        super().__init__(src=src, schema=schema)
+
+    def parse(self, descending: bool = False):
+        try:
+            wlan_event = sorted(
+                (
+                    self.validate_record(index=index, record=record)
+                    for index, record in enumerate(self.wlan_event())
+                ),
+                key=lambda record: record.ts,
+                reverse=descending,
+            )
+            self.records.append(wlan_event)
+        except Exception as e:
+            self.log_error(e)
+            wlan_event = []
+        finally:
+            return wlan_event
+
+    def wlan_event(self) -> Generator[dict, None, None]:
         for entry in self.check_empty_entry(self.iter_entry()):
             try:
                 evtx = Evtx(fh=entry.open("rb"))
@@ -293,7 +322,7 @@ class ForensicEvent(ForensicArtifact):
                 }
 
                 try:
-                    yield EventWLANRecord(**parsed_data)
+                    yield WlanEventRecord(**parsed_data)
                 except ValidationError as e:
                     self.log_error(e)
                     continue

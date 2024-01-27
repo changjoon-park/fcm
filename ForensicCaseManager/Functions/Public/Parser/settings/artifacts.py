@@ -117,19 +117,19 @@ class Artifacts(Enum):
 
     ## Event Log
     EVENT_LOGON = Artifact(
-        name="event_logon",
+        name="logon_event",
         category=Categories.ACCOUNT_USAGE.value,
-        ForensicArtifact=eventlog.ForensicEvent,
+        ForensicArtifact=eventlog.LogonEvent,
     )
     EVENT_USB = Artifact(
-        name="event_usb",
+        name="usb_event",
         category=Categories.EXTERNAL_DEVICE_USB_USAGE.value,
-        ForensicArtifact=eventlog.ForensicEvent,
+        ForensicArtifact=eventlog.UsbEvent,
     )
     EVENT_WLAN = Artifact(
-        name="event_wlan",
+        name="wlan_event",
         category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
-        ForensicArtifact=eventlog.ForensicEvent,
+        ForensicArtifact=eventlog.WlanEvent,
     )
 
     ## Registry
