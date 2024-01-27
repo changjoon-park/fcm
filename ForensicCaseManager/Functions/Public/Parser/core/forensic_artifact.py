@@ -10,7 +10,7 @@ from dissect.target.filesystem import Filesystem
 
 from util.timestamp import Timestamp
 from util.file_extractor import FileExtractor
-from settings.artifacts import ArtifactSchema
+from settings.artifact_schema import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

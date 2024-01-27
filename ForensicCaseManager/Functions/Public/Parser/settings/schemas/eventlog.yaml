@@ -1,0 +1,28 @@
+Artifact:
+  event_logon:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "Security.evtx"
+  event_usb:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "Microsoft-Windows-Partition%4Diagnostic.evtx"
+  event_wlan:
+    root: system
+    owner: windows
+    entries:
+      EventLogs:
+        directories:
+          - Windows/System32/winevt/Logs
+        nodes:
+          - "Microsoft-Windows-WLAN-AutoConfig%4Operational.evtx"

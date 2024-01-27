@@ -78,7 +78,7 @@ Artifacts:
         directories: null
         nodes:
           - HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces
-  usb:
+  reg_usb:
     root: system
     owner: registry
     entries:

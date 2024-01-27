@@ -1,134 +1,186 @@
-import yaml
-import logging
-from pathlib import Path
 from enum import Enum
-from dataclasses import dataclass, field
+from collections import namedtuple
 
-logger = logging.getLogger(__name__)
+from artifacts.filesystem import mft, usnjrnl
+from artifacts.windows import (
+    recyclebin,
+    prefetch,
+    jumplist,
+    thumbcache,
+    sru,
+    windows_timeline,
+    filehistory,
+    eventlog,
+)
+from artifacts.windows.registry import (
+    reg_amcache,
+    reg_userassist,
+    reg_shimcache,
+    reg_bam,
+    reg_usb,
+    reg_autorun,
+    reg_shellbags,
+    reg_systeminfo,
+    reg_networkinfo,
+    reg_useraccount,
+    mru,
+)
+from artifacts.apps.browsers import chrome, edge, iexplore
 
-current_directory = Path(__file__).parent.absolute()
-schemas = {
-    "registry": current_directory / "schemas" / "registry.yaml",
-    "windows": current_directory / "schemas" / "windows.yaml",
-    "filesystem": current_directory / "schemas" / "filesystem.yaml",
-    "apps": current_directory / "schemas" / "apps.yaml",
-}
+
+Artifact = namedtuple("Artifact", ["name", "category", "ForensicArtifact"])
 
 
-# Function to load schema data from multiple files
-def load_schemas(schema_paths):
-    schema_data = {}
-    for name, path in schema_paths.items():
-        with open(path, "r") as file:
-            schema_data[name] = yaml.safe_load(file).get("Artifacts", {})
-    return schema_data
-
-
-schema_data = load_schemas(schemas)
+class Categories(Enum):
+    APPLICATION_EXECUTION = 1
+    FILE_FOLDER_OPENING = 2
+    DELETED_ITEMS_FILE_EXISTENCE = 3
+    BROWSER_ACTIVITY = 4
+    CLOUD_STORAGE = 5
+    ACCOUNT_USAGE = 6
+    NETWORK_ACTIVITY_PHYSICAL_LOCATION = 7
+    SYSTEM_INFORMATION = 8
+    EXTERNAL_DEVICE_USB_USAGE = 9
 
 
 class Artifacts(Enum):
     ## Applications
-    CHROMIUM = "chromium"
-    IEXPLORER = "iexplorer"
+    CHROME = Artifact(
+        name="chrome",
+        category=Categories.BROWSER_ACTIVITY.value,
+        ForensicArtifact=chrome.Chrome,
+    )
+    EDGE = Artifact(
+        name="edge",
+        category=Categories.BROWSER_ACTIVITY.value,
+        ForensicArtifact=edge.Edge,
+    )
+    IEXPLORER = Artifact(
+        name="iexplorer",
+        category=Categories.BROWSER_ACTIVITY.value,
+        ForensicArtifact=iexplore.InternetExplorer,
+    )
 
     ## Filesystem
-    MFT = "mft"
-    USNJRNL = "usnjrnl"
+    MFT = Artifact(
+        name="mft",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=mft.MFT,
+    )
+    USNJRNL = Artifact(
+        name="usnjrnl",
+        category=Categories.DELETED_ITEMS_FILE_EXISTENCE.value,
+        ForensicArtifact=usnjrnl.UsnJrnl,
+    )
 
     ## Windows
-    RECYCLEBIN = "recyclebin"
-    PREFETCH = "prefetch"
-    SRU_NETWORK = "sru_network"
-    SRU_APPLICATION = "sru_application"
-    FILEHISTORY = "filehistory"
-    THUMBCACHE = "thumbcache"
-    JUMPLIST = "jumplist"
-    WINDOWSTIMELINE = "windowstimeline"
-    EVENT_LOGON = "event_logon"
-    EVENT_USB = "event_usb"
-    EVENT_WLAN = "event_wlan"
+    RECYCLEBIN = Artifact(
+        name="recyclebin",
+        category=Categories.DELETED_ITEMS_FILE_EXISTENCE.value,
+        ForensicArtifact=recyclebin.RecycleBin,
+    )
+    PREFETCH = Artifact(
+        name="prefetch",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=prefetch.Prefetch,
+    )
+    SRU_NETWORK = Artifact(
+        name="sru_network",
+        category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
+        ForensicArtifact=sru.SRU,
+    )
+    SRU_APPLICATION = Artifact(
+        name="sru_application",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=sru.SRU,
+    )
+    FILEHISTORY = Artifact(
+        name="filehistory",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=filehistory.FileHistory,
+    )
+    THUMBCACHE = Artifact(
+        name="thumbcache",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=thumbcache.Thumbcache,
+    )
+    JUMPLIST = Artifact(
+        name="jumplist",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=jumplist.JumpList,
+    )
+    WINDOWSTIMELINE = Artifact(
+        name="windowstimeline",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=windows_timeline.WindowsTimeline,
+    )
+
+    ## Event Log
+    EVENT_LOGON = Artifact(
+        name="event_logon",
+        category=Categories.ACCOUNT_USAGE.value,
+        ForensicArtifact=eventlog.ForensicEvent,
+    )
+    EVENT_USB = Artifact(
+        name="event_usb",
+        category=Categories.EXTERNAL_DEVICE_USB_USAGE.value,
+        ForensicArtifact=eventlog.ForensicEvent,
+    )
+    EVENT_WLAN = Artifact(
+        name="event_wlan",
+        category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
+        ForensicArtifact=eventlog.ForensicEvent,
+    )
 
     ## Registry
-    AMCACHE = "amcache"
-    USERACCOUNT = "useraccount"
-    USERASSIST = "userassist"
-    SHIMCACHE = "shimcache"
-    BAM = "bam"
-    NETWORKINFO = "networkinfo"
-    SHELLBAGS = "shellbags"
-    USB = "reg_usb"
-    AUTORUN = "autorun"
-    SYSTEMINFO = "systeminfo"
-    MRU = "mru"
-
-
-class Tables(Enum):
-    ## Applications
-    APP_CHROMIUM_HISTORY = "app_chromium_history"
-    APP_CHROMIUM_DOWNLOADS = "app_chromium_downloads"
-    APP_CHROMIUM_KEYWORDSEARCHTERMS = "app_chromium_keywordsearchterms"
-    APP_CHROMIUM_AUTOFILL = "app_chromium_autofill"
-    APP_CHROMIUM_LOGINDATA = "app_chromium_logindata"
-    APP_CHROMIUM_BOOKMARKS = "app_chromium_bookmarks"
-    APP_IEXPLORE_HISTORY = "app_iexplore_history"
-    APP_IEXPLORE_DOWNLOADS = "app_iexplore_downloads"
-
-    ## Filesystem
-    FS_USNJRNL = "fs_usnjrnl"
-
-    ## Windows
-    WIN_RECYCLEBIN = "win_recyclebin"
-    WIN_PREFETCH = "win_prefetch"
-    WIN_SRU_NETWORK = "win_sru_network"
-    WIN_SRU_APPLICATION = "win_sru_application"
-    WIN_FILE_HISTORY = "win_file_history"
-    WIN_THUMBCACHE = "win_thumbcache"
-    WIN_JUMPLIST = "win_jumplist"
-    WIN_WINDOWSTIMELINE = "win_windowstimeline"
-    WIN_EVENT_LOGON = "win_event_logon"
-    WIN_EVENT_USB = "win_event_usb"
-    WIN_EVENT_WLAN = "win_event_wlan"
-
-    ## Registry
-    REG_AMCACHE_APPLICATION = "reg_amcache_application"
-    REG_AMCACHE_APPLICATION_FILE = "reg_amcache_application_file"
-    REG_AMCACHE_FILE = "reg_amcache_file"
-    REG_AMCACHE_PROGRAMS = "reg_amcache_programs"
-    REG_AMCACHE_BINARY = "reg_amcache_binary"
-    REG_AMCACHE_CONTAINER = "reg_amcache_container"
-    REG_AMCACHE_SHORTCUT = "reg_amcache_shortcut"
-    REG_AUTORUN = "reg_autorun"
-    REG_BAM = "reg_bam"
-    REG_NETWORK_INTERFACE = "reg_network_interface"
-    REG_NETWORK_HISTORY = "reg_network_history"
-    REG_SHELLBAGS = "reg_shellbags"
-    REG_SHIMCACHE = "reg_shimcache"
-    REG_SYSTEMINFO = "reg_systeminfo"
-    REG_USB = "reg_usb"
-    REG_USERACCOUNT_SAM = "reg_useraccount_sam"
-    REG_USERACCOUNT_PROFILELIST = "reg_useraccount_profilelist"
-    REG_USERASSIST = "reg_userassist"
-
-
-@dataclass
-class ArtifactSchema:
-    name: str
-    category: str
-    root: str = field(default_factory=str)
-    owner: str = field(default_factory=str)
-    entries: dict[str] = field(default_factory=dict)
-    _schema: dict = field(init=False, default_factory=dict)
-
-    def __post_init__(self):
-        self._load_schema()
-
-    def _load_schema(self):
-        for schema_type, schema in schema_data.items():
-            if self.name in schema:
-                self._schema = schema[self.name]
-                self.root = self._schema.get("root", self.root)
-                self.owner = self._schema.get("owner", self.owner)
-                self.entries = self._schema.get("entries", self.entries)
-                return
-        logger.error(f"ArtifactSchema not found for {self.name} in any schema type")
+    AMCACHE = Artifact(
+        name="amcache",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=reg_amcache.Amcache,
+    )
+    USERACCOUNT = Artifact(
+        name="useraccount",
+        category=Categories.ACCOUNT_USAGE.value,
+        ForensicArtifact=reg_useraccount.UserAccount,
+    )
+    USERASSIST = Artifact(
+        name="userassist",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=reg_userassist.UserAssist,
+    )
+    SHIMCACHE = Artifact(
+        name="shimcache",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=reg_shimcache.ShimCache,
+    )
+    BAM = Artifact(
+        name="bam",
+        category=Categories.APPLICATION_EXECUTION.value,
+        ForensicArtifact=reg_bam.BAM,
+    )
+    NETWORKINFO = Artifact(
+        name="networkinfo",
+        category=Categories.NETWORK_ACTIVITY_PHYSICAL_LOCATION.value,
+        ForensicArtifact=reg_networkinfo.NetworkInfo,
+    )
+    SHELLBAGS = Artifact(
+        name="shellbags",
+        category=Categories.FILE_FOLDER_OPENING.value,
+        ForensicArtifact=reg_shellbags.Shellbags,
+    )
+    REG_USB = Artifact(
+        name="reg_usb",
+        category=Categories.EXTERNAL_DEVICE_USB_USAGE.value,
+        ForensicArtifact=reg_usb.USB,
+    )
+    AUTORUN = Artifact(
+        name="autorun",
+        category=Categories.SYSTEM_INFORMATION.value,
+        ForensicArtifact=reg_autorun.AutoRun,
+    )
+    SYSTEMINFO = Artifact(
+        name="systeminfo",
+        category=Categories.SYSTEM_INFORMATION.value,
+        ForensicArtifact=reg_systeminfo.SystemInfo,
+    )
+    # MRU = Artifact(name="mru", category=Categories.FILE_FOLDER_OPENING.value)

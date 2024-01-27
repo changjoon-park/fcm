@@ -10,7 +10,8 @@ from dissect import cstruct
 from flow.record.fieldtypes import uri
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 

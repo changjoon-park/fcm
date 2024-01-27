@@ -1,5 +1,5 @@
 from core.forensic_artifact import Source
-from settings.artifacts import ArtifactSchema
+from settings.artifact_schema import ArtifactSchema
 from artifacts.apps.browsers.browser import ChromiumBrowser
 
 

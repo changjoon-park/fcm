@@ -1,5 +1,5 @@
 Artifacts:
-  fs_usnjrnl:
+  usnjrnl:
     root: system
     owner: windows
     entries: 

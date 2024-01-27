@@ -6,7 +6,8 @@ from pydantic import ValidationError
 from dissect.eventlog.evtx import Evtx
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Artifacts, Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class EventLogonRecord(ArtifactRecord):
     evidence_id: str
 
     class Config:
-        table_name: str = Tables.WIN_EVENT_LOGON.value
+        table_name: str = Tables.EVENT_LOGON.value
 
 
 class EventUSBRecord(ArtifactRecord):
@@ -58,7 +59,7 @@ class EventUSBRecord(ArtifactRecord):
     provider: str
 
     class Config:
-        table_name: str = Tables.WIN_EVENT_USB.value
+        table_name: str = Tables.EVENT_USB.value
 
 
 class EventWLANRecord(ArtifactRecord):
@@ -84,7 +85,7 @@ class EventWLANRecord(ArtifactRecord):
     provider: str
 
     class Config:
-        table_name: str = Tables.WIN_EVENT_WLAN.value
+        table_name: str = Tables.EVENT_WLAN.value
 
 
 class ForensicEvent(ForensicArtifact):
@@ -92,7 +93,7 @@ class ForensicEvent(ForensicArtifact):
         super().__init__(src=src, schema=schema)
 
     def parse(self, descending: bool = False):
-        if self.name == Artifacts.EVENT_LOGON.value:
+        if self.name == "event_logon":
             event_logon = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -102,7 +103,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_logon)
-        elif self.name == Artifacts.EVENT_USB.value:
+        elif self.name == "event_usb":
             event_usb = sorted(
                 (
                     self.validate_record(index=index, record=record)
@@ -112,7 +113,7 @@ class ForensicEvent(ForensicArtifact):
                 reverse=descending,
             )
             self.records.append(event_usb)
-        elif self.name == Artifacts.EVENT_WLAN.value:
+        elif self.name == "event_wlan":
             event_wlan = sorted(
                 (
                     self.validate_record(index=index, record=record)

@@ -8,7 +8,6 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from core.forensic_artifact import ArtifactRecord, ArtifactRecord
-from settings.plugins import ARTIFACT_CATEGORIES
 from settings.config import (
     TABLE_NAME_FORENSIC_CASE,
     TABLE_NAME_EVIDENCES,
@@ -138,26 +137,26 @@ class DatabaseManager:
             return True
 
     # create/insert artifact category table
-    def create_artifact_category_table(self):
-        with open_db(self.database) as cursor:
-            cursor.execute(
-                f"""
-            CREATE TABLE IF NOT EXISTS {TABLE_NAME_ARTIFACT_CATEGORY} (
-                id INTEGER PRIMARY KEY,
-                category TEXT NOT NULL
-            )"""
-            )
-            for id, category in ARTIFACT_CATEGORIES:
-                cursor.execute(
-                    f"""
-                INSERT INTO {TABLE_NAME_ARTIFACT_CATEGORY} (id, category)
-                VALUES (?, ?)
-                """,
-                    (
-                        id,
-                        category,
-                    ),
-                )
+    # def create_artifact_category_table(self):
+    #     with open_db(self.database) as cursor:
+    #         cursor.execute(
+    #             f"""
+    #         CREATE TABLE IF NOT EXISTS {TABLE_NAME_ARTIFACT_CATEGORY} (
+    #             id INTEGER PRIMARY KEY,
+    #             category TEXT NOT NULL
+    #         )"""
+    #         )
+    #         for id, category in Categories:
+    #             cursor.execute(
+    #                 f"""
+    #             INSERT INTO {TABLE_NAME_ARTIFACT_CATEGORY} (id, category)
+    #             VALUES (?, ?)
+    #             """,
+    #                 (
+    #                     id,
+    #                     category,
+    #                 ),
+    #             )
 
     def create_artifact_table(self, record: list[ArtifactRecord], evidence_id: str):
         if not isinstance(record, list):

@@ -7,7 +7,8 @@ from dissect.target.exceptions import RegistryValueNotFoundError
 from dissect.target.plugin import internal
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 
 USB_DEVICE_PROPERTY_KEYS = {

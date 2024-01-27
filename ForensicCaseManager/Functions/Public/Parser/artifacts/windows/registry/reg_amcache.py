@@ -6,7 +6,8 @@ from flow.record.fieldtypes import uri
 from dissect.target.helpers import regutil
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 
 class ApplicationAppcompatRecord(ArtifactRecord):

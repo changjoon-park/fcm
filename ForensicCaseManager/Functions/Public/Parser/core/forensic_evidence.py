@@ -7,8 +7,8 @@ from util.converter import convertfrom_extended_ascii
 from pathlib import Path
 from core.forensic_artifact import Source, ForensicArtifact
 from core.case_config import CaseConfig
-from settings.plugins import WINDOWS_PLUGINS
-from settings.artifacts import ArtifactSchema
+from settings.artifacts import Artifacts
+from settings.artifact_schema import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +33,17 @@ class ForensicEvidence(CaseConfig):
         self.evidence_id = "-".join([str(self.session_id), str(self._evidence_number)])
 
         # set forensic_artifacts
-        for plugin_name, plugin in WINDOWS_PLUGINS.items():
-            ForensicArtifact, category = plugin
+        for Artifact in Artifacts:
+            name, category, ForensicArtifact = Artifact.value
+
             if self._artifacts:
                 for artifact_name in self._artifacts:
-                    if plugin_name == artifact_name:
+                    if name == artifact_name:
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src,
                                 schema=ArtifactSchema(
-                                    name=artifact_name,
+                                    name=name,
                                     category=category,
                                 ),
                             )
@@ -54,7 +55,7 @@ class ForensicEvidence(CaseConfig):
                             ForensicArtifact(
                                 src=self.src,
                                 schema=ArtifactSchema(
-                                    name=plugin_name,
+                                    name=name,
                                     category=category,
                                 ),
                             )

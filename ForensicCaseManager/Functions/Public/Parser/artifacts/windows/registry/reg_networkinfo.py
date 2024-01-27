@@ -7,7 +7,8 @@ from dissect.target.exceptions import RegistryError
 from util.converter import convertfrom_extended_ascii
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 
 class NetworkInterfaceRecord(ArtifactRecord):

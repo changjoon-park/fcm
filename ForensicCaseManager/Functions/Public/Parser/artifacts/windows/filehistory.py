@@ -10,7 +10,8 @@ from dissect.sql.exceptions import Error as SQLError
 from dissect.esedb import esedb, record, table
 
 from core.forensic_artifact import Source, ArtifactRecord, ForensicArtifact
-from settings.artifacts import Tables, ArtifactSchema
+from settings.tables import Tables
+from settings.artifact_schema import ArtifactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class FileHistoryRecord(ArtifactRecord):
     source: str
 
     class Config:
-        table_name: str = Tables.WIN_FILE_HISTORY.value
+        table_name: str = Tables.WIN_FILEHISTORY.value
 
 
 @dataclass(kw_only=True)
