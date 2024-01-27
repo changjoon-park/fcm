@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class ForensicEvidence(CaseConfig):
     _evidence_number: int
     _evidence: Optional[str] = None
-    _artifacts: Optional[list] = None
-    _categories: Optional[list] = None
+    _artifacts: Optional[list[str]] = None
+    _categories: Optional[list[int]] = None
     src: Source = field(init=False)
     evidence_id: str = field(init=False)
     forensic_artifacts: list[ForensicArtifact] = field(default_factory=list)
@@ -49,8 +49,8 @@ class ForensicEvidence(CaseConfig):
                             )
                         )
             if self._categories:
-                for category_entry in self._categories:
-                    if category == category_entry:
+                for category_number in self._categories:
+                    if category == int(category_number):
                         self.forensic_artifacts.append(
                             ForensicArtifact(
                                 src=self.src,

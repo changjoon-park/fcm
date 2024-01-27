@@ -9,7 +9,12 @@ from core.forensic_evidence import ForensicEvidence
 from settings.config import LOGFILE_NAME
 
 
-def handle_case(case_directory, evidences, artifacts, categories):
+def handle_case(
+    case_directory: Path,
+    evidences: list[str],
+    artifacts: list[str],
+    categories: list[int],
+):
     log_file = Path(case_directory) / LOGFILE_NAME
 
     logging.basicConfig(
