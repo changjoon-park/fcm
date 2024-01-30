@@ -83,34 +83,38 @@ function Test-Engine {
 
     process {
         # Define the script path
-        $ScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Parser\main.py"
+        $ScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Parser/main.py"
 
-        # Handle 'All' selection for artifacts and categories
-        $processedArtifacts = if ($artifact -contains "All") {
-            $Global:ValidArtifacts | Where-Object { $_ -ne "All" }
-        } else {
-            $artifact | ForEach-Object { $_.ToLower() }
+        if ($Artifact) {
+            # Handle 'All' selection for artifacts and categories
+            $processedArtifacts = if ($artifact -contains "All") {
+                $Global:ValidArtifacts | Where-Object { $_ -ne "All" }
+            } else {
+                $artifact | ForEach-Object { $_.ToLower() }
+            }
+        }
+        if ($Category) {
+            $processedCategories = if ($category -contains "All") {
+                $Global:ValidCategories
+            } else {
+                $category | ForEach-Object { Get-CatetoryNumber $_ }
+            }
         }
 
-        $processedCategories = if ($category -contains "All") {
-            $Global:ValidCategories
-        } else {
-            $category | ForEach-Object { Get-CatetoryNumber $_ }
-        }
-
-        # Construct and execute the command
-        $PythonCommand = "$Python $ScriptPath -c $Case"
+        # Construct the command arguments as an array
+        $Arguments = @("-c", $Case)
         if ($processedArtifacts) {
-            $PythonCommand += " -a " + ($processedArtifacts -join ",")
+            $Arguments += "-a", ($processedArtifacts -join ",")
         } elseif ($processedCategories) {
-            $PythonCommand += " -t " + ($processedCategories -join ",")
+            $Arguments += "-t", ($processedCategories -join ",")
         }
 
         # Execute the command based on the platform
-        if ($platform -eq "Unix") {
-            & $PythonCommand
+        if ($PSVersionTable.Platform -eq "Unix") {
+            & $Python $ScriptPath $Arguments
         } else {
-            & cmd /c $PythonCommand
+            $command = "$Python $ScriptPath " + ($Arguments -join " ")
+            & cmd /c $command
         }
     }
 }
