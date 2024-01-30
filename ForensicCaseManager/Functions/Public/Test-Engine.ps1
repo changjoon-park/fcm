@@ -11,7 +11,27 @@ $Global:ValidCategories = @(
     "File and Folder Opening", "Deleted Items and File Existence", "Browser Activity", "External Device And USB Usage"
 )
 
-function Get-CatetoryNumber {
+function Add-DynamicParam {
+    param (
+        [string]$Name,
+        [System.Collections.ObjectModel.Collection[System.Attribute]]$Attributes,
+        [string]$ParameterSetName,
+        [int]$Position
+    )
+
+    $paramAttribute = New-Object System.Management.Automation.ParameterAttribute
+    $paramAttribute.ParameterSetName = $ParameterSetName
+    $paramAttribute.Position = $Position
+
+    $Attributes.Add($paramAttribute)
+
+    $dynamicParam = New-Object System.Management.Automation.RuntimeDefinedParameter(
+        $Name, [string[]], $Attributes)
+    
+    $runtimeParameters.Add($Name, $dynamicParam)
+}
+
+function Get-CategoryNumber {
     param (
         [string]$CategoryName
     )
@@ -41,26 +61,18 @@ function Test-Engine {
         $runtimeParameters = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
 
         # Artifact parameter
-        $attributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
-        $validateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($Global:ValidArtifacts)
-        $attributeCollection.Add($validateSetAttribute)
-        $artifactParam = New-Object System.Management.Automation.RuntimeDefinedParameter(
-            'Artifact', [string[]], $attributeCollection)
-        $artifactParam.Attributes.Add((New-Object System.Management.Automation.ParameterAttribute -Property @{
-            ParameterSetName = 'ArtifactSet'
-        }))
-        $runtimeParameters.Add('Artifact', $artifactParam)
+        $artifactAttributes = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
+        $artifactAttributes.Add((New-Object System.Management.Automation.ValidateSetAttribute($Global:ValidArtifacts)))
+
+        # Add Artifact Dynamic Parameter at position 1
+        Add-DynamicParam -Name 'Artifact' -Attributes $artifactAttributes -ParameterSetName 'ArtifactSet' -Position 1
 
         # Category parameter
-        $attributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
-        $validateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($Global:ValidCategories)
-        $attributeCollection.Add($validateSetAttribute)
-        $categoryParam = New-Object System.Management.Automation.RuntimeDefinedParameter(
-            'Category', [string[]], $attributeCollection)
-        $categoryParam.Attributes.Add((New-Object System.Management.Automation.ParameterAttribute -Property @{
-            ParameterSetName = 'CategorySet'
-        }))
-        $runtimeParameters.Add('Category', $categoryParam)
+        $categoryAttributes = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
+        $categoryAttributes.Add((New-Object System.Management.Automation.ValidateSetAttribute($Global:ValidCategories)))
+
+        # Add Category Dynamic Parameter at position 2
+        Add-DynamicParam -Name 'Category' -Attributes $categoryAttributes -ParameterSetName 'CategorySet' -Position 2
 
         return $runtimeParameters
     }
@@ -74,47 +86,35 @@ function Test-Engine {
             return
         }
 
-        # Determine the system platform
-        $platform = $PSVersionTable.Platform
-
         # Determine the appropriate Python executable based on the operating system
         $Python = if ($PSVersionTable.Platform -eq "Unix") { "python3" } else { "python.exe" }
+        $ScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Parser/main.py"
     }
 
     process {
-        # Define the script path
-        $ScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Parser/main.py"
-
-        if ($Artifact) {
-            # Handle 'All' selection for artifacts and categories
-            $processedArtifacts = if ($artifact -contains "All") {
-                $Global:ValidArtifacts | Where-Object { $_ -ne "All" }
+        $Arguments = @("-c", $Case)
+        if ($PSBoundParameters.ContainsKey('Artifact')) {
+            $processedArtifacts = if ('All' -in $Artifact) {
+                $Global:ValidArtifacts.Where({ $_ -ne 'All' }).ForEach({ $_.ToLower() })
             } else {
-                $artifact | ForEach-Object { $_.ToLower() }
+                $Artifact.ForEach({ $_.ToLower() })
             }
+            $Arguments += "-a", ($processedArtifacts -join ",")
         }
-        if ($Category) {
-            $processedCategories = if ($category -contains "All") {
+        
+        if ($PSBoundParameters.ContainsKey('Category')) {
+            $processedCategories = if ('All' -in $Category) {
                 $Global:ValidCategories
             } else {
-                $category | ForEach-Object { Get-CatetoryNumber $_ }
+                $Category.ForEach({ Get-CategoryNumber $_ })
             }
-        }
-
-        # Construct the command arguments as an array
-        $Arguments = @("-c", $Case)
-        if ($processedArtifacts) {
-            $Arguments += "-a", ($processedArtifacts -join ",")
-        } elseif ($processedCategories) {
             $Arguments += "-t", ($processedCategories -join ",")
         }
 
-        # Execute the command based on the platform
         if ($PSVersionTable.Platform -eq "Unix") {
             & $Python $ScriptPath $Arguments
         } else {
-            $command = "$Python $ScriptPath " + ($Arguments -join " ")
-            & cmd /c $command
+            & cmd /c "$Python $ScriptPath $Arguments"
         }
     }
 }
