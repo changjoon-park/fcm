@@ -50,8 +50,44 @@ function Get-CategoryNumber {
     }
 }
 
+function Invoke-ForensicCaseManager {
+    param (
+        [string]$PythonExecutable,
+        [string]$ScriptPath,
+        [string]$Case,
+        [string[]]$Artifact,
+        [string[]]$Category
+    )
+
+    $Arguments = @("-c", $Case)
+    if ($Artifact) {
+        $processedArtifacts = if ('All' -in $Artifact) {
+            $Global:ValidArtifacts.Where({ $_ -ne 'All' }).ForEach({ $_.ToLower() })
+        } else {
+            $Artifact.ForEach({ $_.ToLower() })
+        }
+        $Arguments += "-a", ($processedArtifacts -join ",")
+    }
+    
+    if ($Category) {
+        $processedCategories = if ('All' -in $Category) {
+            $Global:ValidCategories
+        } else {
+            $Category.ForEach({ Get-CategoryNumber $_ })
+        }
+        $Arguments += "-t", ($processedCategories -join ",")
+    }
+
+    if ($PSVersionTable.Platform -eq "Unix") {
+        & $PythonExecutable $ScriptPath $Arguments
+    } else {
+        & cmd /c "$PythonExecutable $ScriptPath $Arguments"
+    }
+}
+
+
 function Test-Engine {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'None')]
     param (
         [Parameter(Mandatory = $true, Position = 0)]
         [string]$Case
@@ -78,10 +114,10 @@ function Test-Engine {
     }
 
     begin {
-        $artifact = $PSBoundParameters['Artifact']
-        $category = $PSBoundParameters['Category']
+        $Artifact = $PSBoundParameters['Artifact']
+        $Category = $PSBoundParameters['Category']
 
-        if ($artifact -and $category) {
+        if ($Artifact -and $Category) {
             Write-Warning -Message "Select only one of the two options: [Artifact] / [Category]"
             return
         }
@@ -92,29 +128,12 @@ function Test-Engine {
     }
 
     process {
-        $Arguments = @("-c", $Case)
-        if ($PSBoundParameters.ContainsKey('Artifact')) {
-            $processedArtifacts = if ('All' -in $Artifact) {
-                $Global:ValidArtifacts.Where({ $_ -ne 'All' }).ForEach({ $_.ToLower() })
-            } else {
-                $Artifact.ForEach({ $_.ToLower() })
-            }
-            $Arguments += "-a", ($processedArtifacts -join ",")
-        }
-        
-        if ($PSBoundParameters.ContainsKey('Category')) {
-            $processedCategories = if ('All' -in $Category) {
-                $Global:ValidCategories
-            } else {
-                $Category.ForEach({ Get-CategoryNumber $_ })
-            }
-            $Arguments += "-t", ($processedCategories -join ",")
+        if ($PSBoundParameters.ContainsKey('Artifact') -and $PSBoundParameters.ContainsKey('Category')) {
+            Write-Warning -Message "Select only one of the two options: [Artifact] / [Category]"
+            return
         }
 
-        if ($PSVersionTable.Platform -eq "Unix") {
-            & $Python $ScriptPath $Arguments
-        } else {
-            & cmd /c "$Python $ScriptPath $Arguments"
-        }
+        # Call Invoke-ForensicCaseManager
+        Invoke-ForensicCaseManager -PythonExecutable $Python -ScriptPath $ScriptPath -Case $Case -Artifact $Artifact -Category $Category
     }
 }
