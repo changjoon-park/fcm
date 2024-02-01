@@ -1,0 +1,132 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.PSRepositoryItemInfo</T>
+      <T>System.Management.Automation.PSCustomObject</T>
+      <T>System.Object</T>
+    </TN>
+    <MS>
+      <S N="Name">SimplySql</S>
+      <Version N="Version">1.9.1</Version>
+      <S N="Type">Module</S>
+      <S N="Description">Querying SQL (SQL Server, Oracle, PostgreSql, SQLite, &amp; mySql) the PowerShell way: simple commands... powerful opportunities._x000D__x000A__x000D__x000A_SimplySql is a module that provides an intuitive set of cmdlets for talking to databases that abstracts the vendor specifics, allowing you to focus on getting work done.  The basic pattern is to connect to a database, execute one or more sql statements and then close your database connection.  This module provides cmdlets that map to this basic pattern.  Each provider has its own Open-*Connection cmdlet -&gt; Open-SqlConnection, Open-SQLiteConnection, Open-OracleConnection, Open-PostGreConnection, Open-MySqlConnection.  The rest of the commands are provider agnostic._x000D__x000A__x000D__x000A_Open/Close/Show/Test/Set/Get -SqlConnection &gt;&gt; Control as many active connections as you want._x000D__x000A_Invoke- SqlScalar/SqlQuery/SqlUpdate &gt;&gt; Interact with those connections._x000D__x000A_Get/Clear -SqlMessage &gt;&gt; Get Informational messages, if provider supports it._x000D__x000A_Invoke-SqlBulkCopy &gt;&gt; Bulk Dataload from one connection to another._x000D__x000A_Start/Complete/Undo/Get -SqlTransaction &gt;&gt; Utilize transactions!</S>
+      <S N="Author">Mithrandyr</S>
+      <S N="CompanyName">Mithrandyr</S>
+      <S N="Copyright">(c) 2021 Mithrandyr. All rights reserved.</S>
+      <DT N="PublishedDate">2023-01-29T22:49:36+00:00</DT>
+      <Obj N="InstalledDate" RefId="1">
+        <DT>2024-02-01T23:50:34.147+00:00</DT>
+        <MS>
+          <Obj N="DisplayHint" RefId="2">
+            <TN RefId="1">
+              <T>Microsoft.PowerShell.Commands.DisplayHintType</T>
+              <T>System.Enum</T>
+              <T>System.ValueType</T>
+              <T>System.Object</T>
+            </TN>
+            <ToString>DateTime</ToString>
+            <I32>2</I32>
+          </Obj>
+        </MS>
+      </Obj>
+      <Nil N="UpdatedDate" />
+      <URI N="LicenseUri">https://github.com/mithrandyr/SimplySql/blob/master/LICENSE</URI>
+      <URI N="ProjectUri">https://github.com/mithrandyr/SimplySql</URI>
+      <Nil N="IconUri" />
+      <Obj N="Tags" RefId="3">
+        <TN RefId="2">
+          <T>System.Object[]</T>
+          <T>System.Array</T>
+          <T>System.Object</T>
+        </TN>
+        <LST>
+          <S>SQL</S>
+          <S>SQLite</S>
+          <S>Database</S>
+          <S>Oracle</S>
+          <S>MySql</S>
+          <S>PostGre</S>
+          <S>Npgsql</S>
+          <S>MSSQL</S>
+          <S>PSModule</S>
+        </LST>
+      </Obj>
+      <Obj N="Includes" RefId="4">
+        <TN RefId="3">
+          <T>System.Collections.Hashtable</T>
+          <T>System.Object</T>
+        </TN>
+        <DCT>
+          <En>
+            <S N="Key">Command</S>
+            <Obj N="Value" RefId="5">
+              <TNRef RefId="2" />
+              <LST />
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Function</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">DscResource</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Workflow</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">RoleCapability</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Cmdlet</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+        </DCT>
+      </Obj>
+      <Nil N="PowerShellGetFormatVersion" />
+      <S N="ReleaseNotes">Currently Supporting Microsoft SQL, SQLite, MySql, PostGre and Oracle.  1.7 added support for retrieving the sqlconnection and sqltransaction objects.  1.8 enhanced support for notifications from BulkCopy.</S>
+      <Obj N="Dependencies" RefId="6">
+        <TNRef RefId="2" />
+        <LST />
+      </Obj>
+      <S N="RepositorySourceLocation">https://www.powershellgallery.com/api/v2</S>
+      <S N="Repository">PSGallery</S>
+      <S N="PackageManagementProvider">NuGet</S>
+      <Obj N="AdditionalMetadata" RefId="7">
+        <TN RefId="4">
+          <T>System.Management.Automation.PSCustomObject</T>
+          <T>System.Object</T>
+        </TN>
+        <MS>
+          <S N="copyright">(c) 2021 Mithrandyr. All rights reserved.</S>
+          <S N="description">Querying SQL (SQL Server, Oracle, PostgreSql, SQLite, &amp; mySql) the PowerShell way: simple commands... powerful opportunities._x000D__x000A__x000D__x000A_SimplySql is a module that provides an intuitive set of cmdlets for talking to databases that abstracts the vendor specifics, allowing you to focus on getting work done.  The basic pattern is to connect to a database, execute one or more sql statements and then close your database connection.  This module provides cmdlets that map to this basic pattern.  Each provider has its own Open-*Connection cmdlet -&gt; Open-SqlConnection, Open-SQLiteConnection, Open-OracleConnection, Open-PostGreConnection, Open-MySqlConnection.  The rest of the commands are provider agnostic._x000D__x000A__x000D__x000A_Open/Close/Show/Test/Set/Get -SqlConnection &gt;&gt; Control as many active connections as you want._x000D__x000A_Invoke- SqlScalar/SqlQuery/SqlUpdate &gt;&gt; Interact with those connections._x000D__x000A_Get/Clear -SqlMessage &gt;&gt; Get Informational messages, if provider supports it._x000D__x000A_Invoke-SqlBulkCopy &gt;&gt; Bulk Dataload from one connection to another._x000D__x000A_Start/Complete/Undo/Get -SqlTransaction &gt;&gt; Utilize transactions!</S>
+          <S N="requireLicenseAcceptance">False</S>
+          <S N="releaseNotes">Currently Supporting Microsoft SQL, SQLite, MySql, PostGre and Oracle.  1.7 added support for retrieving the sqlconnection and sqltransaction objects.  1.8 enhanced support for notifications from BulkCopy.</S>
+          <S N="isLatestVersion">True</S>
+          <S N="isAbsoluteLatestVersion">True</S>
+          <S N="versionDownloadCount">646405</S>
+          <S N="downloadCount">1047229</S>
+          <S N="packageSize">8366663</S>
+          <S N="published">29/01/2023 22:49:36 +00:00</S>
+          <S N="created">29/01/2023 22:49:36 +00:00</S>
+          <S N="lastUpdated">01/02/2024 23:46:54 +00:00</S>
+          <S N="tags">SQL SQLite Database Oracle MySql PostGre Npgsql MSSQL PSModule</S>
+          <S N="developmentDependency">False</S>
+          <S N="updated">2024-02-01T23:46:54Z</S>
+          <S N="NormalizedVersion">1.9.1</S>
+          <S N="Authors">Mithrandyr</S>
+          <S N="IsPrerelease">false</S>
+          <S N="ItemType">Module</S>
+          <S N="FileList">SimplySql.nuspec|Classes.ps1|Cmdlets\xTest.ps1|DataReaderToPSObject\System.Diagnostics.Process.dll|DataReaderToPSObject\System.IO.MemoryMappedFiles.dll|DataReaderToPSObject\System.Reflection.dll|DataReaderToPSObject\System.Security.Cryptography.Csp.dll|DataReaderToPSObject\System.Xml.XDocument.dll|Providers\Oracle\Oracle.ManagedDataAccess.dll|DataReaderToPSObject\DataReaderToPSObject.dll|DataReaderToPSObject\System.Diagnostics.StackTrace.dll|DataReaderToPSObject\System.IO.Pipes.dll|DataReaderToPSObject\System.Reflection.Extensions.dll|DataReaderToPSObject\System.Security.Cryptography.Encoding.dll|DataReaderToPSObject\System.Xml.XmlDocument.dll|Providers\Oracle\provider.ps1|SimplySql.psd1|DataReaderToPSObject\DataReaderToPSObject.dll.config|DataReaderToPSObject\System.Diagnostics.TextWriterTraceListener.dll|DataReaderToPSObject\System.IO.UnmanagedMemoryStream.dll|DataReaderToPSObject\System.Reflection.Primitives.dll|DataReaderToPSObject\System.Security.Cryptography.Primitives.dll|DataReaderToPSObject\System.Xml.XmlSerializer.dll|Providers\PostGre\config.ps1|SimplySql.psm1|DataReaderToPSObject\Microsoft.Win32.Primitives.dll|DataReaderToPSObject\System.Diagnostics.Tools.dll|DataReaderToPSObject\System.Linq.dll|DataReaderToPSObject\System.Resources.Reader.dll|DataReaderToPSObject\System.Security.Cryptography.X509Certificates.dll|DataReaderToPSObject\System.Xml.XPath.dll|Providers\PostGre\GeoAPI.dll|Cmdlets\Clear-SqlMessage.ps1|DataReaderToPSObject\netstandard.dll|DataReaderToPSObject\System.Diagnostics.TraceSource.dll|DataReaderToPSObject\System.Linq.Expressions.dll|DataReaderToPSObject\System.Resources.ResourceManager.dll|DataReaderToPSObject\System.Security.Principal.dll|DataReaderToPSObject\System.Xml.XPath.XDocument.dll|Providers\PostGre\NetTopologySuite.dll|Cmdlets\Close-SqlConnection.ps1|DataReaderToPSObject\System.AppContext.dll|DataReaderToPSObject\System.Diagnostics.Tracing.dll|DataReaderToPSObject\System.Linq.Parallel.dll|DataReaderToPSObject\System.Resources.Writer.dll|DataReaderToPSObject\System.Security.SecureString.dll|en-US\about_SimplySql.help.txt|Providers\PostGre\NetTopologySuite.IO.PostGis.dll|Cmdlets\Complete-SqlTransaction.ps1|DataReaderToPSObject\System.Collections.Concurrent.dll|DataReaderToPSObject\System.Drawing.Primitives.dll|DataReaderToPSObject\System.Linq.Queryable.dll|DataReaderToPSObject\System.Runtime.CompilerServices.VisualC.dll|DataReaderToPSObject\System.Text.Encoding.dll|en-US\about_SimplySql_Providers.help.txt|Providers\PostGre\Npgsql.dll|Cmdlets\Get-SqlConnection.ps1|DataReaderToPSObject\System.Collections.dll|DataReaderToPSObject\System.Dynamic.Runtime.dll|DataReaderToPSObject\System.Net.Http.dll|DataReaderToPSObject\System.Runtime.dll|DataReaderToPSObject\System.Text.Encoding.Extensions.dll|Functions\TestConnectionName.ps1|Providers\PostGre\Npgsql.NetTopologySuite.dll|Cmdlets\Get-SqlMessage.ps1|DataReaderToPSObject\System.Collections.NonGeneric.dll|DataReaderToPSObject\System.Globalization.Calendars.dll|DataReaderToPSObject\System.Net.NameResolution.dll|DataReaderToPSObject\System.Runtime.Extensions.dll|DataReaderToPSObject\System.Text.RegularExpressions.dll|Providers\MySql\BouncyCastle.Crypto.dll|Providers\PostGre\provider.ps1|Cmdlets\Get-SqlTransaction.ps1|DataReaderToPSObject\System.Collections.Specialized.dll|DataReaderToPSObject\System.Globalization.dll|DataReaderToPSObject\System.Net.NetworkInformation.dll|DataReaderToPSObject\System.Runtime.Handles.dll|DataReaderToPSObject\System.Threading.dll|Providers\MySql\config.ps1|Providers\PostGre\System.Runtime.CompilerServices.Unsafe.dll|Cmdlets\Invoke-SqlBulkCopy.ps1|DataReaderToPSObject\System.ComponentModel.dll|DataReaderToPSObject\System.Globalization.Extensions.dll|DataReaderToPSObject\System.Net.Ping.dll|DataReaderToPSObject\System.Runtime.InteropServices.dll|DataReaderToPSObject\System.Threading.Overlapped.dll|Providers\MySql\Google.Protobuf.dll|Providers\PostGre\System.Threading.Tasks.Extensions.dll|Cmdlets\Invoke-SqlQuery.ps1|DataReaderToPSObject\System.ComponentModel.EventBasedAsync.dll|DataReaderToPSObject\System.IO.Compression.dll|DataReaderToPSObject\System.Net.Primitives.dll|DataReaderToPSObject\System.Runtime.InteropServices.RuntimeInformation.dll|DataReaderToPSObject\System.Threading.Tasks.dll|Providers\MySql\K4os.Compression.LZ4.Streams.dll|Providers\PostGre\System.ValueTuple.dll|Cmdlets\Invoke-SqlScalar.ps1|DataReaderToPSObject\System.ComponentModel.Primitives.dll|DataReaderToPSObject\System.IO.Compression.ZipFile.dll|DataReaderToPSObject\System.Net.Requests.dll|DataReaderToPSObject\System.Runtime.Numerics.dll|DataReaderToPSObject\System.Threading.Tasks.Parallel.dll|Providers\MySql\MySql.Data.dll|Providers\SQL\config.ps1|Cmdlets\Invoke-SqlUpdate.ps1|DataReaderToPSObject\System.ComponentModel.TypeConverter.dll|DataReaderToPSObject\System.IO.dll|DataReaderToPSObject\System.Net.Security.dll|DataReaderToPSObject\System.Runtime.Serialization.Formatters.dll|DataReaderToPSObject\System.Threading.Thread.dll|Providers\MySql\provider.ps1|Providers\SQLite\config.ps1|Cmdlets\Set-SqlConnection.ps1|DataReaderToPSObject\System.Console.dll|DataReaderToPSObject\System.IO.FileSystem.dll|DataReaderToPSObject\System.Net.Sockets.dll|DataReaderToPSObject\System.Runtime.Serialization.Json.dll|DataReaderToPSObject\System.Threading.ThreadPool.dll|Providers\MySql\System.Memory.dll|Providers\SQLite\provider.ps1|Cmdlets\Show-SqlConnection.ps1|DataReaderToPSObject\System.Data.Common.dll|DataReaderToPSObject\System.IO.FileSystem.DriveInfo.dll|DataReaderToPSObject\System.Net.WebHeaderCollection.dll|DataReaderToPSObject\System.Runtime.Serialization.Primitives.dll|DataReaderToPSObject\System.Threading.Timer.dll|Providers\MySql\Ubiety.Dns.Core.dll|Providers\SQLite\System.Data.SQLite.dll|Cmdlets\Start-SqlTransaction.ps1|DataReaderToPSObject\System.Diagnostics.Contracts.dll|DataReaderToPSObject\System.IO.FileSystem.Primitives.dll|DataReaderToPSObject\System.Net.WebSockets.Client.dll|DataReaderToPSObject\System.Runtime.Serialization.Xml.dll|DataReaderToPSObject\System.ValueTuple.dll|Providers\MySql\ZstdNet.dll|Providers\SQLite\x64\SQLite.Interop.dll|Cmdlets\Test-SqlConnection.ps1|DataReaderToPSObject\System.Diagnostics.Debug.dll|DataReaderToPSObject\System.IO.FileSystem.Watcher.dll|DataReaderToPSObject\System.Net.WebSockets.dll|DataReaderToPSObject\System.Security.Claims.dll|DataReaderToPSObject\System.Xml.ReaderWriter.dll|Providers\Oracle\config.ps1|Providers\SQLite\x86\SQLite.Interop.dll|Cmdlets\Undo-SqlTransaction.ps1|DataReaderToPSObject\System.Diagnostics.FileVersionInfo.dll|DataReaderToPSObject\System.IO.IsolatedStorage.dll|DataReaderToPSObject\System.ObjectModel.dll|DataReaderToPSObject\System.Security.Cryptography.Algorithms.dll</S>
+          <S N="GUID">71b1095f-dcb6-497d-8b47-a69c284aec64</S>
+          <S N="PowerShellVersion">5.0</S>
+          <S N="CompanyName">SolarNet</S>
+        </MS>
+      </Obj>
+      <S N="InstalledLocation">/Users/leon/.local/share/powershell/Modules/SimplySql/1.9.1</S>
+    </MS>
+  </Obj>
+</Objs>

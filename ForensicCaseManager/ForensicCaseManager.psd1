@@ -73,6 +73,7 @@ FunctionsToExport = @(
     "Enter-VirtualEnv",
     "New-ForensicCaseDirectory",
     "Invoke-ForensicCaseManager",
+    "Get-ForensicCaseInfo",
     "Get-ForensicCaseManager",
     "Test-Engine"
 )
